@@ -1,0 +1,731 @@
+;try {
+/* module-key = 'confluence.web.resources:page-move-resources', location = '/includes/soy/page-move-dialog.soy' */
+// This file was automatically generated from page-move-dialog.soy.
+// Please don't edit this file by hand.
+
+/**
+ * @fileoverview Templates in namespace Confluence.Templates.MovePage.
+ */
+
+if (typeof Confluence == 'undefined') { var Confluence = {}; }
+if (typeof Confluence.Templates == 'undefined') { Confluence.Templates = {}; }
+if (typeof Confluence.Templates.MovePage == 'undefined') { Confluence.Templates.MovePage = {}; }
+
+
+Confluence.Templates.MovePage.movePageAdvancedPanel = function(opt_data, opt_ignored) {
+  return '<div class="row information"><div class="inner"><div class="element">' + soy.$$escapeHtml("Specify the new parent page for this page and its children by space and title.") + '</div></div></div><form class="aui" onsubmit="return false;"><fieldset><legend class="assistive"><span>' + soy.$$escapeHtml("Change the Parent Page to a Known Page") + '</span></legend><div class="field-group"><label for="new-space">' + soy.$$escapeHtml("New space:") + '</label><div class="value new-space-value"><input id="new-space-key" name="new-space-key" type="hidden" value="' + soy.$$escapeHtml(opt_data.spaceKey) + '">' + ((opt_data.canMoveBetweenSpaces) ? '<span class="space-input"><input id="new-space" name="new-space" value="' + soy.$$escapeHtml(opt_data.spaceName) + '" class="text long-field"></span><div class="description hidden">' + soy.$$escapeHtml("Start typing a space name to see a list of suggestions.") + '</div>' : '<span class="space-input"><input id="new-space" name="new-space" value="' + soy.$$escapeHtml(opt_data.spaceName) + '" disabled="disabled" class="text long-field"></span><div class="description warning">' + soy.$$escapeHtml("You cannot move this page to another space because you do not have permission to delete it from this space.") + '</div>') + '<div class="new-space-dropdown aui-dd-parent autocomplete"></div></div></div><div class="field-group"><label for="new-parent-page">' + soy.$$escapeHtml("New parent page:") + '</label><div class="value new-parent-page-value"><span class="page-input"><input id="new-parent-page" name="new-parent-page" value="' + soy.$$escapeHtml(opt_data.parentPageTitle) + '" class="text long-field"></span><div class="description">' + soy.$$escapeHtml("Start typing a page title to see a list of suggestions.") + '</div><div class="new-parent-page-dropdown aui-dd-parent autocomplete"></div></div></div></fieldset></form><div class="location-info"><div class="row"><label>' + soy.$$escapeHtml("Current location:") + '</label><div class="value breadcrumbs-container"><div class="breadcrumbs-line"><ul id="current-parent-breadcrumbs" class="breadcrumbs"></ul></div></div></div><div class="row"><label>' + soy.$$escapeHtml("New location:") + '</label><div class="value breadcrumbs-container"><div class="breadcrumbs-line"><ul id="new-parent-breadcrumbs" class="breadcrumbs"></ul></div></div></div></div>';
+};
+if (goog.DEBUG) {
+  Confluence.Templates.MovePage.movePageAdvancedPanel.soyTemplateName = 'Confluence.Templates.MovePage.movePageAdvancedPanel';
+}
+
+
+Confluence.Templates.MovePage.movePageSearchPanel = function(opt_data, opt_ignored) {
+  return '<div class="row information"><div class="inner"><div class="element">' + soy.$$escapeHtml("Search for and select the new parent page for this page and its children.") + '</div></div></div><div id="move-page-search-container" class="row"><form class="aui" onsubmit="return false;"><fieldset><legend class="assistive"><span>' + soy.$$escapeHtml("Search for a New Parent Page") + '</span></legend><label  for="move-page-search-query" class="assistive">' + soy.$$escapeHtml("Search keywords") + '</label><input class="search-query text" id="move-page-search-query"><label  for="move-page-search-spac" class="assistive">' + soy.$$escapeHtml("Search in space") + '</label>' + ((opt_data.canMoveBetweenSpaces) ? '<select id="move-page-search-space" class="search-space select"><option value="conf_all" selected="selected">' + soy.$$escapeHtml("All Spaces") + '</option><option value="' + soy.$$escapeHtml(opt_data.spaceKey) + '">' + soy.$$escapeHtml(opt_data.spaceName) + '</option></select>' : '<select id="move-page-search-space" class="search-space select" disabled="disabled"><option value="' + soy.$$escapeHtml(opt_data.spaceKey) + '" selected="selected">' + soy.$$escapeHtml(opt_data.spaceName) + '</option></select>') + '<input type="button" value="' + soy.$$escapeHtml("Search") + '" class="button submit">' + ((! opt_data.canMoveBetweenSpaces) ? '<div class="description warning">' + soy.$$escapeHtml("You cannot move this page to another space because you do not have permission to delete it from this space.") + '</div>' : '') + '</fieldset></form><div class="search-results"></div></div>';
+};
+if (goog.DEBUG) {
+  Confluence.Templates.MovePage.movePageSearchPanel.soyTemplateName = 'Confluence.Templates.MovePage.movePageSearchPanel';
+}
+
+
+Confluence.Templates.MovePage.errorMessage = function(opt_data, opt_ignored) {
+  return '<div id="move-errors" class="hidden warning"></div>';
+};
+if (goog.DEBUG) {
+  Confluence.Templates.MovePage.errorMessage.soyTemplateName = 'Confluence.Templates.MovePage.errorMessage';
+}
+
+
+Confluence.Templates.MovePage.noMatchingPages = function(opt_data, opt_ignored) {
+  return '<ol><li><span class="warning">' + soy.$$escapeHtml("No matching pages found.") + '</span></li></ol>';
+};
+if (goog.DEBUG) {
+  Confluence.Templates.MovePage.noMatchingPages.soyTemplateName = 'Confluence.Templates.MovePage.noMatchingPages';
+}
+
+
+Confluence.Templates.MovePage.noMatchingSpaces = function(opt_data, opt_ignored) {
+  return '<ol><li><span class="warning">' + soy.$$escapeHtml("No matching spaces found.") + '</span></li></ol>';
+};
+if (goog.DEBUG) {
+  Confluence.Templates.MovePage.noMatchingSpaces.soyTemplateName = 'Confluence.Templates.MovePage.noMatchingSpaces';
+}
+
+
+Confluence.Templates.MovePage.searchResultsLoading = function(opt_data, opt_ignored) {
+  return '<div class="searching">' + soy.$$escapeHtml("Searching\u2026") + '</div>';
+};
+if (goog.DEBUG) {
+  Confluence.Templates.MovePage.searchResultsLoading.soyTemplateName = 'Confluence.Templates.MovePage.searchResultsLoading';
+}
+
+
+Confluence.Templates.MovePage.pageHistoryLoading = function(opt_data, opt_ignored) {
+  return '<div class="searching">' + soy.$$escapeHtml("Loading\u2026") + '</div>';
+};
+if (goog.DEBUG) {
+  Confluence.Templates.MovePage.pageHistoryLoading.soyTemplateName = 'Confluence.Templates.MovePage.pageHistoryLoading';
+}
+
+
+Confluence.Templates.MovePage.panelLoading = function(opt_data, opt_ignored) {
+  return '<span>' + soy.$$escapeHtml("Loading\u2026") + '</span>';
+};
+if (goog.DEBUG) {
+  Confluence.Templates.MovePage.panelLoading.soyTemplateName = 'Confluence.Templates.MovePage.panelLoading';
+}
+
+
+Confluence.Templates.MovePage.browsePanelSpace = function(opt_data, opt_ignored) {
+  return '<ul><li id=\'tree-root-node-item\' class=\'root-node-list-item\'><a class=\'root-node\' href=\'#\'>' + soy.$$escapeHtml(opt_data.linkText) + '</a></li></ul>';
+};
+if (goog.DEBUG) {
+  Confluence.Templates.MovePage.browsePanelSpace.soyTemplateName = 'Confluence.Templates.MovePage.browsePanelSpace';
+}
+
+
+Confluence.Templates.MovePage.orderingPagePanel = function(opt_data, opt_ignored) {
+  return '<div id="orderingPlaceHolder"></div>';
+};
+if (goog.DEBUG) {
+  Confluence.Templates.MovePage.orderingPagePanel.soyTemplateName = 'Confluence.Templates.MovePage.orderingPagePanel';
+}
+
+
+Confluence.Templates.MovePage.reorderCheckbox = function(opt_data, opt_ignored) {
+  return '<span id="reorderRequirement"><input id="reorderCheck" type="checkbox" name="reorderFlag" title="' + soy.$$escapeHtml("Choose the position of this page within the list of child pages.") + '"/><label for="reorderCheck" title="' + soy.$$escapeHtml("Choose the position of this page within the list of child pages.") + '">' + soy.$$escapeHtml("Reorder") + '</label></span>';
+};
+if (goog.DEBUG) {
+  Confluence.Templates.MovePage.reorderCheckbox.soyTemplateName = 'Confluence.Templates.MovePage.reorderCheckbox';
+}
+
+
+Confluence.Templates.MovePage.helpLink = function(opt_data, opt_ignored) {
+  return '' + Confluence.Templates.Dialog.helpLink({href: "https://docs.atlassian.com/confluence/docs-59/Move+and+Reorder+Pages"});
+};
+if (goog.DEBUG) {
+  Confluence.Templates.MovePage.helpLink.soyTemplateName = 'Confluence.Templates.MovePage.helpLink';
+}
+
+
+Confluence.Templates.MovePage.historyPanel = function(opt_data, opt_ignored) {
+  return '<div class="row information"><div class="inner"><div class="element">' + soy.$$escapeHtml(AJS.format("Select the new parent page for this page and its children from your history.",opt_data.pageTitle)) + '</div></div></div><div id="move-page-search-container" class="row"><div class="search-results"></div></div>';
+};
+if (goog.DEBUG) {
+  Confluence.Templates.MovePage.historyPanel.soyTemplateName = 'Confluence.Templates.MovePage.historyPanel';
+}
+
+
+Confluence.Templates.MovePage.browsePanel = function(opt_data, opt_ignored) {
+  return '<div class="row information"><div class="inner"><div class="element">' + soy.$$escapeHtml(AJS.format("Click to select the new parent page for this page and its children.",opt_data.pageTitle)) + '</div></div></div><div class="tree"></div>';
+};
+if (goog.DEBUG) {
+  Confluence.Templates.MovePage.browsePanel.soyTemplateName = 'Confluence.Templates.MovePage.browsePanel';
+}
+
+
+Confluence.Templates.MovePage.spinnerButton = function(opt_data, opt_ignored) {
+  return '<div class=\'button-spinner\'></div>';
+};
+if (goog.DEBUG) {
+  Confluence.Templates.MovePage.spinnerButton.soyTemplateName = 'Confluence.Templates.MovePage.spinnerButton';
+}
+
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'confluence.web.resources:page-move-resources', location = '/includes/js/page-move-dialog-ordering.js' */
+define("confluence/page-move-dialog-ordering",["jquery","confluence/templates","ajs"],function(a,i,g){return function(j,k,l,m){var n=a("#confluence-context-path").attr("content"),c=a("#orderingPlaceHolder",this);c.addClass("loading").html(i.MovePage.panelLoading());c.load(n+"/panels/reorderpage.action",{panelName:"reorder",spaceKey:j,title:k,movedPageId:g.params.pageId,pageTitle:l},function(){c.removeClass("loading");var b=a(".dropper",c),f=a(".target",b);a("li",b).each(function(b){!b&&a(this).before(a('<li class="leading">&nbsp;</li>'));
+a(this).after(a('<li class="leading">&nbsp;</li>'))});var h=f.next();a(".leading",b).hover(function(){a(this).addClass("here")},function(){a(this).removeClass("here")}).click(function(){var b=a(this),d,c=b.prevAll("li.sibling")[0];c?d="below":(d="above",c=b.nextAll("li.sibling")[0]);c&&(g.debug("Reorder: positionIndicator = "+d+" and target = "+c.innerHTML),b=a("i",c).text(),m(b,d));var e=this;f.hide(150,function(){e!=h[0]&&a(e).after(h).after(f);f.show(150)})});var b=a(".siblings",c),d=a(".target",
+b);if(d.length){var d=d.position().top,e=b.height();(0>d||d>e)&&b.scrollTop(b.scrollTop()+d-e/3)}})}});require("confluence/module-exporter").exportModuleAsGlobal("confluence/page-move-dialog-ordering","jQuery.fn.movePageOrdering");
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'confluence.web.resources:page-move-resources', location = '/includes/js/page-move-dialog-autocomplete.js' */
+define("confluence/page-move-dialog-autocomplete",["jquery"],function(a){return function(c,d,e,f){return a(this).quicksearch(c,null,{dropdownPostprocess:function(b){a("> ol.last",b).remove();a("> ol",b).length||a(b).append(e);a("> ol:last-child",b).addClass("last");a("a",b).attr("tabindex","-1")},dropdownPlacement:function(b){a(d).append(b)},ajsDropDownOptions:{selectionHandler:function(b,a){a&&(this.hide("selected"),f(b,a),b.preventDefault())}}})}});
+require("confluence/module-exporter").exportModuleAsGlobal("confluence/page-move-dialog-autocomplete","jQuery.fn.movePageAutocomplete");
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'confluence.web.resources:page-move-resources', location = '/includes/js/page-move-dialog-location.js' */
+define("confluence/page-move-dialog-location",["jquery","ajs","confluence/legacy","confluence/meta","window"],function(a,e,i,j,k){return function(f){var c=a(this),b=a("#new-space",c),g=a("#new-space-key",c),d=a("#new-parent-page",c),l=e.DarkFeatures.isEnabled("editor.ajax.save")&&!e.DarkFeatures.isEnabled("editor.ajax.save.disable"),h=function(){b.is(":visible")&&(""===b.val()&&(b.val(j.get("space-name")),g.val(j.get("space-key"))),f.clearErrors(),l?d.val()?f.select(g.val(),b.val(),d.val(),a("#parentPageId").val()):
+f.select(g.val(),b.val(),d.val(),""):f.select(g.val(),b.val(),d.val()))},m=function(){var a=b.val(),e=d.val();k.setTimeout(function(){a===b.val()&&e===d.val()&&h()},100)};d.blur(m).focus(function(){f.clearErrors();e.dropDown.current&&e.dropDown.current.hide()});b.blur(m).focus(function(){e.dropDown.current&&e.dropDown.current.hide()});b.movePageAutocomplete("/rest/quicknav/1/search?type=spacedesc&type=personalspacedesc",a(".new-space-dropdown",c),i.Templates.MovePage.noMatchingSpaces(),function(a,
+f){var c=f.find("span").data("properties");g.val(c.spaceKey);b.val(e("span").html(c.name).text());d.val("");h();d.focus()});d.movePageAutocomplete(function(){return"/rest/quicknav/1/search?type=page&spaceKey="+g.val()},a(".new-parent-page-dropdown",c),i.Templates.MovePage.noMatchingPages(),function(b,c){var g=e("span").html(c.find("span").data("properties").name).text();d.val(g);l&&a("#parentPageId").val(a(c).data().properties.id);h();k.setTimeout(function(){f.moveButton.focus()},50)})}});
+require("confluence/module-exporter").exportModuleAsGlobal("confluence/page-move-dialog-location","jQuery.fn.movePageLocation");
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'confluence.web.resources:page-move-resources', location = '/includes/js/page-move-dialog-search.js' */
+define("confluence/page-move-dialog-search",["jquery","ajs","confluence/templates"],function(c,d,j){return function(b){var k=c("#confluence-context-path").attr("content"),a=this,f=c("input[type=button]",a),e=c("input.search-query",a),i=c(".search-space",a),g=c(".search-results",a);c([i[0],e[0]]).keydown(function(c){13===c.which&&f.click()});c([e[0],g[0]]).keydown(function(b){function d(b){var h=c(".search-result",a),l=c(".search-result.selected",a),b=h.index(l)+b;0>b&&(b=h.length-1);b>=h.length&&
+(b=0);h.eq(b).click()}38===b.which?d(-1):40===b.which&&d(1)});f.click(function(){b.clearErrors();var a=e.val();""==a?g.empty():(g.html(j.MovePage.searchResultsLoading()),c.ajax({type:"GET",dataType:"json",data:{queryString:a,where:i.val(),types:["spacedesc","personalspacedesc","page"]},url:k+"/json/search.action",error:function(){b.error("Failed to retrieve search results from the server.")},success:function(e,f){"success"!=f?b.error("Failed to retrieve search results from the server."):g.searchResultsGrid(a,
+e,c(b).extend({select:function(c,a){"page"==a.type?b.select(a.spaceKey,a.spaceName,a.title,a.id):b.select(a.spaceKey,a.spaceName)}}),{noSearchResults:"There were no pages found containing \u003cb\u003e{0}\u003c/b\u003e.",resultsCount:"Showing \u003cb\u003e{0}\u003c/b\u003e-\u003cb\u003e{1}\u003c/b\u003e of \u003cb\u003e{2}\u003c/b\u003e pages containing \u003cb\u003e{3}\u003c/b\u003e."})}}))})}});require("confluence/module-exporter").exportModuleAsGlobal("confluence/page-move-dialog-search","jQuery.fn.movePageSearch");
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'confluence.web.resources:page-move-resources', location = '/includes/js/page-move-dialog-history.js' */
+define("confluence/page-move-dialog-history",["jquery","confluence/templates","ajs"],function(c,g,b){return function(f){var h=c("#confluence-context-path").attr("content"),d=this,e=c(".search-results",d);c(e).keydown(function(b){function e(a){var b=c(".search-result",d),f=c(".search-result.selected",d),a=b.index(f)+a;0>a&&(a=b.length-1);a>=b.length&&(a=0);b.eq(a).click()}38===b.which?e(-1):40===b.which&&e(1)});e.html(g.MovePage.pageHistoryLoading());c.ajax({type:"GET",dataType:"json",data:{types:["spacedesc",
+"personalspacedesc","page"]},url:h+"/json/history.action",error:function(){f.error(b.params.movePageDialogHistoryError)},success:function(d,g){"success"!=g?f.error(b.params.movePageDialogHistoryError):!d.history||0===d.history.length?e.html("<div class='no-results'>"+"There were no recently viewed pages found."+"</div>"):(e.html(b.getTemplate("searchResultsGrid").toString()),c.each(d.history,function(){var a=this;if(a.id!=b.params.pageId){var d=c(b.renderTemplate("searchResultsGridRow",[a.title,
+h+a.url,a.type,a.spaceName,a.spaceKey,a.friendlyDate,a.date]));c(d).click(function(d){"page"==a.type?f.select(a.spaceKey,a.spaceName,a.title,a.id):f.select(a.spaceKey,a.spaceName);e.find(".selected").removeClass("selected");c(this).addClass("selected");return b.stopEvent(d)});c(d).hover(function(){c(this).addClass("hover")},function(){c(this).removeClass("hover")});e.find("table").append(d)}}),0===c(".search-result",e).length&&e.html("<div class='no-results'>"+"There were no recently viewed pages found."+
+"</div>"))}})}});require("confluence/module-exporter").exportModuleAsGlobal("confluence/page-move-dialog-history","jQuery.fn.movePageHistory");
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'confluence.web.resources:page-move-resources', location = '/includes/js/page-move-dialog-browse.js' */
+define("confluence/page-move-dialog-browse",["jquery","ajs","confluence/templates","confluence/legacy"],function(a,g,l,q){return function(j,b,f,d,i,m){var k=a("#confluence-context-path").attr("content"),c=a(".tree",this);c.addClass("loading").html(l.MovePage.panelLoading());var e,r=function(){c.removeClass("rendering").addClass("expanding");a("#parent-selection-tree .dialog-button-panel").remove();n(g.Meta.get("space-key"),i,function(a){if(a&&""!=i){var h=e.findNodeBy("text",i);h&&h.$.find("> a").addClass("current-parent")}h=
+g.Meta.get("page-title");if(a&&h&&(a=e.findNodeBy("text",h)))a.makeUnclickable(),h!=m&&a.setText(m);n(b,d,function(a){if(a&&(a=e.findNodeBy("text",d))){a.$.find("> a").addClass("highlighted");var a=a.$.position().top,o=c.height();(0>a||a>o)&&c.scrollTop(c.scrollTop()+a-o/3)}c.removeClass("expanding")})})},p=function(e){e.preventDefault();a("a.highlighted",c).removeClass("highlighted");a(this).addClass("highlighted");b=a("#chosenSpaceKey").val();f=a("#chosenSpaceKey option:selected").text();d=a(this).hasClass("root-node")?
+"":a(this).find("span").text();!g.DarkFeatures.isEnabled("editor.ajax.save")||g.DarkFeatures.isEnabled("editor.ajax.save.disable")?j.select(b,f,d):0<d.length?j.select(b,f,d,a(this).parent().attr("id").split("-")[1]):j.select(b,f,d,"")},n=function(b,d,c){b!=a("#chosenSpaceKey").val()?c(!1):q.Dialogs.Breadcrumbs.defaultGetBreadcrumbs({spaceKey:b,title:d},function(b){b=b.slice(1);b[0]&&-1!==b[0].url.indexOf("collector/pages.action")&&b.shift();b=a.map(b,function(a){return{text:a.title}});e.expandPath(b,
+function(){c(!0)})},function(){j.error("Could not retrieve tree expansion information.");c(!1)})};c.load(k+"/panels/browsepagelocation.action",{panelName:"browse",dialogMode:"view",spaceKey:b,parentPageString:d,pageId:g.params.pageId},function(){c.removeClass("loading").addClass("rendering");a("select#chosenSpaceKey").val(b).change(function(){var f=a(this).val(),h=a(this).find("option:selected").text();a("#tree-root-node-item a").text(h).toggleClass("highlighted",b==f&&""==d).toggleClass("current-parent",
+g.Meta.get("space-key")==f&&""==i);c.addClass("rendering");e=e.reload({initUrl:k+"/pages/children.action?spaceKey="+encodeURIComponent(f)+"&node=root"})});a("#tree-root-div").html(l.MovePage.browsePanelSpace({linkText:f})).find("a").click(p).toggleClass("highlighted",""==d).toggleClass("current-parent",g.Meta.get("space-key")==b&&""==i);e=a("#parent-selection-tree").tree({url:k+"/pages/children.action",initUrl:k+"/pages/children.action?spaceKey="+encodeURIComponent(b)+"&node=root",parameters:["pageId",
+"text"],undraggable:!0,spinnerId:"move-page-dialog-spinner",nodeId:"pageId",click:p,onready:r,oninsert:function(){this.$.parents("li:first").attr("unclickable")&&this.makeUnclickable()}});g.MoveDialog.tree=e})}});require("confluence/module-exporter").exportModuleAsGlobal("confluence/page-move-dialog-browse","jQuery.fn.movePageBrowse");
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'confluence.web.resources:page-move-resources', location = '/includes/js/page-move-dialog.js' */
+/**
+ * @tainted aui
+ */
+define('confluence/page-move-dialog', [
+    'ajs',
+    'confluence/templates',
+    'confluence/legacy',
+    'window',
+    'jquery'
+], function(
+    AJS,
+    Templates,
+    Confluence,
+    window,
+    $
+) {
+    "use strict";
+
+    return function PageMoveDialog() {
+        var dialogWidth = 840;
+        var dialogHeight = 590;
+        var locationPanelHeight = 71;
+
+        var isEditorAjaxSaveEnabled = AJS.DarkFeatures.isEnabled('editor.ajax.save') && !AJS.DarkFeatures.isEnabled('editor.ajax.save.disable');
+
+        var MovePageDialog = function (options) {
+            var pageTitle = AJS.Meta.get('page-title');
+            options = $.extend({
+                spaceKey: AJS.Meta.get('space-key'),
+                spaceName: AJS.Meta.get('space-name'),
+                pageTitle: pageTitle,
+                parentPageTitle: AJS.Meta.get('parent-page-title'),
+                title: AJS.format("Move Page \u2013 \u2018{0}\u2019", pageTitle), // "Move Page - 'Title'
+                buttonName: "Move",
+                openedPanel: "Advanced", // Ideally this would be the Browse panel, however due to performance reasons we can't do this
+                moveHandler: function (dialog) {
+                    AJS.debug("No move handler defined. Closing dialog.");
+                    dialog.remove();
+                },
+                cancelHandler: function (dialog) {
+                    dialog.remove();
+                    return false;
+                }
+            }, options);
+
+            var newSpaceKey = options.spaceKey;
+            var newSpaceName = options.spaceName;
+            var newParentPage = options.parentPageTitle;
+
+            var reorderTargetId = "";
+            var reorderTargetPosition = "";
+
+            // called when the ordering of a page is set beneath a parent.
+            var reorder = function (targetId, positionIndicator) {
+                reorderTargetId = targetId;
+                reorderTargetPosition = positionIndicator;
+            };
+
+            var structure = AJS.ConfluenceDialog({
+                width: dialogWidth,
+                height: dialogHeight,
+                id: "move-page-dialog"
+            });
+
+            var templateVars = {
+                spaceKey: newSpaceKey,
+                spaceName: newSpaceName,
+                parentPageTitle: newParentPage,
+
+                // canMoveBetweenSpaces: AJS.Meta.get("page-id") == 0 || AJS.Meta.getBoolean("can-remove-page") // remember that you move between drafts
+                
+                //Setting this to always true for now, since we allow page moves accross spaces regardless of delete space perm.
+                //Move wil not be allowed between spaces if there are restricted children (from user). WOuld be nice if we caught that here.
+                //Would need to place a meta tag that returns the value of userCanViewAllDescendantPages
+                canMoveBetweenSpaces: true
+            };
+
+            structure.addHeader(options.title);
+            structure.addPanel("Advanced", Templates.MovePage.movePageAdvancedPanel(templateVars), "location-panel", "location-panel-id");
+            structure.addPanel("Search", Templates.MovePage.movePageSearchPanel(templateVars), "search-panel", "search-panel-id");
+            structure.addPanel("Recently Viewed", Templates.MovePage.historyPanel({pageTitle: AJS.Meta.get("page-title")}), "history-panel", "history-panel-id");
+            structure.addPanel("Browse", Templates.MovePage.browsePanel({pageTitle: AJS.Meta.get("page-title")}), "browse-panel", "browse-panel-id");
+
+            // panel switching logic
+
+            structure.get('#"' + "Advanced" + '"')[0].onselect = function () {
+                $("#new-space-key").val(newSpaceKey);
+                $("#new-space").val(newSpaceName);
+                $("#new-parent-page").val(newParentPage).select();
+            };
+            structure.get('#"' + "Search" + '"')[0].onselect = function () {
+                // always clear out the previous selection
+                $("#move-page-dialog .search-panel .search-results .selected").removeClass("selected");
+                $("#move-page-dialog input.search-query").focus();
+            };
+            structure.get('#"' + "Recently Viewed" + '"')[0].onselect = function () {
+                // refresh the history panel every time it loads, in case the user has navigated elsewhere in another tab
+                $(".history-panel", dialog).movePageHistory(controls);
+            };
+            structure.get('#"' + "Browse" + '"')[0].onselect = function () {
+                // always refresh the tree when loading the Browse tab, don't load it initially
+                AJS.debug("browse: " + [newSpaceKey, newSpaceName, newParentPage].join());
+                $(".browse-panel", dialog).movePageBrowse(controls, newSpaceKey, newSpaceName, newParentPage, originalParent, options.pageTitle);
+            };
+
+            var gotoReorderPage = function (dialog) {
+                dialog.nextPage();
+                var dialogDom = $("#move-page-dialog");
+                $(".ordering-panel", dialogDom).movePageOrdering(newSpaceKey, newParentPage, options.pageTitle, reorder);
+            };
+
+            var moveFunction = function (dialog) {
+                var space = $("#new-space:visible").val();
+                var spaceKey = $("#new-space-key").val();
+                var parentPage = $("#new-parent-page:visible").val();
+                if (space && (space != newSpaceName || spaceKey != newSpaceKey || parentPage != newParentPage)) {
+                    Confluence.Dialogs.Breadcrumbs.defaultGetBreadcrumbs({
+                        spaceKey: spaceKey,
+                        pageTitle: parentPage
+                    }, function () {
+                        Confluence.PageLocation.set({
+                            spaceKey: spaceKey,
+                            spaceName: space,
+                            parentPageTitle: parentPage
+                        });
+                        options.moveHandler(dialog, spaceKey, space, parentPage, reorderTargetId, reorderTargetPosition, setErrors);
+                    }, function (xhr) {
+                        $('#new-parent-breadcrumbs').html(Templates.MovePage.breadcrumbError());
+                        if (xhr.status === 404) {
+                            controls.error("The specified page was not found.");
+                        }
+                    });
+                } else {
+                    Confluence.PageLocation.set({
+                        spaceKey: newSpaceKey,
+                        spaceName: newSpaceName,
+                        parentPageTitle: newParentPage
+                    });
+                    options.moveHandler(dialog, newSpaceKey, newSpaceName, newParentPage, reorderTargetId, reorderTargetPosition, setErrors);
+                }
+            };
+
+            // Decide whether to execute the move or goto the re-order page instead.
+            var executeMove = function (dialog) {
+                if ($("#createpageform").length > 0 &&
+                        AJS.DarkFeatures.isEnabled('editor.ajax.save') && !AJS.DarkFeatures.isEnabled('editor.ajax.save.disable')) {
+                    moveFunction(dialog);
+                } else {
+
+                    if ($("#reorderCheck")[0].checked) {
+                        gotoReorderPage(dialog);
+                    } else {
+                        moveFunction(dialog);
+                    }
+                }
+            };
+
+            structure.addButton(options.buttonName, executeMove, "move-button");
+            structure.addCancel("Cancel", options.cancelHandler);
+            // CONFDEV-12853: Add help link via prepend() instead of append() to prevent FF display issue
+            structure.popup.element.find(".dialog-title").prepend(Templates.MovePage.helpLink());
+
+            // Add the ordering page
+            if ($("#createpageform").length > 0) {
+                if (!isEditorAjaxSaveEnabled) {
+                    structure.addPage()
+                            .addHeader(options.title)
+                            .addPanel("Page Ordering", Templates.MovePage.orderingPagePanel(), "ordering-panel", "ordering-panel-id")
+                            .addLink("Back", function (dialog) { dialog.prevPage(); }, "dialog-back-link")
+                            .addButton("Reorder", moveFunction, "reorder-button")
+                            .addCancel("Cancel", options.cancelHandler);
+                }
+            } else {
+                structure.addPage()
+                        .addHeader(options.title)
+                        .addPanel("Page Ordering", Templates.MovePage.orderingPagePanel(), "ordering-panel", "ordering-panel-id")
+                        .addLink("Back", function (dialog) { dialog.prevPage(); }, "dialog-back-link")
+                        .addButton("Reorder", moveFunction, "reorder-button")
+                        .addCancel("Cancel", options.cancelHandler);
+            }
+
+            var moveButton = structure.get("button#" + options.buttonName)[0].item;
+            if ($("#createpageform").length > 0) {
+                if (!isEditorAjaxSaveEnabled) {
+                    $("button.move-button").before(Templates.MovePage.reorderCheckbox());
+                    $("button.reorder-button").before(Templates.MovePage.spinnerButton());
+                    $("#reorderRequirement").before(Templates.MovePage.spinnerButton());
+                }
+            } else {
+                $("button.move-button").before(Templates.MovePage.reorderCheckbox());
+                $("button.reorder-button").before(Templates.MovePage.spinnerButton());
+                $("#reorderRequirement").before(Templates.MovePage.spinnerButton());
+            }
+
+            structure.gotoPage(0);
+
+            // The concept of the location panel does not fit into AUI's dialog, which applies inline styling to the panel bodies.
+            var dialog = $('#move-page-dialog');
+            var dialogPageMenus = dialog.find('.dialog-page-menu');
+            var dialogPageBodies = dialog.find('.dialog-page-body');
+
+            // first page (move) dimensions
+            var firstPageMenu = $(dialogPageMenus[0]);
+            var firstPageBody = $(dialogPageBodies[0]);
+
+            firstPageBody.height(firstPageMenu.height());
+            firstPageBody.width('75%');
+            firstPageBody.find('.dialog-panel-body').height(firstPageMenu.height() - locationPanelHeight);
+
+            // second page (reorder) dimensions
+            var secondPageMenu = $(dialogPageMenus[1]);
+            var secondPageBody = $(dialogPageBodies[1]);
+
+            secondPageMenu.width('0');
+            secondPageBody.width('100%');
+
+            structure.show();
+
+            // move breadcrumbs to the bottom of all pages on the first page of the dialog (location selection page)
+            $(".location-panel .location-info", dialog).appendTo($(".dialog-page-body:first", dialog));
+
+            var breadcrumbs = new Confluence.Dialogs.Breadcrumbs.Controller($('#new-parent-breadcrumbs'));
+
+            function setErrors(errors) {
+                var errorsContainer = $("#move-errors");
+                if (errorsContainer.length > 0) {
+                    errorsContainer.remove();
+                }
+                errorsContainer = $(Templates.MovePage.errorMessage());
+
+                var container = dialog.find(".browse-controls:visible");
+                if (!container.length) {
+                    container = dialog.find(".dialog-panel-body:visible");
+                    container.prepend(errorsContainer);
+                } else {
+                    container.append(errorsContainer);
+                }
+
+                if (!errors || errors.length === 0) {
+                    $(moveButton).prop("disabled", false);
+                    return;
+                }
+
+                var errorMessageText = "The following error(s) occurred:";
+                errorMessageText += "<ul>\n<li>";
+
+                if ($.isArray(errors)) {
+                    errorMessageText += errors.join("</li>\n<li>");
+                } else {
+                    errorMessageText += errors;
+                }
+                errorMessageText += "</li>\n</ul>";
+
+                var errorMessage = aui.message.warning({'content': errorMessageText});
+                errorsContainer.html(errorMessage);
+                errorsContainer.removeClass('hidden');
+            }
+
+            var controls = {
+                moveButton: moveButton,
+                clearErrors: function () {
+                    setErrors([]);
+                },
+                error: setErrors,
+
+                // called when a destination is selected on one of the panels
+                select: function (spaceKey, spaceName, parentPageTitle, parentPageId) {
+                    AJS.debug("select: " + [spaceKey, spaceName, parentPageTitle].join());
+
+                    if ($("#createpageform").length > 0 && isEditorAjaxSaveEnabled) {
+                        if (typeof parentPageId !== 'undefined') {
+                            $("#parentPageId").val(parentPageId);
+                        }
+                    }
+
+                    newSpaceKey = spaceKey;
+                    newSpaceName = spaceName;
+                    newParentPage = parentPageTitle || "";
+
+                    $(moveButton).prop("disabled", true); // disable submission until the location is validated
+                    breadcrumbs.update({spaceKey: newSpaceKey, title: newParentPage}, controls);
+
+                }
+            };
+            structure.overrideLastTab();
+            structure.get('#"' + options.openedPanel + '"').select();
+
+            // render the current breadcrumbs immediately
+            var originalParent = AJS.Meta.get('parent-page-title') || AJS.Meta.get('from-page-title');
+            var currentBreadcrumbs = new Confluence.Dialogs.Breadcrumbs.Controller($('#current-parent-breadcrumbs'));
+            currentBreadcrumbs.update({spaceKey: AJS.Meta.get('space-key'), title: originalParent}, controls);
+
+            $(".location-panel", dialog).movePageLocation(controls);
+            $(".search-panel", dialog).movePageSearch(controls);
+            $(".history-panel", dialog).movePageHistory(controls);
+
+
+            $("#new-parent-page").select(); // focus the new parent page input
+            if (options.hint) {
+                structure.addHelpText(options.hint.template || options.hint.text, options.hint.arguments);
+            }
+            return dialog;
+        };
+
+        var MovePageParams = function (spaceKey, pageTitle, siblingId, siblingRelativePosition) {
+            var params = {
+                pageId: AJS.params.pageId,
+                spaceKey: spaceKey
+            };
+
+            if (siblingId) {
+                params.position = siblingRelativePosition; // may be above or below
+                params.targetId = siblingId;
+            }
+            else if (pageTitle != "") {
+                params.targetTitle = pageTitle;
+                params.position = "append";
+            } else {
+                params.position = "topLevel";
+            }
+            return params;
+        };
+
+        function viewPageMoveHandler(dialog, newSpaceKey, newSpaceName, newParentPage, newSiblingId, newSiblingPosition, setErrors) {
+            $("#move-errors").remove();
+            $('.button-spinner').each(function (i, val) {$(val).spin();});
+            var moveButton = $("#move-page-dialog .move-button").disable();
+            var reorderButton;
+            var cancelButton;
+            var backButton;
+            var reorderCheck;
+            if ($("#createpageform").length > 0) {
+                if (!isEditorAjaxSaveEnabled) {
+                    reorderButton = $("button.reorder-button").disable();
+                    cancelButton = $("#move-page-dialog .button-panel-cancel-link").disable();
+                    backButton = $("#move-page-dialog .dialog-back-link").disable();
+                    reorderCheck = $("#move-page-dialog #reorderCheck").disable();
+                }
+            } else {
+                reorderButton = $("button.reorder-button").disable();
+                cancelButton = $("#move-page-dialog .button-panel-cancel-link").disable();
+                backButton = $("#move-page-dialog .dialog-back-link").disable();
+                reorderCheck = $("#move-page-dialog #reorderCheck").disable();
+            }
+
+            function error(messages) {
+                setErrors(messages);
+                moveButton.enable();
+                reorderButton.enable();
+                reorderCheck.enable();
+                cancelButton.enable();
+                backButton.enable();
+                $('.button-spinner').each(function (i, val) {$(val).spinStop();});
+            }
+
+            AJS.safe.ajax({
+                url: AJS.contextPath() + "/pages/movepage.action",
+                type: "GET",
+                dataType: "json",
+                timeout: 180000,
+                data: new MovePageParams(newSpaceKey, newParentPage, newSiblingId, newSiblingPosition),
+                error: function () {
+                    error("Move failed. There was a problem contacting the server.");
+                },
+                success: function (data) {
+                    var errors = [].concat(data.validationErrors || []).concat(data.actionErrors || []).concat(data.errorMessage || []);
+                    if (errors.length > 0) {
+                        error(errors);
+                        return;
+                    }
+                    window.location.href = AJS.contextPath() + data.page.url + (data.page.url.indexOf("?") >= 0 ? "&" : "?") + "moved=true";
+                }
+            });
+        }
+
+        AJS.bind("deferred.page-move.tools-menu", function (e) {
+            e.preventDefault();
+
+            if ($("#move-page-dialog").length > 0) {
+                $("#move-page-dialog, body > .shadow, body > .aui-blanket").remove();
+            }
+
+            new MovePageDialog({
+                moveHandler: viewPageMoveHandler
+            });
+
+            return false;
+        });
+
+        var currentSpaceName; // space names aren't stored in hidden fields, so store it in a variable
+
+        AJS.bind("deferred.page-move.editor", function (e) {
+            e.preventDefault();
+
+            if ($("#move-page-dialog").length > 0) {
+                $("#move-page-dialog, body > .shadow, body > .aui-blanket").remove();
+            }
+            new MovePageDialog({
+                spaceName: currentSpaceName,
+                spaceKey: $("#newSpaceKey").val(),
+                pageTitle: $("#content-title").val(),
+                parentPageTitle: $("#parentPageString").val(),
+                buttonName: "Move",
+                title: "Set Page Location",
+                moveHandler: function (dialog, newSpaceKey, newSpaceName, newParentPage, targetId, newPositionIndicator, setErrors) {
+                    // TODO: AJAX validation, should use setErrors
+                    currentSpaceName = newSpaceName;
+                    $("#newSpaceKey").val(newSpaceKey);
+                    $("#parentPageString").val(newParentPage);
+                    if (newParentPage != "") {
+                        $("#position").val("append");
+                    } else {
+                        $("#position").val("topLevel");
+                    }
+
+                    if ($("#createpageform").length > 0 && isEditorAjaxSaveEnabled) {
+                        if ((typeof $("#parentPageId") !== 'undefined') && (typeof $("#parentPageId").val() !== 'undefined')) {
+                            AJS.Meta.set('parent-page-id', $("#parentPageId").val());
+                        }
+                        if (typeof newSpaceKey !== 'undefined') {
+                            AJS.Meta.set('space-key', newSpaceKey);
+                        }
+                    }
+
+                    // If explicit position has been set then override the positions that may have been set up
+                    if (targetId) {
+                        $("#targetId").val(targetId);
+                        $("#position").val(newPositionIndicator);
+                    }
+
+                    dialog.remove();
+                    // TODO: After we move the page, should update restrictions and breadcrumbs
+                    // see: https://jira.atlassian.com/browse/CONFDEV-15399
+                }
+            });
+
+            return false;
+        });
+
+        return MovePageDialog;
+    };
+});
+
+require('confluence/module-exporter').safeRequire('confluence/page-move-dialog', function(PageMoveDialog) {
+    var Confluence = require('confluence/legacy');
+
+    require('ajs').toInit(function() {
+        var movePageDialog = PageMoveDialog();
+
+        Confluence.MovePageDialog = movePageDialog;
+    });
+});
+
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'confluence.web.resources:page-move-resources', location = '/includes/js/blogpost-move-dialog.js' */
+define("confluence/blogpost-move-dialog",["ajs","jquery","confluence/legacy","confluence/templates","confluence/api/constants"],function(a,b,h,j,k){function l(c,e,d){function f(a){d(a);g.enable();h.enable();b(".button-spinner").spinStop()}function i(b){a.trigger("analyticsEvent",{name:b,data:{newSpaceKey:e,oldSpaceKey:a.params.spaceKey,blogPostId:a.params.pageId}})}b("#move-blogpost-dialog .move-errors").empty();b(".button-spinner").spin();var g=b(".move-button").disable(),h=b("#move-blogpost-dialog .button-panel-cancel-link").disable();
+""===e?f("Please select a space"):b.ajax({url:k.CONTEXT_PATH+"/pages/moveblogpost.action",type:"GET",dataType:"json",timeout:18E4,data:{blogPostId:a.params.pageId,spaceKey:e},error:function(b){403===b.status||401===b.status?f("You are not permitted to perform this operation."):f("Move blog post failed");i("moveblogpost.ajaxError")},success:function(b){var c=[].concat(b.validationErrors||[]).concat(b.actionErrors||[]).concat(b.errorMessage||[]);
+0<c.length?(f(c[0]),i("moveblogpost.serverValidationError")):(i("moveblogpost.success"),window.location.href=a.contextPath()+b.blogPost.url+(0<=b.blogPost.url.indexOf("?")?"&":"?")+"moved=true")}})}function g(c){function e(c){b("#move-blogpost-dialog .move-errors").empty();a.messages.error("#move-blogpost-dialog .move-errors",{body:c,closeable:!1})}a.Meta.get("page-title");var c=b.extend({spaceKey:a.Meta.get("space-key"),spaceName:a.Meta.get("space-name"),title:"Move to",
+buttonName:"Move",moveHandler:function(b){a.debug("No move handler defined. Closing dialog.");b.remove()},cancelHandler:function(b){b.remove();return!1}},c),d=a.ConfluenceDialog({width:m,height:n,id:"move-blogpost-dialog"});d.addHeader(c.title);d.addPanel("move.blogpost.dialog.panel.title",j.MoveBlogPost.dialogPanel(),"move-blogpost-dialog-panel","move-blogpost-dialog-panel-id");b("#new-space").auiSelect2(h.UI.Components.SpacePicker.build());d.addButton(c.buttonName,
+function(a){var d=b("#new-space").val();c.moveHandler(a,d,e)},"move-button");d.addCancel("Cancel",c.cancelHandler);d.popup.element.find(".dialog-button-panel").prepend("<div class='button-spinner'>&nbsp;</div>");d.show();return d}var m=400,n=250;return{control:g,initialiser:function(a){a.preventDefault();0<b("#move-blogpost-dialog").length&&b("#move-blogpost-dialog, body > .shadow, body > .aui-blanket").remove();new g({moveHandler:l});return!1}}});
+require("confluence/module-exporter").safeRequire("confluence/blogpost-move-dialog",function(a){require("confluence/legacy").MoveBlogPostDialog=a.control;require("ajs").bind("deferred.blog-move.tools-menu.click",a.initialiser)});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'confluence.web.resources:page-move-resources', location = '/includes/soy/blogpost-move-dialog.soy' */
+// This file was automatically generated from blogpost-move-dialog.soy.
+// Please don't edit this file by hand.
+
+/**
+ * @fileoverview Templates in namespace Confluence.Templates.MoveBlogPost.
+ */
+
+if (typeof Confluence == 'undefined') { var Confluence = {}; }
+if (typeof Confluence.Templates == 'undefined') { Confluence.Templates = {}; }
+if (typeof Confluence.Templates.MoveBlogPost == 'undefined') { Confluence.Templates.MoveBlogPost = {}; }
+
+
+Confluence.Templates.MoveBlogPost.dialogPanel = function(opt_data, opt_ignored) {
+  return '<div class="new-space-value"><input type="hidden" id="new-space" style="width: 100%"/></div><div class="move-errors"></div>';
+};
+if (goog.DEBUG) {
+  Confluence.Templates.MoveBlogPost.dialogPanel.soyTemplateName = 'Confluence.Templates.MoveBlogPost.dialogPanel';
+}
+
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;

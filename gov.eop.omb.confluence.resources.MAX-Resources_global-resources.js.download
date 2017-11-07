@@ -1,0 +1,477 @@
+;try {
+/* module-key = 'gov.eop.omb.confluence.resources.MAX-Resources:global-resources', location = 'gov/eop/omb/confluence/resources/jQuery/jquery-cookie/jquery.cookie.js' */
+/**
+ * Cookie plugin
+ *
+ * Copyright (c) 2006 Klaus Hartl (stilbuero.de)
+ * Dual licensed under the MIT and GPL licenses:
+ * http://www.opensource.org/licenses/mit-license.php
+ * http://www.gnu.org/licenses/gpl.html
+ *
+ */
+
+/**
+ * Create a cookie with the given name and value and other optional parameters.
+ *
+ * @example $.cookie('the_cookie', 'the_value');
+ * @desc Set the value of a cookie.
+ * @example $.cookie('the_cookie', 'the_value', {expires: 7, path: '/', domain: 'jquery.com', secure: true});
+ * @desc Create a cookie with all available options.
+ * @example $.cookie('the_cookie', 'the_value');
+ * @desc Create a session cookie.
+ * @example $.cookie('the_cookie', null);
+ * @desc Delete a cookie by passing null as value.
+ *
+ * @param String name The name of the cookie.
+ * @param String value The value of the cookie.
+ * @param Object options An object literal containing key/value pairs to provide optional cookie attributes.
+ * @option Number|Date expires Either an integer specifying the expiration date from now on in days or a Date object.
+ *                             If a negative value is specified (e.g. a date in the past), the cookie will be deleted.
+ *                             If set to null or omitted, the cookie will be a session cookie and will not be retained
+ *                             when the the browser exits.
+ * @option String path The value of the path atribute of the cookie (default: path of page that created the cookie).
+ * @option String domain The value of the domain attribute of the cookie (default: domain of page that created the cookie).
+ * @option Boolean secure If true, the secure attribute of the cookie will be set and the cookie transmission will
+ *                        require a secure protocol (like HTTPS).
+ * @type undefined
+ *
+ * @name $.cookie
+ * @cat Plugins/Cookie
+ * @author Klaus Hartl/klaus.hartl@stilbuero.de
+ */
+
+/**
+ * Get the value of a cookie with the given name.
+ *
+ * @example $.cookie('the_cookie');
+ * @desc Get the value of a cookie.
+ *
+ * @param String name The name of the cookie.
+ * @return The value of the cookie.
+ * @type String
+ *
+ * @name $.cookie
+ * @cat Plugins/Cookie
+ * @author Klaus Hartl/klaus.hartl@stilbuero.de
+ */
+jQuery.cookie = function(name, value, options) {
+    if (typeof value != 'undefined') { // name and value given, set cookie
+        options = options || {};
+        if (value === null) {
+            value = '';
+            options.expires = -1;
+        }
+        var expires = '';
+        if (options.expires && (typeof options.expires == 'number' || options.expires.toUTCString)) {
+            var date;
+            if (typeof options.expires == 'number') {
+                date = new Date();
+                date.setTime(date.getTime() + (options.expires * 24 * 60 * 60 * 1000));
+            } else {
+                date = options.expires;
+            }
+            expires = '; expires=' + date.toUTCString(); // use expires attribute, max-age is not supported by IE
+        }
+        var path = options.path ? '; path=' + options.path : '';
+        var domain = options.domain ? '; domain=' + options.domain : '';
+        var secure = '; secure';
+        document.cookie = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
+    } else { // only name given, get cookie
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+};
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.resources.MAX-Resources:global-resources', location = 'gov/eop/omb/confluence/resources/scripts/utilities.js' */
+// Defind utils space
+if(typeof utils == 'undefined')
+	utils = {};
+
+utils.proxyTicket = "";
+utils.proxyTicketRetryCount = 0;
+
+utils.getProxyTicket = function (service)
+{
+	utils.proxyTicket = "";
+	
+	var CASredirectUrl = "";
+	
+	jQuery.ajax({
+		type: "GET",
+		dataType: "json",
+		cache: false,
+		async: false,
+		url: contextPath + '/ajax/proxyticket.jsp?url=' + service,
+		success: function (data, textStatus, jqXHR){
+			utils.proxyTicket = data.cas_proxy_ticket;		
+			CASredirectUrl = data.cas_proxy_ticket;			
+		},
+		error: utils.getProxyTicketError
+	});
+	
+	return utils.proxyTicket;
+};
+
+utils.getProxyTicketError = function ()
+{
+	var dialog = jQuery("#proxy-ticket-error-dialog");
+	
+	if(dialog.length == 0)
+	{
+		var dialogConfig = new JQUERYUI_DIALOG_ERROR_HASH;
+		var p = jQuery("<p></p>");
+		
+		dialog = jQuery("<div></div>");
+		
+		dialog.attr("id", "proxy-ticket-error-dialog");
+		dialogConfig.title = "Client Error";
+		
+		dialogConfig.buttons.OK = function()
+		{ 
+			jQuery(this).dialog("destroy");
+			
+			window.location.reload();
+		};
+		
+		dialogConfig.buttons.Cancel = function()
+		{ 
+			jQuery(this).dialog("destroy");
+		};
+		
+		p.text("An error has occured while attempting to contact the server. Please backup anything you have been working on. Refreshing the page may resolve the issue, click OK to refresh.");
+		
+		dialog.append(p);
+		dialog.dialog(dialogConfig);
+	}
+	else
+	{
+		dialog.dialog("open");
+	}
+};
+
+// HTML Entity Encode (<, &, etc.)
+utils.encode = function (text)
+{
+	var newText = jQuery("<div />").text(text).html();
+	
+	return newText;
+};
+
+//HTML Entity Decode (<, &, etc.)
+utils.decode = function (text)
+{
+	var newText = jQuery("<div />").html(text).text();
+	
+	return newText;
+};
+
+/*
+ * Contains MD5 Functions
+ */
+utils.md5 = {};
+utils.md5.internal = {};
+
+// Convert JSON Element to MD5 Hash
+utils.md5.JSONHash = function (jsonElement)
+{
+	return utils.md5.stringHash(JSON.stringify(jsonElement));
+};
+
+//Convert String to MD5 Hash
+utils.md5.stringHash = function (string)
+{
+	return utils.md5.internal.rstr2hex(utils.md5.internal.rstr_md5(utils.md5.internal.str2rstr_utf8(string)));
+};
+
+// Convert a raw string to a hex string
+utils.md5.internal.rstr2hex = function (input)
+{
+	try
+	{
+		hexcase
+	}
+	catch(e)
+	{
+		hexcase=0;
+	}
+	
+	var hex_tab = hexcase ? "0123456789ABCDEF" : "0123456789abcdef";
+	var output = "";
+	var x;
+	
+	for ( var i = 0; i < input.length; i++)
+	{
+		x = input.charCodeAt(i);
+		output += hex_tab.charAt((x >>> 4) & 0x0F) + hex_tab.charAt(x & 0x0F);
+	}
+	
+	return output;
+};
+
+// Calculate the MD5 of a raw string
+utils.md5.internal.rstr_md5 = function (string)
+{
+	return utils.md5.internal.binl2rstr(utils.md5.internal.binl_md5(utils.md5.internal.rstr2binl(string), string.length * 8));
+};
+
+// Encode a string as utf-8.
+utils.md5.internal.str2rstr_utf8 = function (input)
+{
+	var output = "";
+	var i = -1;
+	var x, y;
+
+	while (++i < input.length)
+	{
+		/* Decode utf-16 surrogate pairs */
+		x = input.charCodeAt(i);
+		y = i + 1 < input.length ? input.charCodeAt(i + 1) : 0;
+		if (0xD800 <= x && x <= 0xDBFF && 0xDC00 <= y && y <= 0xDFFF)
+		{
+			x = 0x10000 + ((x & 0x03FF) << 10) + (y & 0x03FF);
+			i++;
+		}
+
+		/* Encode output as utf-8 */
+		if (x <= 0x7F)
+			output += String.fromCharCode(x);
+		else if (x <= 0x7FF)
+			output += String.fromCharCode(0xC0 | ((x >>> 6) & 0x1F), 0x80 | (x & 0x3F));
+		else if (x <= 0xFFFF)
+			output += String.fromCharCode(0xE0 | ((x >>> 12) & 0x0F), 0x80 | ((x >>> 6) & 0x3F), 0x80 | (x & 0x3F));
+		else if (x <= 0x1FFFFF)
+			output += String.fromCharCode(0xF0 | ((x >>> 18) & 0x07), 0x80 | ((x >>> 12) & 0x3F), 0x80 | ((x >>> 6) & 0x3F), 0x80 | (x & 0x3F));
+	}
+	
+	return output;
+};
+
+// Convert an array of little-endian words to a string
+utils.md5.internal.binl2rstr = function (input)
+{
+	var output = "";
+	
+	for ( var i = 0; i < input.length * 32; i += 8)
+	{
+		output += String.fromCharCode((input[i >> 5] >>> (i % 32)) & 0xFF);
+	}
+	
+	return output;
+};
+
+// Calculate the MD5 of an array of little-endian words, and a bit length.
+utils.md5.internal.binl_md5 = function (x, len)
+{
+	/* append padding */
+	x[len >> 5] |= 0x80 << ((len) % 32);
+	x[(((len + 64) >>> 9) << 4) + 14] = len;
+
+	var a = 1732584193;
+	var b = -271733879;
+	var c = -1732584194;
+	var d = 271733878;
+
+	for ( var i = 0; i < x.length; i += 16)
+	{
+		var olda = a;
+		var oldb = b;
+		var oldc = c;
+		var oldd = d;
+
+		a = utils.md5.internal.md5_ff(a, b, c, d, x[i + 0], 7, -680876936);
+		d = utils.md5.internal.md5_ff(d, a, b, c, x[i + 1], 12, -389564586);
+		c = utils.md5.internal.md5_ff(c, d, a, b, x[i + 2], 17, 606105819);
+		b = utils.md5.internal.md5_ff(b, c, d, a, x[i + 3], 22, -1044525330);
+		a = utils.md5.internal.md5_ff(a, b, c, d, x[i + 4], 7, -176418897);
+		d = utils.md5.internal.md5_ff(d, a, b, c, x[i + 5], 12, 1200080426);
+		c = utils.md5.internal.md5_ff(c, d, a, b, x[i + 6], 17, -1473231341);
+		b = utils.md5.internal.md5_ff(b, c, d, a, x[i + 7], 22, -45705983);
+		a = utils.md5.internal.md5_ff(a, b, c, d, x[i + 8], 7, 1770035416);
+		d = utils.md5.internal.md5_ff(d, a, b, c, x[i + 9], 12, -1958414417);
+		c = utils.md5.internal.md5_ff(c, d, a, b, x[i + 10], 17, -42063);
+		b = utils.md5.internal.md5_ff(b, c, d, a, x[i + 11], 22, -1990404162);
+		a = utils.md5.internal.md5_ff(a, b, c, d, x[i + 12], 7, 1804603682);
+		d = utils.md5.internal.md5_ff(d, a, b, c, x[i + 13], 12, -40341101);
+		c = utils.md5.internal.md5_ff(c, d, a, b, x[i + 14], 17, -1502002290);
+		b = utils.md5.internal.md5_ff(b, c, d, a, x[i + 15], 22, 1236535329);
+
+		a = utils.md5.internal.md5_gg(a, b, c, d, x[i + 1], 5, -165796510);
+		d = utils.md5.internal.md5_gg(d, a, b, c, x[i + 6], 9, -1069501632);
+		c = utils.md5.internal.md5_gg(c, d, a, b, x[i + 11], 14, 643717713);
+		b = utils.md5.internal.md5_gg(b, c, d, a, x[i + 0], 20, -373897302);
+		a = utils.md5.internal.md5_gg(a, b, c, d, x[i + 5], 5, -701558691);
+		d = utils.md5.internal.md5_gg(d, a, b, c, x[i + 10], 9, 38016083);
+		c = utils.md5.internal.md5_gg(c, d, a, b, x[i + 15], 14, -660478335);
+		b = utils.md5.internal.md5_gg(b, c, d, a, x[i + 4], 20, -405537848);
+		a = utils.md5.internal.md5_gg(a, b, c, d, x[i + 9], 5, 568446438);
+		d = utils.md5.internal.md5_gg(d, a, b, c, x[i + 14], 9, -1019803690);
+		c = utils.md5.internal.md5_gg(c, d, a, b, x[i + 3], 14, -187363961);
+		b = utils.md5.internal.md5_gg(b, c, d, a, x[i + 8], 20, 1163531501);
+		a = utils.md5.internal.md5_gg(a, b, c, d, x[i + 13], 5, -1444681467);
+		d = utils.md5.internal.md5_gg(d, a, b, c, x[i + 2], 9, -51403784);
+		c = utils.md5.internal.md5_gg(c, d, a, b, x[i + 7], 14, 1735328473);
+		b = utils.md5.internal.md5_gg(b, c, d, a, x[i + 12], 20, -1926607734);
+
+		a = utils.md5.internal.md5_hh(a, b, c, d, x[i + 5], 4, -378558);
+		d = utils.md5.internal.md5_hh(d, a, b, c, x[i + 8], 11, -2022574463);
+		c = utils.md5.internal.md5_hh(c, d, a, b, x[i + 11], 16, 1839030562);
+		b = utils.md5.internal.md5_hh(b, c, d, a, x[i + 14], 23, -35309556);
+		a = utils.md5.internal.md5_hh(a, b, c, d, x[i + 1], 4, -1530992060);
+		d = utils.md5.internal.md5_hh(d, a, b, c, x[i + 4], 11, 1272893353);
+		c = utils.md5.internal.md5_hh(c, d, a, b, x[i + 7], 16, -155497632);
+		b = utils.md5.internal.md5_hh(b, c, d, a, x[i + 10], 23, -1094730640);
+		a = utils.md5.internal.md5_hh(a, b, c, d, x[i + 13], 4, 681279174);
+		d = utils.md5.internal.md5_hh(d, a, b, c, x[i + 0], 11, -358537222);
+		c = utils.md5.internal.md5_hh(c, d, a, b, x[i + 3], 16, -722521979);
+		b = utils.md5.internal.md5_hh(b, c, d, a, x[i + 6], 23, 76029189);
+		a = utils.md5.internal.md5_hh(a, b, c, d, x[i + 9], 4, -640364487);
+		d = utils.md5.internal.md5_hh(d, a, b, c, x[i + 12], 11, -421815835);
+		c = utils.md5.internal.md5_hh(c, d, a, b, x[i + 15], 16, 530742520);
+		b = utils.md5.internal.md5_hh(b, c, d, a, x[i + 2], 23, -995338651);
+
+		a = utils.md5.internal.md5_ii(a, b, c, d, x[i + 0], 6, -198630844);
+		d = utils.md5.internal.md5_ii(d, a, b, c, x[i + 7], 10, 1126891415);
+		c = utils.md5.internal.md5_ii(c, d, a, b, x[i + 14], 15, -1416354905);
+		b = utils.md5.internal.md5_ii(b, c, d, a, x[i + 5], 21, -57434055);
+		a = utils.md5.internal.md5_ii(a, b, c, d, x[i + 12], 6, 1700485571);
+		d = utils.md5.internal.md5_ii(d, a, b, c, x[i + 3], 10, -1894986606);
+		c = utils.md5.internal.md5_ii(c, d, a, b, x[i + 10], 15, -1051523);
+		b = utils.md5.internal.md5_ii(b, c, d, a, x[i + 1], 21, -2054922799);
+		a = utils.md5.internal.md5_ii(a, b, c, d, x[i + 8], 6, 1873313359);
+		d = utils.md5.internal.md5_ii(d, a, b, c, x[i + 15], 10, -30611744);
+		c = utils.md5.internal.md5_ii(c, d, a, b, x[i + 6], 15, -1560198380);
+		b = utils.md5.internal.md5_ii(b, c, d, a, x[i + 13], 21, 1309151649);
+		a = utils.md5.internal.md5_ii(a, b, c, d, x[i + 4], 6, -145523070);
+		d = utils.md5.internal.md5_ii(d, a, b, c, x[i + 11], 10, -1120210379);
+		c = utils.md5.internal.md5_ii(c, d, a, b, x[i + 2], 15, 718787259);
+		b = utils.md5.internal.md5_ii(b, c, d, a, x[i + 9], 21, -343485551);
+
+		a = utils.md5.internal.safe_add(a, olda);
+		b = utils.md5.internal.safe_add(b, oldb);
+		c = utils.md5.internal.safe_add(c, oldc);
+		d = utils.md5.internal.safe_add(d, oldd);
+	}
+
+	return Array(a, b, c, d);
+};
+
+// Convert a raw string to an array of little-endian words
+// Characters >255 have their high-byte silently ignored.
+utils.md5.internal.rstr2binl = function (input)
+{
+	var output = Array(input.length >> 2);
+	
+	for ( var i = 0; i < output.length; i++)
+	{
+		output[i] = 0;
+	}
+	
+	for ( var i = 0; i < input.length * 8; i += 8)
+	{
+		output[i >> 5] |= (input.charCodeAt(i / 8) & 0xFF) << (i % 32);
+	}
+	
+	return output;
+};
+
+// These functions implement the four basic operations the algorithm uses.
+utils.md5.internal.md5_cmn = function (q, a, b, x, s, t)
+{
+	return utils.md5.internal.safe_add(utils.md5.internal.bit_rol(utils.md5.internal.safe_add(utils.md5.internal.safe_add(a, q), utils.md5.internal.safe_add(x, t)), s),b);
+};
+
+utils.md5.internal.md5_ff = function (a, b, c, d, x, s, t)
+{
+	return utils.md5.internal.md5_cmn((b & c) | ((~b) & d), a, b, x, s, t);
+};
+
+utils.md5.internal.md5_gg = function (a, b, c, d, x, s, t)
+{
+	return utils.md5.internal.md5_cmn((b & d) | (c & (~d)), a, b, x, s, t);
+};
+
+utils.md5.internal.md5_hh = function (a, b, c, d, x, s, t)
+{
+	return utils.md5.internal.md5_cmn(b ^ c ^ d, a, b, x, s, t);
+};
+
+utils.md5.internal.md5_ii = function (a, b, c, d, x, s, t)
+{
+	return utils.md5.internal.md5_cmn(c ^ (b | (~d)), a, b, x, s, t);
+};
+
+// Add integers, wrapping at 2^32. This uses 16-bit operations internally to work around bugs in some JS interpreters.
+utils.md5.internal.safe_add = function (x, y)
+{
+	var lsw = (x & 0xFFFF) + (y & 0xFFFF);
+	var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+	
+	return (msw << 16) | (lsw & 0xFFFF);
+};
+
+// Bitwise rotate a 32-bit number to the left.
+utils.md5.internal.bit_rol = function (num, cnt)
+{
+	return (num << cnt) | (num >>> (32 - cnt));
+};
+
+/*
+ * JSON Utils
+ */
+
+// Defind JSON space
+if(typeof JSON == 'undefined')
+	JSON = {};
+
+// JSON Utility
+JSON.clone = function (obj)
+{
+	return JSON.parse( JSON.stringify( obj ) );
+};
+
+JSON.traverse = function (obj, func, loc)
+{
+	if(loc == undefined)
+		loc = "";
+	else
+		loc = loc + ".";
+		
+	for(element in obj)
+	{
+		func.apply(this, [element,obj[element],loc]);
+		
+		if(typeof (obj[element]) == "object")
+		{
+			JSON.traverse(obj[element], func, loc + element);
+		}
+	}
+};
+
+
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;

@@ -1,0 +1,378 @@
+/* module-key = 'gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:wizard-resources', location = 'styles/wizard.css' */
+/**
+Main wizard styles
+**/
+#wizard-container .aui-button {
+	padding-left: 12px;
+	padding-right: 12px;
+	margin: 12px;
+}
+
+#wizard-container .wizard-buttons {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	margin: 8px;
+	width: 666px;
+}
+
+#wizard-container .wizard-next {
+	float: right;
+}
+
+#wizard-container .wizard-create {
+	/*float: right;
+	height: 40px;
+	width: 100px;*/
+	font-size: 18px;
+	margin-left: 0px;
+}
+
+#wizard-container .wizard-back, #wizard-container .wizard-cancel {
+	float: left;
+}
+
+.wizard-step-container {
+	padding: 10px;
+}
+
+/**
+Step 1 select collaboration template styles
+**/
+#wizard-container .wizard-collaboration-select-wrapper {
+	background-color: rgb(207, 201, 201);
+	border: rgb(103, 101, 101) 1px solid;
+	height: 400px;
+	overflow: auto;
+}
+
+#wizard-anchor-page-secondary-select {
+	margin-top: 18px;
+}
+
+.wizard-collaboration-select-error {
+	position: absolute;
+	right: 84px;
+	top: 25px;
+	border-radius: 4px;
+	padding: 4px;
+}
+
+.wizard-collaboration-select-heading {
+	font-weight: bold;
+	font-size: 14px;
+	margin-bottom: 6px;
+}
+
+.wizard-selectable-type .ui-selecting {
+	background: #FECA40;
+}
+
+.wizard-selectable-type .ui-selected {
+	/*background: #F39814; jQuery UI orange */
+	background: #58C1F9;
+	color: white;
+}
+
+#wizard-container .wizard-selectable-type {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	width: 90%;
+	margin-left: 32px;
+	margin-top: 8px;
+}
+
+.wizard-selectable-type li {
+	margin: 3px;
+	padding: 0.4em;
+	font-size: 12px;
+	height: 70px;
+}
+
+.wizard-collaboration-select-info,
+	.wizard-collaboration-select-preview-img {
+	margin: 3px;
+	padding: 0.4em;
+	float: left;
+}
+
+.wizard-collaboration-select-preview-img img {
+	width: 60px;
+	height: 60px;
+	/*padding: 0.4em;*/
+	background: white;
+}
+
+.wizard-collaboration-select-info-title {
+	font-size: 13px;
+	font-weight: bold;
+}
+
+.wizard-collaboration-select-info-paragraph {
+	font-size: 11px;
+	width: 440px;
+}
+
+.wizard-collaboration-select-info-preview {
+	/*margin-top: 8px;*/
+	
+}
+
+/**
+
+Step 2 select location and additional restrictions 
+**/
+.wizard-collaboration-location-title,
+	.wizard-collaboration-location-select-wrapper {
+	/*text-align: center;*/
+	
+}
+
+.wizard-collaboration-location-title {
+	font-size: 16px;
+	font-weight: bold;
+	padding-top: 6px;
+	margin-top: 6px;
+	padding-bottom: 4px;
+	margin-bottom: 4px;
+}
+
+.wizard-collaboration-location-subtitle,
+	.wizard-collaboration-restrictions-subtitle {
+	color: grey;
+}
+
+.wizard-collaboration-restrictions-title {
+	font-size: 16px;
+	font-weight: bold;
+	padding-top: 6px;
+	margin-top: 6px;
+	padding-bottom: 4px;
+	margin-bottom: 4px;
+}
+
+.wizard-collaboration-location-select-wrapper {
+	/*padding-bottom: 12px;
+	margin-bottom: 46px;*/
+	height: 70px;
+	/*text-align: center;*/
+	padding-left: 14px;
+	/* padding-bottom: 40px; */
+	/*height: 60px;*/
+}
+
+.wizard-collaboration-location-select-wrapper.error-shown {
+	height: 110px;
+}
+
+.wizard-collaboration-location-select-wrapper.secondary-error-shown {
+	height: 135px;
+}
+
+.wizard-collaboration-location-select-wrapper select {
+	width: 500px;
+	font-size: 14px;
+}
+
+.wizard-collaboration-location-select-wrapper select.error,
+	.wizard-anchor-page-secondary-select-error-message {
+	border: red 1px solid;
+}
+
+.wizard-anchor-page-secondary-select-error-message {
+	margin-top: 12px;
+	padding: 6px;
+}
+
+/**
+Step 3 page title and other options
+**/
+.wizard-collaboration-restrictions-wrapper {
+	/*text-align: center;*/
+	
+}
+
+.wizard-collaboration-page-title-wrapper {
+	padding-bottom: 8px;
+	margin-bottom: 65px;
+	font-size: 17px;
+}
+
+.wizard-page-title {
+	margin-top: 8px;
+	width: 500px;
+}
+
+.wizard-collaboration-other-options-title {
+	font-weight: bold;
+	padding-bottom: 10px;
+	font-size: 15px;
+}
+
+.wizard-page-title-label {
+	font-weight: bold;
+}
+
+.wizard-collaboration-restrictions-radio-buttons p {
+	padding: 8px;
+}
+
+.wizard-collaboration-restrictions-radio-buttons label {
+	margin-left: 10px;
+	font-size: 14px;
+}
+
+.wizard-collaboration-restrictions-input {
+	height: 24px;
+	width: 225px;
+}
+
+.wizard-page-title-status {
+	position: absolute;
+	margin-left: 12px;
+	padding-bottom: 10px;
+	height: 12px;
+	padding-left: 4px;
+	padding-right: 4px;
+	margin-left: 12px;
+	/*border-radius: 10px;*/
+}
+
+.wizard-page-title-status.wizard-success {
+	top: 141px;
+	left: 10px;
+}
+
+.wizard-success {
+	/*border: 1px solid green;*/
+	color: green;
+	font-weight: bold;
+	font-size: 14px;
+}
+
+.wizard-page-title-status.wizard-error {
+	top: 141px;
+	left: 10px;
+}
+
+.wizard-error {
+	/*border: 1px solid red;*/
+	color: red;
+	font-weight: bold;
+	font-size: 14px;
+}
+
+.wizard-collaboration-restrictions-add-button {
+	margin-left: 20px;
+}
+
+.wizard-collaboration-restrictions-current-list-title {
+	font-weight: bold;
+	font-size: 13px;
+	text-align: left;
+	margin-top: 10px;
+	margin-bottom: 6px;
+}
+
+.wizard-collaboration-restrictions-current-list {
+	text-align: left;
+	overflow: auto;
+	height: 112px;
+	width: 436px;
+	padding-right: 12px;
+}
+
+.wizard-collaboration-restrictions-current-listitem {
+	display: block;
+}
+
+.wizard-collaboration-restrictions-remove {
+	float: right;
+}
+
+.wizard-collaboration-restrictions-current-profile-pic {
+	width: 18px;
+	height: 18px;
+	padding-right: 5px;
+}
+
+.wizard-collaboration-restrictions-current-username {
+	
+}
+
+.wizard-collaboration-restrictions-current-group {
+	
+}
+
+.wizard-collaboration-other-options {
+	margin-top: 20px;
+	font-size: 13px;
+}
+
+.wizard-collaboration-other-options label {
+	font-weight: bold;
+	margin-right: 6px;
+}
+
+.wizard-collaboration-suppress-notifications-description,
+	.wizard-collaboration-remove-notifications-description {
+	font-size: 12px;
+	margin-top: 4px;
+	margin-bottom: 12px;
+	margin-left: 20px;
+	width: 550px;
+}
+
+.wizard-page-title-spinner {
+	position: absolute;
+	left: 508px;
+	top: 104px;
+}
+
+.wizard-page-create-spinner {
+	padding-right: 4px;
+	margin-left: -4px;
+	margin-bottom: -4px;
+}
+
+.wizard-collaboration-create-general-error {
+	position: absolute;
+	right: 90px;
+	top: 25px;
+	border-radius: 4px;
+	padding: 4px;
+}
+
+.wizard-summary-wrapper {
+	/*border: 1px solid grey;
+	padding: 6px;
+	background-color: rgb(245, 241, 241);
+	margin-top: 15px;*/
+	
+}
+
+.wizard-summary-wrapper .wizard-summary-item {
+	margin-top: 16px;
+	margin-bottom: 16px;
+	font-size: 16px;
+}
+
+.wizard-summary-title {
+	font-weight: bold;
+	font-size: 21px;
+}
+
+.wizard-summary-item {
+	
+}
+
+.wizard-summary-info-section {
+	margin-top: 30px;
+	font-size: 16px;
+}
+
+.wizard-summary-create-button-wrapper {
+	text-align: center;
+	margin-top: 20px;
+}

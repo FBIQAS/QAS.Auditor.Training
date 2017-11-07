@@ -1,0 +1,4828 @@
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/mds.js' */
+// Make sure JavaScript name spaces exist
+if(typeof community == 'undefined')
+	community = {};
+
+if(community.plugins == undefined)
+	community.plugins = {};
+
+if(community.plugins.mds == undefined)
+	community.plugins.mds = {};
+
+community.plugins.mds.instance = {};
+community.plugins.mds.documentAssemblyActionUrl = "/pages/assembledocument.action";
+community.plugins.mds.documentCompareActionUrl = "/pages/comparedocument.action";
+community.plugins.mds.documentAssembleClassName = "jquery-mds-document-assembly-macro";
+community.plugins.mds.documentCompareClassName = "jquery-mds-document-compare-macro";
+community.plugins.mds.smallSpinnerImg = "<img class='assemble-document-waiting-image' style='padding-left: 5px;' src='/community/s/en/2171/31/1.13.60.58/_/download/batch/gov.eop.omb.confluence.max.utils:mds-web-resources/images/ajax-loader.gif'/>";
+community.plugins.mds.currentlyRunning = false;
+
+community.plugins.mds.init = function (index, Element)
+{
+	var element = jQuery(this);
+	var id = element.find("input[name=id]").val();
+		
+	var instance = {};
+	
+	instance.id = id;
+	instance.attachmentList = element.find("input[name=attachmentList]").val();
+	instance.name = element.find("input[name=title]").val();
+	instance.downloadName = element.find("input[name=downloadName]");
+	
+	community.plugins.mds.instance[id] = instance;
+	
+	element.button();
+	element.click(community.plugins.mds.serviceAction);
+};
+
+community.plugins.mds.serviceAction = function (eventObject)
+{
+	if (community.plugins.mds.currentlyRunning) { return false;}
+	
+	community.plugins.mds.currentlyRunning = true;
+	
+	var element = jQuery(this);
+	var id = element.attr("id");
+	
+	var actionUrl = "";
+	if (element.hasClass(community.plugins.mds.documentAssembleClassName)) 
+	{
+		actionUrl = contextPath + community.plugins.mds.documentAssemblyActionUrl;
+	} else if(element.hasClass(community.plugins.mds.documentCompareClassName)) 
+	{
+		actionUrl = contextPath + community.plugins.mds.documentCompareActionUrl;
+	}
+	
+	var wordAssembleDocumentsAsync = element.next(".am-assemble-email-results").children("#"+id+"-mdsWordAssembleDocumentsAsync").is(":checked");
+	var wordCompareDocumentsAsync = element.next(".am-compare-email-results").children("#"+id+"-mdsWordCompareDocumentsAsync").is(":checked");
+	var pageTitle = jQuery("#page-header-complete .page-title").text();
+	// show loading spinner
+	jQuery(this).find("span.document-asseble-title").append(community.plugins.mds.smallSpinnerImg);	
+
+	jQuery.ajax({
+		type: "GET",
+		url: actionUrl,
+		data: { attachmentInfos: community.plugins.mds.instance[id].attachmentList, 
+				downloadName: community.plugins.mds.instance[id].downloadName,
+				wordAssembleDocumentsAsync: wordAssembleDocumentsAsync,
+				wordCompareDocumentsAsync: wordCompareDocumentsAsync,
+				pageTitle: pageTitle},
+		dataType: "json",
+		complete: community.plugins.mds.loadComplete
+	});
+};
+
+community.plugins.mds.loadComplete = function (jqXHR, textStatus)
+{
+	if(jqXHR.status == 200) // Success
+		community.plugins.mds.loadSuccess(jqXHR.responseText);
+	else if(jqXHR.status == 500) // Server Error
+		community.plugins.mds.loadError(jqXHR, textStatus);
+	else if (jqXHR.readyState == 4 && (jqXHR.status == 0 || jqXHR.status == 12017)) // Session Timeout
+		community.plugins.mds.loadError(jqXHR, textStatus);
+	else // Unknown Error
+		community.plugins.mds.loadError(jqXHR, textStatus);
+	
+	community.plugins.mds.currentlyRunning = false;
+};
+
+community.plugins.mds.loadSuccess = function (data)
+{
+	// hide spinner
+	jQuery("img.assemble-document-waiting-image").remove();
+	
+	var rpcJsonResponse = JSON.parse(data);
+	if (rpcJsonResponse.finalDocumentPath) {
+		window.location = rpcJsonResponse.finalDocumentPath;
+	}
+};
+
+community.plugins.mds.loadError = function (jqXHR, textStatus)
+{
+	// hide spinner
+	jQuery("img.assemble-document-waiting-image").remove();
+	
+	var dialog = jQuery("<div></div>");
+	var dialogConfig = new JQUERYUI_DIALOG_ERROR_HASH;
+	var p = jQuery("<p></p>");
+	
+	userPreferences.errors.count++;
+	
+	dialogConfig.title = "Assemble Word Document";
+	dialogConfig.buttons.OK = function() { 
+		jQuery(this).dialog("destroy");
+	};
+	
+	p.text("An error has occurred while assembling the word document.");
+	dialog.append(p);
+	dialog.dialog(dialogConfig);
+};
+
+jQuery(document).ready(function ()
+{
+	jQuery(".jquery-mds-document-assembly-macro").each(community.plugins.mds.init);
+	jQuery(".jquery-mds-document-compare-macro").each(community.plugins.mds.init);
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/adv-doc-assemble.js' */
+// Make sure JavaScript name spaces exist
+if (typeof community == 'undefined')
+	community = {};
+
+if (community.plugins == undefined)
+	community.plugins = {};
+
+if (community.plugins.advDocAssemble == undefined)
+	community.plugins.advDocAssemble = {};
+
+community.plugins.advDocAssemble.instance = {};
+community.plugins.advDocAssemble.documentAssemblyActionUrl = "/pages/assembledocument.action";
+community.plugins.advDocAssemble.documentCompareActionUrl = "/pages/comparedocument.action";
+community.plugins.advDocAssemble.spreadsheetConsolidateActionUrl = "/pages/spreadsheetconsolidate.action";
+community.plugins.advDocAssemble.documentAssembleGetConfigureUIUrl = "/pages/getadvassembledoc.action";
+community.plugins.advDocAssemble.documentAssembleSetConfigureUIUrl = "/pages/setadvassembledoc.action";
+community.plugins.advDocAssemble.getAllPageDocumentsUrl = "/pages/getallpagedocuments.action";
+community.plugins.advDocAssemble.getAllPageSpreadsheetsUrl = "/pages/getallpagespreadsheets.action";
+community.plugins.advDocAssemble.getAdvancedAddDocumentsUrl = "/pages/getadvancedadddocuments.action";
+community.plugins.advDocAssemble.assembleIndependentPDFs = "/exercises/collect/export/document_assemble";
+community.plugins.advDocAssemble.documentAssembleClassName = "jquery-adv-doc-assemble";
+community.plugins.advDocAssemble.smallSpinnerImg = "<img class='assemble-document-waiting-image' style='padding-left: 5px;' src='/community/s/en/2171/31/1.13.60.58/_/download/batch/gov.eop.omb.confluence.max.utils:mds-web-resources/images/ajax-loader.gif'/>";
+community.plugins.advDocAssemble.warningImg = "<img class='warningImg' src='/community/s/en/2172/32/1.14.12.78/_/download/batch/gov.eop.omb.confluence.resources.MAX-Resources:design-resources/images/icon-error-alert-red-small.png'/>";
+community.plugins.advDocAssemble.currentlyRunning = false;
+
+community.plugins.advDocAssemble.init = function(index, Element) {
+	var instance;
+	var element = jQuery(this);
+	var id = element.find("input[name=id]").val();
+	var isSpreadsheetConsolidate = element.find('input[name=isSpreadsheetConsolidate]').val() === 'true';
+	var isDocumentCompare = element.find('input[name=isDocumentCompare]').val() === 'true';
+
+	if (typeof community.plugins.advDocAssemble.instance[id] == 'undefined') {
+		instance = {};
+		instance.id = id;
+	} else {
+		instance = community.plugins.advDocAssemble.instance[id];
+	}
+
+	instance.attachmentList = element.find("input[name=attachmentList]").val();
+	instance.name = element.find("input[name=title]").val();
+	instance.downloadName = element.find("input[name=downloadName]");
+	instance.attachmentListWithoutMissing = element.find("input[name=attachmentListWithoutMissing]").val();
+	community.plugins.advDocAssemble.instance[id] = instance;
+
+	// clear exsiting bindings
+	element.find(".am-assemble-button").unbind();
+	element.find(".am-assemble-button-details").unbind();
+
+	if (instance.attachmentList == "" && (isSpreadsheetConsolidate || isDocumentCompare)) {
+		element.find(".am-assemble-button").click(function() {
+			alert('Document Assemble list is empty or not setup yet.');
+			return false;
+		});
+	} else {
+		element.find(".am-assemble-button").click(community.plugins.advDocAssemble.attemptServiceAction);
+	}
+
+	// TODO: bind configure button to open light box
+	element.find(".am-assemble-button-details").click(community.plugins.advDocAssemble.loadAssembleConfigureUI);
+
+};
+
+/**
+ * Deprecate - Open Spreadsheet Consolidate the old way.
+ * 
+ * @param id
+ *                Spreadsheet Consolidate to load. Undefined if new.
+ * @param isCompare
+ *                True if Document Compare, otherwise false.
+ */
+community.plugins.advDocAssemble.loadOldMDS = function(id, isCompare) {
+	var configureDialogTitle;
+
+	if (isCompare) {
+		configureDialogTitle = "Configure Document Compare";
+	} else {
+		configureDialogTitle = "Configure Spreadsheet Consolidate";
+	}
+
+	var dialog = jQuery("<div></div>");
+	var dialogConfig = new JQUERYUI_DIALOG_MODAL_HASH;
+
+	dialogConfig.buttons = {
+		"Cancel": function() {
+			if (community.plugins.advDocAssemble.checkForAssembleChanges(jQuery(this))) {
+				community.plugins.advDocAssemble.unsavedChangesDialog(jQuery(this));
+			} else {
+				jQuery(this).dialog("close");
+			}
+		},
+		"Save": function() {
+			community.plugins.advDocAssemble.saveDocumentAssemble(this);
+			jQuery(this).dialog("close");
+		}
+	}
+
+	dialogConfig.closeOnEscape = false;
+
+	// defaults were 520 height and 740 width
+	dialogConfig.width = 635 // windowWidth * 0.8; // take 80%
+	dialogConfig.title = configureDialogTitle;
+	dialogConfig.resizable = false;
+	dialogConfig.minWidth = 650;
+
+	var configureDocumentAssembleHTML = jQuery("<div class='am-macro-details-wrapper'></div>");
+
+	dialog.append(configureDocumentAssembleHTML);
+
+	// get content of dialog
+	var assembleConfigUIHtml;
+
+	jQuery.ajax({
+		type: "GET",
+		url: contextPath + community.plugins.advDocAssemble.documentAssembleGetConfigureUIUrl,
+		data: {
+			pageId: AJS.params.pageId,
+			id: id,
+			isCompare: isCompare,
+			isSpreadsheetConsolidate: !isCompare
+		},
+		async: false,
+		dataType: "json",
+		complete: function(jqXHR, textStatus) {
+			var rpcJsonResponse = JSON.parse(jqXHR.responseText);
+
+			// check for loss of session
+			if (rpcJsonResponse.errorMessage) {
+				var pageHref = jQuery("link[rel='canonical']").attr("href");
+				assembleConfigUIHtml = "<div class='assemble-session-lost'>Your session has been lost due to inactivity, <a href='" + pageHref + "'>click here to refresh.</a></div>";
+			}
+			if (typeof rpcJsonResponse.assembleDataObject.documentAssembleListHtml != 'undefined') {
+				assembleConfigUIHtml = rpcJsonResponse.assembleDataObject.documentAssembleListHtml;
+			} else {
+				assembleConfigUIHtml = "An error occured while loading the data.";
+			}
+		}
+	});
+
+	configureDocumentAssembleHTML.append(assembleConfigUIHtml);
+
+	// advanced add
+	var advancedAddHtml = "<div class='am-macro-advanced-wrapper hidden'>" + "	<div class='am-header-content'>" + "		<h2>Advanced Add/Edit</h2>" + "		<h3>Enter one file per line, e.g:<br>Page Name:filename.docx<br>Another Page Name:A Different File.pdf</h3>" + "	</div>	"
+			+ "	<textarea class='am-advanced-add-textarea' wrap='off'></textarea>" + "	<div class='ui-dialog-buttonset'>" + "		<button type='button' class='am-button-add ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only' role='button'>"
+			+ "			<span class='ui-button-text'>Save</span>" + "		</button>" + "		<button type='button' class='am-button-cancel ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only' role='button'>" + "			<span class='ui-button-text'>Cancel</span>" + "		</button>"
+			+ "	</div>" + "</div>";
+
+	dialog.append(advancedAddHtml);
+
+	// add macro configure options
+	var macroConfigureOptionsHtml = "<div class='am-macro-configure-options hidden'>" + "	<div class='am-header-content'>" + "		<h2>Options</h2>" + "	</div>	" + "   <div class='am-configure-options-item-wrapper'>" + "		<span class='am-configure-options-title-label'>Button Title</span>"
+			+ "		<input class='am-configure-options-title' maxlength='100' value='" + jQuery(dialog).find(".am-macro-details-wrapper input[name='title']").val() + "'></input>" + "   </div>" + "	<div class='ui-dialog-buttonset'>"
+			+ "		<button type='button' class='am-button-ok ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only' role='button'>" + "			<span class='ui-button-text'>Save</span>" + "		</button>"
+			+ "		<button type='button' class='am-button-cancel ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only' role='button'>" + "			<span class='ui-button-text'>Cancel</span>" + "		</button>" + "	</div>" + "</div>";
+
+	dialog.append(macroConfigureOptionsHtml);
+
+	// bind up buttons
+	community.plugins.advDocAssemble.bindConfigureButtons(dialog);
+
+	// fix numbers and zebra stripe
+	community.plugins.advDocAssemble.fixZebraStripeAndNumbering(dialog);
+
+	// bind click events and dragging
+	community.plugins.advDocAssemble.bindConfigureUlContentsEvents(dialog);
+
+	dialog.dialog(dialogConfig);
+
+	community.plugins.advDocAssemble.instance[id].jsonAtStart = community.plugins.advDocAssemble.getAssembleListJson(dialog);
+
+	return false;
+}
+
+/**
+ * Deprecate
+ */
+community.plugins.advDocAssemble.saveDocumentAssemble = function(dialogObj) {
+	var documentList = community.plugins.advDocAssemble.getAssembleListJson(dialogObj);
+	var title;
+	var id = jQuery(dialogObj).find("input[name=id]").val();
+	var generatedId = jQuery(dialogObj).find("input[name=generatedId]").val();
+	var instance = community.plugins.advDocAssemble.instance[id];
+
+	if (typeof (instance) != 'undefined') {
+		if (typeof (instance.title) != 'undefined') {
+			title = utils.encode(instance.title);
+			jQuery("#" + id + " a.am-assemble-button").html(title);
+		}
+	}
+
+	var isCompare = jQuery(dialogObj).find("input[name=isCompare]").val();
+	var isConsolidate = jQuery(dialogObj).find("input[name=isSpreadsheetConsolidate]").val()
+	var mergeType = jQuery(dialogObj).find("#spreadsheet-consolidate-merge-type option:selected").val();
+	var mergeAsPDF = jQuery(dialogObj).find("input[name='mergeAsPDF']").is(":checked");
+
+	// fire off save
+	jQuery.ajax({
+		type: "POST",
+		url: contextPath + community.plugins.advDocAssemble.documentAssembleSetConfigureUIUrl,
+		data: {
+			pageId: AJS.params.pageId,
+			id: id,
+			documents: documentList,
+			generatedId: generatedId,
+			title: title,
+			isCompare: isCompare,
+			isConsolidate: isConsolidate,
+			includeSpreadsheets: true,
+			mergeType: mergeType,
+			mergeAsPDF: mergeAsPDF
+		},
+		async: false,
+		dataType: "json",
+		complete: function(jqXHR, textStatus) {
+			var rpcJsonResponse = JSON.parse(jqXHR.responseText);
+			// check for loss of session
+			if (rpcJsonResponse.errorMessage) {
+				alert("Your session has been lost due to inactivity, please refresh and try again.");
+			}
+
+			if (typeof rpcJsonResponse.assembleDataObject == 'undefined') {
+				alert("An error occured during the save.");
+			} else {
+				// check for error
+				if (rpcJsonResponse.assembleDataObject.error != undefined) {
+					alert("An error occured during the save. Message: " + rpcJsonResponse.assembleDataObject.error);
+				}
+				// update values in form for button
+				$("#" + id + " input[name='attachmentList']").val(rpcJsonResponse.assembleDataObject.attachmentList);
+				$("#" + id + " input[name='attachmentListWithoutMissing']").val(rpcJsonResponse.assembleDataObject.attachmentListWithoutMissing);
+				$("#" + id + " input[name='disableDueToMissingAttachment']").val(rpcJsonResponse.assembleDataObject.disableDueToMissingAttachment);
+				$("#" + id + " input[name='attachmentObjs']").val(rpcJsonResponse.assembleDataObject.attachmentObjs);
+				$("#" + id + " input[name='mergeType']").val(mergeType);
+				$("#" + id + " input[name='mergeAsPDF']").val(mergeAsPDF);
+
+				// jQuery("#"+id).find("input[name='mergeAsPDF']").val(mergeAsPDF);
+				var isWordAssembleDocumentAsyncUserSet = (jQuery("#" + id + " input[name='mergeAsPDF']").parent().find("input[name='wordAssembleDocumentAsyncUserSet']").val() == "true");
+				console.log("isWordAssembleDocumentAsyncUserSet: " + isWordAssembleDocumentAsyncUserSet);
+
+				if (mergeAsPDF) {
+					jQuery("#" + id).find("input[name='wordAssembleDocumentsAsync']").prop('checked', true);
+					jQuery("#" + id).find("input[name='wordAssembleDocumentsAsync']").prop('disabled', true);
+					console.log("merge as pdf is true");
+				} else {
+					console.log("merge as pdf is false");
+					jQuery("#" + id).find("input[name='wordAssembleDocumentsAsync']").prop('checked', isWordAssembleDocumentAsyncUserSet);
+					jQuery("#" + id).find("input[name='wordAssembleDocumentsAsync']").prop('disabled', false);
+				}
+
+				// re-init this button
+				jQuery("#" + id).each(community.plugins.advDocAssemble.init);
+
+				// if this was inserting a new macro that was saved into the page, refresh the page
+				if (generatedId == "true") {
+					var pageHref = jQuery("link[rel='canonical']").attr("href");
+					document.location = pageHref;
+				}
+			}
+		}
+	});
+
+	// return false;
+}
+
+/**
+ * Deprecate
+ */
+community.plugins.advDocAssemble.insertAddedDocuments = function(documents, dialogObj, allowDuplicates) {
+
+	// hide the there are no docs message
+	jQuery(dialogObj).find("li.am-no-documents-warning").addClass("hidden");
+
+	// build html string, only add doument if its not in the list already if allowDuplicates is true
+	var newDocumentsHtml = "";
+	var i = 0;
+	for (i = 0; i < documents.length; i++) {
+		// check if its already there when allowDuplicates is false
+		if (allowDuplicates) {
+			newDocumentsHtml += community.plugins.advDocAssemble.getDocumentLiHtml(documents[i]);
+		} else {
+			if (jQuery(dialogObj).find("ul li.am-item input[value|='" + documents[i].attachmentId + "']").size() == 0) {
+				newDocumentsHtml += community.plugins.advDocAssemble.getDocumentLiHtml(documents[i]);
+			}
+		}
+	}
+	// insert into dialog
+	jQuery(dialogObj).find("ul.am-item-list").prepend(jQuery(newDocumentsHtml).fadeIn('slow'));
+
+	// fix numbers and zebra stripe
+	community.plugins.advDocAssemble.fixZebraStripeAndNumbering(dialogObj);
+
+	// bind click events and dragging
+	community.plugins.advDocAssemble.bindConfigureUlContentsEvents(dialogObj);
+
+}
+
+/**
+ * Deprecate
+ */
+community.plugins.advDocAssemble.fixZebraStripeAndNumbering = function(dialogObj) {
+	jQuery(dialogObj).find("ul.am-item-list li.am-item").each(function(index, value) {
+		jQuery(value).removeClass("even").removeClass("odd");// clear current
+		if (index % 2 == 0) {
+			jQuery(value).addClass("even"); // even
+		} else {
+			jQuery(value).addClass("odd"); // odd
+		}
+		// number
+		jQuery(value).find("div.am-number-order").html(index + 1); // correct for zero index loop
+	});
+
+}
+
+/**
+ * Deprecate
+ */
+community.plugins.advDocAssemble.getAssembleListJson = function(dialogObj) {
+	var documentList = '[';
+
+	var length = jQuery(dialogObj).find("ul.am-item-list li.am-item").length;
+	jQuery(dialogObj).find("ul.am-item-list li.am-item").each(function(index, element) {
+		if (index == length - 1) {
+			// documentList += ('{"document": ' + jQuery(this).find("pre").html() + '}');
+			documentList += jQuery(this).find("pre").html();
+		} else {
+			// documentList += ('{"document": ' + jQuery(this).find("pre").html() + '},');
+			documentList += (jQuery(this).find("pre").html() + ',');
+		}
+	});
+
+	documentList += "]";
+
+	return documentList;
+}
+
+/**
+ * Deprecate
+ */
+community.plugins.advDocAssemble.bindConfigureButtons = function(dialogObj) {
+
+	var getAllUrl = contextPath + community.plugins.advDocAssemble.getAllPageDocumentsUrl;
+	if (jQuery(dialogObj).find("input[name=isSpreadsheetConsolidate]").val() == "true") {
+		getAllUrl = contextPath + community.plugins.advDocAssemble.getAllPageSpreadsheetsUrl;
+		// set text
+	}
+
+	// bind add all this pages documetns button
+	// TODO: Prevent exec while running
+	jQuery(dialogObj).find("a.am-button-addall").click(function() {
+
+		var includeSpreadsheets = jQuery(dialogObj).find("#jquery-mds-include-spreadsheets").is(":checked");
+
+		jQuery.ajax({
+			type: "GET",
+			url: getAllUrl,
+			data: {
+				pageId: AJS.params.pageId,
+				includeSpreadsheets: includeSpreadsheets
+			},
+			dataType: "json",
+			complete: function(jqXHR, textStatus) {
+				var rpcJsonResponse = JSON.parse(jqXHR.responseText);
+				// check for loss of session
+				if (rpcJsonResponse.errorMessage) {
+					alert("Your session has been lost due to inactivity, please refresh and try again.");
+					return false;
+				}
+
+				if (typeof rpcJsonResponse.assembleDataObject.allPageDocuments != 'undefined') {
+					if (rpcJsonResponse.assembleDataObject.allPageDocuments.length > 0) {
+						community.plugins.advDocAssemble.insertAddedDocuments(rpcJsonResponse.assembleDataObject.allPageDocuments, dialogObj, false);
+					} else {
+						// no "documents" found on page
+						alert("No valid documents attached to this page.\n\nOnly '.doc' and '.docx' Microsoft Word files are currently supported.");
+					}
+				} else {
+					alert("An error occured while loading the data.");
+				}
+			}
+		});
+
+		return false;
+	});
+
+	// bind show/hide document sources button
+	jQuery(dialogObj).find("a.am-button-showdocsource").click(function() {
+		if (jQuery(this).hasClass("showing")) {
+			jQuery(dialogObj).find("ul.am-item-list").removeClass("expanded");
+			jQuery(this).removeClass("showing").html("<span></span>Show Document Sources");
+		} else {
+			jQuery(dialogObj).find("ul.am-item-list").addClass("expanded");
+			jQuery(this).addClass("showing").html("<span></span>Hide Document Sources");
+		}
+		return false;
+	});
+
+	// bind clear all
+	jQuery(dialogObj).find("a.am-button-clearall").click(function() {
+		jQuery(dialogObj).find("ul.am-item-list li.am-item").remove();
+		return false;
+	});
+
+	// bind download all
+	jQuery(dialogObj).find("a.am-button-downloadall").click(function() {
+		if (jQuery(this).hasClass("running")) {
+			return false;
+		}
+		var downloadAllLinkObj = jQuery(this);
+		downloadAllLinkObj.addClass("running");
+
+		var id = jQuery(dialogObj).find("input[name='id']").val();
+
+		AJS.log("--------> Download All id: " + id + " pageId: " + AJS.params.pageId);
+
+		downloadAllLinkObj.append(community.plugins.advDocAssemble.smallSpinnerImg);
+
+		jQuery.ajax({
+			type: "GET",
+			url: contextPath + "/ajax/downloadallassemble.action",
+			data: {
+				id: id,
+				pageId: AJS.params.pageId
+			},
+			dataType: "json",
+			complete: function(jqXHR, textStatus) {
+				downloadAllLinkObj.removeClass("running");
+
+				if (jqXHR.status == 200) { // Success
+					// hide spinner
+					downloadAllLinkObj.find("img.assemble-document-waiting-image").remove();
+
+					var rpcJsonResponse = JSON.parse(jqXHR.responseText);
+					console.log(rpcJsonResponse);
+					// check for error
+					if (rpcJsonResponse.error) {
+						var dialog = jQuery("<div></div>");
+						var dialogConfig = new JQUERYUI_DIALOG_ERROR_HASH;
+						var p = jQuery("<p></p>");
+
+						dialogConfig.title = "Error has occured";
+						dialogConfig.buttons.OK = function() {
+							jQuery(this).dialog("destroy");
+						};
+
+						dialogConfig.height = 300
+						dialogConfig.width = 450
+
+						p.text("Please try your request again. If this problem persists, please contact MAX Support.");
+						console.error(rpcJsonResponse.errorMessage);
+						dialog.append(p);
+						dialog.dialog(dialogConfig);
+						return false;
+					}
+
+					if (rpcJsonResponse.finalDocumentPath) {
+						window.location = rpcJsonResponse.finalDocumentPath;
+					}
+				} else if (jqXHR.status == 500) { // Server Error
+					alert("A server error has occurred.");
+				} else if (jqXHR.readyState == 4 && (jqXHR.status == 0 || jqXHR.status == 12017)) { // Session Timeout
+					alert("An error has occurred.");
+				} else { // Unknown Error
+					alert("An unknown error has occurred.");
+				}
+			}
+		});
+
+		return false;
+	});
+
+	// bind advanced add show
+	jQuery(dialogObj).find("a.am-button-advancedadd").click(function() {
+		// jQuery(".am-macro-details-wrapper").removeClass("hidden");
+		// jQuery(".am-macro-advanced-wrapper").removeClass("hidden");
+		// populate with values already added
+		var list = JSON.parse(community.plugins.advDocAssemble.getAssembleListJson(jQuery(dialogObj)));
+		var advAddList = "";
+		var count = 0;
+		for ( var obj in list) {
+			advAddList += list[obj].pageName + ":" + list[obj].attachmentName;
+			if (list[obj].tocTitle != undefined) {
+				advAddList += ":" + list[obj].tocTitle;
+			}
+			if (count < list.length) {
+				advAddList += "\n";
+			}
+			count++;
+		}
+		// AJS.log(advAddList);
+		jQuery(dialogObj).find(".am-advanced-add-textarea").val(advAddList);
+
+		jQuery(dialogObj).find(".am-macro-details-wrapper").slideUp('slow', function() {
+			jQuery(this).addClass("hidden");
+			jQuery(dialogObj).find(".am-macro-advanced-wrapper").removeClass("hidden");
+		});
+		jQuery(dialogObj).parent().find("div.ui-dialog-buttonpane").hide();
+		return false;
+	});
+
+	// bind cancel in advanced add
+	jQuery(dialogObj).find(".am-macro-advanced-wrapper .am-button-cancel").click(function() {
+		jQuery(dialogObj).find(".am-macro-advanced-wrapper").addClass("hidden");
+		jQuery(dialogObj).find(".am-macro-details-wrapper").removeClass("hidden");
+		jQuery(dialogObj).parent().find("div.ui-dialog-buttonpane").show();
+		jQuery(dialogObj).find(".am-macro-details-wrapper").slideDown('slow');
+		return false;
+	});
+
+	// bind show configure options
+	jQuery(dialogObj).find("a.am-button-configure-options").click(function() {
+		jQuery(dialogObj).find(".am-macro-details-wrapper").slideUp('slow', function() {
+			jQuery(this).addClass("hidden");
+			jQuery(dialogObj).find(".am-macro-configure-options").removeClass("hidden");
+		});
+		jQuery(dialogObj).parent().find("div.ui-dialog-buttonpane").hide();
+		return false;
+	});
+
+	// bind cancel configure options
+	jQuery(dialogObj).find(".am-macro-configure-options .am-button-cancel").click(function() {
+		jQuery(dialogObj).find(".am-macro-configure-options").addClass("hidden");
+		jQuery(dialogObj).find(".am-macro-details-wrapper").removeClass("hidden");
+		jQuery(dialogObj).parent().find("div.ui-dialog-buttonpane").show();
+		jQuery(dialogObj).find(".am-macro-details-wrapper").slideDown('slow');
+		return false;
+	});
+
+	// bind Ok button in configure options
+	jQuery(dialogObj).find(".am-macro-configure-options .am-button-ok").click(function() {
+		// update the value for later saving in teh instance
+		var id = jQuery(dialogObj).find("input[name='id']").val();
+		var newTitle = jQuery(dialogObj).find("input.am-configure-options-title").val();
+		var instance = community.plugins.advDocAssemble.instance[id];
+
+		if (typeof community.plugins.advDocAssemble.instance[id] == 'undefined') {
+			instance = {};
+			instance.id = id;
+
+			community.plugins.advDocAssemble.instance[id] = instance;
+		} else {
+			instance = community.plugins.advDocAssemble.instance[id];
+		}
+
+		instance.title = newTitle;
+
+		// close out this form
+		jQuery(dialogObj).find(".am-macro-configure-options .am-button-cancel").click();
+		return false;
+	});
+
+	// bind add button in advanced add section
+	jQuery(dialogObj).find(".am-macro-advanced-wrapper .am-button-add").click(function() {
+		jQuery.ajax({
+			type: "POST",
+			url: contextPath + community.plugins.advDocAssemble.getAdvancedAddDocumentsUrl,
+			data: {
+				pageId: AJS.params.pageId,
+				advAttachmentsList: jQuery(dialogObj).find(".am-advanced-add-textarea").val().replace(/(\r\n|\n|\r)/gm, ";"),
+				includeSpreadsheets: true
+			},
+			dataType: "json",
+			complete: function(jqXHR, textStatus) {
+				var rpcJsonResponse = JSON.parse(jqXHR.responseText);
+				if (typeof rpcJsonResponse.assembleDataObject != 'undefined') {
+
+					// check for loss of session
+					if (rpcJsonResponse.errorMessage) {
+						alert("Your session has been lost due to inactivity, please refresh and try again.");
+						return false;
+					}
+
+					if (rpcJsonResponse.assembleDataObject.error != undefined) {
+						alert("An error occured during the add. Message: " + rpcJsonResponse.assembleDataObject.error);
+						return false;
+					}
+
+					if (rpcJsonResponse.assembleDataObject.advancedAddDocuments.length > 0) {
+						// clear all old docs first
+						jQuery(dialogObj).find("ul.am-item-list li.am-item").remove();
+
+						community.plugins.advDocAssemble.insertAddedDocuments(rpcJsonResponse.assembleDataObject.advancedAddDocuments, dialogObj, true);
+
+						// clear close add interface show list
+						jQuery(dialogObj).find(".am-advanced-add-textarea").val("");
+						jQuery(dialogObj).find(".am-button-cancel").click();
+
+					} else {
+						// no "documents" found in list
+						alert("No valid documents could be found.\n\nOnly '.doc' and '.docx' Microsoft Word files are currently supported.");
+					}
+				} else {
+					alert("An error occured while loading the data.");
+				}
+			}
+		});
+
+		return false;
+	});
+}
+
+/**
+ * Deprecate
+ */
+community.plugins.advDocAssemble.getAssembleListJson = function(dialogObj) {
+	var documentList = '[';
+
+	var length = jQuery(dialogObj).find("ul.am-item-list li.am-item").length;
+	jQuery(dialogObj).find("ul.am-item-list li.am-item").each(function(index, element) {
+		if (index == length - 1) {
+			// documentList += ('{"document": ' + jQuery(this).find("pre").html() + '}');
+			documentList += jQuery(this).find("pre").html();
+		} else {
+			// documentList += ('{"document": ' + jQuery(this).find("pre").html() + '},');
+			documentList += (jQuery(this).find("pre").html() + ',');
+		}
+	});
+
+	documentList += "]";
+
+	return documentList;
+}
+
+/**
+ * Deprecate
+ */
+community.plugins.advDocAssemble.bindConfigureUlContentsEvents = function(dialogObj) {
+	jQuery(dialogObj).find("ul.am-item-list").sortable({
+		revert: true,
+		axis: 'y',
+		placeholder: "am-item-insert-highlight",
+		opacity: 0.7
+	});
+
+	jQuery(dialogObj).find("ul.am-item-list li.am-item").disableSelection();
+
+	jQuery(dialogObj).find("ul.am-item-list").unbind("sortstop"); // incase already binded, prevent multiple firing
+
+	jQuery(dialogObj).find("ul.am-item-list").bind("sortstop", function(event, ui) {
+		community.plugins.advDocAssemble.fixZebraStripeAndNumbering(dialogObj);
+	});
+
+	// bind remove individual item buttons
+	jQuery(dialogObj).find(".am-document-remove").unbind();
+	jQuery(dialogObj).find(".am-document-remove").click(function() {
+		jQuery(this).parent("li.am-item").fadeOut('fast', function() {
+			jQuery(this).remove();
+			community.plugins.advDocAssemble.fixZebraStripeAndNumbering(dialogObj);
+		});
+		return false;
+	});
+
+	// bind empty document list links
+	jQuery(dialogObj).find(".am-empty-link-addall").click(function() {
+		jQuery(dialogObj).find(".am-button-addall").click();
+		return false;
+	});
+
+	jQuery(dialogObj).find(".am-empty-link-advancedadd").click(function() {
+		jQuery(dialogObj).find(".am-button-advancedadd").click();
+		return false;
+	});
+
+}
+
+community.plugins.advDocAssemble.submitForm = function(verb, url, data, target) {
+	var form = document.createElement("form");
+	form.action = url;
+	form.method = verb;
+	form.target = target || "_self";
+	if (data) {
+		for ( var key in data) {
+			var input = document.createElement("textarea");
+			input.name = key;
+			input.value = typeof data[key] === "object" ? JSON.stringify(data[key]) : data[key];
+			form.appendChild(input);
+		}
+	}
+	form.style.display = 'none';
+	document.body.appendChild(form);
+	form.submit();
+};
+
+// Override Backbone.sync to replace PUTs with POSTs.
+Backbone.osync = Backbone.sync;
+Backbone.sync = function(method, model, options) {
+	if (method === 'update') {
+		// turn put into post.
+		method = 'create';
+	}
+
+	return Backbone.osync.apply(this, arguments);
+}
+
+/**
+ * 
+ */
+function getModel(mode, pageId, id) {
+	var mdsClass;
+
+	switch (mode) {
+	case 'assemble':
+		mdsClass = DocumentAssemble;
+		break;
+
+	case 'compare':
+		mdsClass = DocumentCompare;
+		break;
+	}
+
+	return new mdsClass({
+		id: id,
+		pageId: pageId
+	});
+}
+
+/**
+ * 
+ */
+function getComponent(model) {
+	var mdsClass, mode;
+
+	if (model instanceof DocumentAssemble) {
+		mdsClass = AssembleComponent;
+		mode = 'assemble';
+	} else if (model instanceof DocumentCompare) {
+		mdsClass = CompareComponent;
+		mode = 'compare';
+	}
+
+	return new mdsClass({
+		model: model,
+		mode: mode
+	})
+}
+
+/**
+ * Construct the document assemble model and component.
+ * 
+ * @param dialog
+ *                jQuery popup overlay.
+ * @param mode
+ *                String indicating if this is 'compare' or 'assemble'.
+ * @param title
+ *                String containing the title of the dialog.
+ * @param id
+ *                String containing the ID of the document compare object.
+ * @param pageId
+ *                String containing the current pageId.
+ * @param parent
+ *                Element to build the Document Assemble component in.
+ * @return Return the document assembly buttons.
+ */
+community.plugins.advDocAssemble.startDocumentAssemble = function(dialog, mode, title, id, pageId, parent) {
+	var model = getModel(mode, pageId, id), dialogConfig = new JQUERYUI_DIALOG_MODAL_HASH, component;
+
+	/**
+	 * function to close the dialog and check for changed before.
+	 * 
+	 * @param component
+	 * @param model
+	 * @param dialog
+	 * @return True if the dialog can close, otherwise false.
+	 */
+	var confirmCloseDialog = function(component, model, dialog) {
+		// confirm before closing.
+		component.save();
+
+		if (model.isDirty() && !community.plugins.advDocAssemble.confirm) {
+			community.plugins.advDocAssemble.confirm = true;
+			community.plugins.advDocAssemble.unsavedChangesDialog(dialog);
+			return false;
+		} else {
+			// reset variable (after to prevent recursive loop) and stop full screen mode.
+			community.plugins.advDocAssemble.confirm = false;
+			community.plugins.advDocAssemble.stopMDSResize(dialog);
+		}
+
+		return true;
+	}
+
+	dialogConfig.closeOnEscape = false;
+	dialogConfig.beforeClose = function(event, ui) {
+		if (!confirmCloseDialog(component, model, $(this))) {
+			// do not close the dialog, yet -- there are changes.
+			event.preventDefault();
+		}
+		else{
+			$(this).dialog('destroy');
+			//Remove add single document dialog as well -COP-3434
+			$('#select-attachment-dialog').remove();
+		}
+	}
+	dialogConfig.height = 550;
+	dialogConfig.width = 750;
+	dialogConfig.title = title;
+	dialogConfig.resizable = false;
+	dialogConfig.minWidth = 750;
+	dialogConfig.buttons = [ {
+		text: 'Cancel',
+		click: function() {
+			if (component.isOtherSettingsMode() || component.isAdvancedMode()) {
+				// return to normal settings
+				component.standardSettings();
+
+				// using button:last-child since the button is added using jQuery UI dialog and does not have
+				// a specific class appended to it.
+				$('.ui-dialog-buttonset').find('.edit-button-label').show();
+				$('.ui-dialog-buttonset button:last-child').show();
+			} else {
+				// make call to close the dialog.
+				dialog.dialog('close');
+
+				//Removing dialog component
+				// component.remove();
+
+			}
+		}
+	}, {
+		text: 'Save',
+		click: function() {
+			var dialog = $(this);
+
+			if (component.isOtherSettingsMode() || component.isAdvancedMode()) {
+				// return to normal settings
+				component.standardSettings(true);
+				$('.ui-dialog-buttonset').find('button:last-child').show()
+				$('a.edit-button-label').show();
+			} else {
+				// prevent the confirm dialog from displaying.
+				community.plugins.advDocAssemble.confirm = true;
+
+				// save to model.
+				component.save();
+
+				// save to backend
+				model.save({}, {
+					success: function(model, response) {
+						if (model.isNew()) {
+							// make component display on page.
+							location.reload();
+						}
+
+						// update the button label.
+						$('#' + model.id + ' .am-assemble-button > span:first-child').text(model.get('buttonLabel'));
+
+						if (model.get('type') === DocumentAssemble.TYPE.PDF) {
+							// force email - disable checkbox.
+							$('#' + id + '-wordAssembleDocumentsAsync').attr('disabled', 'disabled').attr('checked', 'checked');
+							$('#' + id + '-am-assemble-email-results').css('color', '#969696').find('> label > span').text('(required option for PDF)');
+						} else {
+							// allow direct download.
+							$('#' + id + '-wordAssembleDocumentsAsync').removeAttr('disabled').removeAttr('checked');
+							$('#' + id + '-am-assemble-email-results').css('color', '#000').find('> label > span').text('(use for larger Word documents)');
+						}
+
+						dialog.dialog('close');
+						component.remove();
+					}
+				});
+			}
+		}
+	}];
+//Moving to add dropdown
+/*
+	{
+		text: 'Advanced Edit',
+		id: 'advanced-edit-button',
+		click: function(event) {
+			// switch to advanced settings view and hide the other settings button.
+			component.advancedSettings();
+			$(event.currentTarget).hide();
+		}
+	}
+	*/
+
+	dialogConfig.dragStop = function(event, ui) {
+		// remove height restriction - auto size. jQuery dialog sets height on each drag/drop.
+		dialog.parent().css('height', 'auto');
+	};
+
+	dialog.dialog(dialogConfig).parent().addClass('configure-mds-dialog');
+
+	// initialize component here - controlling download button from here - not good.
+	component = getComponent(model);
+	community.plugins.advDocAssemble.component = component;
+
+	if (model.isNew()) {
+		// render the component with a new model.
+		parent.html(component.$el);
+		component.render();
+	} else {
+		// fetch a pre-existing model and render the component.
+		model.fetch({
+			success: function(model, response) {
+				// render the component
+				parent.html(component.$el);
+				component.render();
+			},
+			error: function() {
+				// error message.
+				parent.html('An error has occurred while communicating with the server.');
+			}
+		});
+	}
+
+	community.plugins.advDocAssemble.updateTitleBar($(dialog));
+
+	return dialog;
+};
+
+/**
+ * Update the dialog title bar options.
+ * 
+ * @param dialog
+ *                Reference to the dialog to update title bar of.
+ */
+community.plugins.advDocAssemble.updateTitleBar = function(dialog) {
+	var container = dialog.parent(), expand = $('<a href="#" title="Expand Dialog" class="expand-button"><span>Expand</span></a>'), collapse = $('<a href="#" title="Collapse Dialog" class="collapse-button"><span>Collapse</span></a>');
+
+	expand.click(community.plugins.advDocAssemble.onExpandClick);
+	collapse.click(community.plugins.advDocAssemble.onCollapseClick).hide();
+
+	// update corner buttons
+	container.find('.ui-dialog-titlebar.ui-widget-header').append(expand);
+	container.find('.ui-dialog-titlebar.ui-widget-header').append(collapse);
+}
+
+/**
+ * Called when the user clicks the expand button.
+ * 
+ * @param event
+ *                MouseEvent that triggered the call.
+ */
+community.plugins.advDocAssemble.onExpandClick = function(event) {
+	var target = $(event.currentTarget), container = target.parent(), dialog = container.parent();
+
+	// modify dialog, append class, resize dialog, etc.
+	dialog.addClass('dialog-expand');
+	$(window).scrollTop(0).resize(community.plugins.advDocAssemble.onWindowResize);
+	$('body').css('overflow', 'hidden');
+	community.plugins.advDocAssemble.resizeWindow();
+
+	// activate component full screen.
+	// disable draggable since this will cause the dialog to move to the right corner in expand mode when it is collapsed.
+	dialog.dialog('option', 'draggable', false);
+	community.plugins.advDocAssemble.component.fullScreen(true);
+
+	// swap button.
+	target.hide();
+	container.find('.collapse-button').show();
+}
+
+/**
+ * Called to resize the dialog to fill the screen.
+ */
+community.plugins.advDocAssemble.resizeWindow = function() {
+	$('.configure-mds-dialog').height($(window).height() - 35);
+}
+
+/**
+ * Called when the user resizes the window and the MDS component is in expanded mode.
+ * 
+ * @param event
+ */
+community.plugins.advDocAssemble.onWindowResize = function(event) {
+	community.plugins.advDocAssemble.resizeWindow();
+}
+
+/**
+ * 
+ */
+community.plugins.advDocAssemble.stopMDSResize = function(dialog) {
+	// swap classes around.
+	dialog.removeClass('dialog-expand');
+	$(window).off('resize', community.plugins.advDocAssemble.onWindowResize);
+
+	// activate component full screen
+	// renable dragging.
+	dialog.dialog('option', 'draggable', true);
+	dialog.css('height', 'auto');
+
+	// remove automatic resizing.
+	$('body').css('overflow', 'initial');
+}
+
+/**
+ * Called when the user clicks the collapse button.
+ * 
+ * @param event
+ *                MouseEvent that triggered the call.
+ */
+community.plugins.advDocAssemble.onCollapseClick = function(event) {
+	var target = $(event.currentTarget), container = target.parent(), dialog = container.parent();
+
+	// disable resize calls.
+	community.plugins.advDocAssemble.stopMDSResize(dialog);
+	community.plugins.advDocAssemble.component.fullScreen(false);
+
+	// swap button.
+	target.hide();
+	container.find('.expand-button').show();
+}
+
+/**
+ * @param eventObject
+ * @return A String indicating the mode for the MDS component.
+ */
+community.plugins.advDocAssemble.getMode = function(eventObject) {
+	var result = 'assemble';
+
+	if ($(eventObject.currentTarget).parent().find("input[name=isDocumentCompare]").val() == "true") {
+		result = 'compare';
+	}
+
+	if ($(eventObject.currentTarget).parent().find("input[name=isSpreadsheetConsolidate]").val() == "true") {
+		result = 'consolidate';
+	}
+
+	if (_.isString(eventObject)) {
+		if (eventObject.indexOf("compare") != -1) {
+			result = 'compare';
+		}
+
+		if (eventObject.indexOf("consolidate") != -1) {
+			result = 'consolidate';
+		}
+	}
+
+	return result;
+}
+
+/**
+ * @param eventObject
+ * @return A String indicating the title for the MDS dialog.
+ */
+community.plugins.advDocAssemble.getTitle = function(eventObject) {
+	// check if assemble or compare, init accordingly
+	var result = "Configure Document Assembly";
+
+	if (jQuery(eventObject.currentTarget).parent().find("input[name=isDocumentCompare]").val() == "true") {
+		result = "Configure Document Compare";
+	}
+
+	if (jQuery(eventObject.currentTarget).parent().find("input[name=isSpreadsheetConsolidate]").val() == "true") {
+		result = "Configure Spreadsheet Consolidate";
+	}
+
+	if (_.isString(eventObject)) {
+		if (eventObject.indexOf("compare") != -1) {
+			result = "Configure Document Compare";
+		}
+
+		if (eventObject.indexOf("consolidate") != -1) {
+			result = "Configure Spreadsheet Consolidate";
+		}
+	}
+
+	return result;
+}
+
+community.plugins.advDocAssemble.component = undefined;
+community.plugins.advDocAssemble.isTemplateLoaded = false;
+community.plugins.advDocAssemble.loadAssembleConfigureUI = function(eventObject) {
+	//Check to see if dialog already exists, if so, show -AWP
+	// if ( $( "#am-macro-details-dialog" ).length ) {
+ //   		$( "#am-macro-details-dialog" ).parent().show();
+	// }
+	// else {
+
+		var id = jQuery(this).parent().attr("id");
+		var dialog = jQuery("<div id='am-macro-details-dialog'></div>");
+		var configureDocumentAssembleHTML = jQuery("<div class='am-macro-details-wrapper'></div>");
+
+		if ($(eventObject.currentTarget).parent().find('input[name=isSpreadsheetConsolidate]').val() === "true") {
+			// spreadsheet consolidate - make deprecated call
+			community.plugins.advDocAssemble.loadOldMDS(id, false);
+			return false;
+		}
+
+		dialog.append(configureDocumentAssembleHTML);
+
+		if (!community.plugins.advDocAssemble.isTemplateLoaded) {
+			// load the document assemble template - use epoche seconds to reload the template each time (don't cache).
+			$.get('/s/4396/' + (new Date()).getTime() + '/_/download/batch/gov.eop.omb.confluence.max.utils:mds-web-resources/gov.eop.omb.confluence.max.utils:Template.html').done(function(response) {
+				// load the templates into the browser.
+				$('body').append(response);
+				community.plugins.advDocAssemble.startDocumentAssemble(dialog, community.plugins.advDocAssemble.getMode(eventObject), community.plugins.advDocAssemble.getTitle(eventObject), id, AJS.params.pageId, configureDocumentAssembleHTML);
+			});
+		} else {
+			// templates are loaded, start document assemble component.
+			community.plugins.advDocAssemble.startDocumentAssemble(dialog, eventObject, configureDialogTitle, id, AJS.params.pageId, configureDocumentAssembleHTML);
+		}
+	// }
+
+	return false;
+}
+
+community.plugins.advDocAssemble.checkForAssembleChanges = function(dialogObj) {
+
+	var id = jQuery(dialogObj).find("input[name=id]").val();
+
+	instance = community.plugins.advDocAssemble.instance[id];
+
+	var jsonCurrent = community.plugins.advDocAssemble.getAssembleListJson(dialogObj);
+
+	if (typeof (id) == 'undefined') {
+		return false; // probally lost session.. let them out of the
+		// dialog
+	}
+
+	if (typeof (instance) == 'undefined') {
+		return false; // cancel from unsaved will cause this
+	}
+
+	if (jsonCurrent == instance.jsonAtStart) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+community.plugins.advDocAssemble.unsavedChangesDialog = function(dialogObj) {
+	var dialog = jQuery("<div></div>");
+	var dialogConfig = new JQUERYUI_DIALOG_MODAL_HASH;
+
+	dialogConfig.buttons = {
+		"Cancel": function() {
+			community.plugins.advDocAssemble.confirm = false;
+			jQuery(this).dialog("close");
+		},
+		"OK": function() {
+			jQuery(this).dialog("close");
+			dialogObj.dialog("close");
+			dialogObj.dialog("destroy");
+			//Remove add single document dialog as well -COP-3434
+			$('#select-attachment-dialog').remove();
+		}
+	}
+	dialogConfig.closeOnEscape = false;
+
+	dialogConfig.height = 200 // windowHeight * 0.8; // take 80%
+	dialogConfig.width = 250 // windowWidth * 0.8; // take 80%
+	dialogConfig.title = "Unsaved Changes";
+
+	dialogConfig.resizable = false;
+
+	dialog.append("<p>You have unsaved changes. Your changes will be lost if you don't save them. Are you sure you want to close?</p>");
+	dialog.dialog(dialogConfig);
+
+	return false;
+
+}
+
+community.plugins.advDocAssemble.getDocumentLiHtml = function(document) {
+	return "<li class='am-item recently-added " + community.plugins.advDocAssemble.getDocumentAlertStatus(document) + "'>" + "<input type='hidden' name='attachmentId' value='" + document.attachmentId + "' />" + "<pre class='jquery-document-json-container hidden'>" + JSON.stringify(document)
+			+ "</pre>	" + "<div class='am-number-order'>0</div>" + "<div class='am-document-info'>" + "	<span class='am-document-name'>" + document.attachmentName + "</span>" + "	<span class='am-document-location'>" + document.pageName + "</span>"
+			+ "   <span class='am-document-metatext hidden'>" + document.tocTitle + "</span>" + "</div>" + community.plugins.advDocAssemble.getDocumentAlertHtml(document) + "<a class='am-document-remove' href='#'></a>" + "<div class='am-document-draggable' ></div>" + "</li>	";
+
+}
+
+community.plugins.advDocAssemble.getDocumentAlertStatus = function(document) {
+	if (document.foundStatus) {
+		return "";
+	} else {
+		return "alert";
+	}
+
+}
+
+community.plugins.advDocAssemble.getDocumentAlertHtml = function(document) {
+	if (document.foundStatus == false && document.foundStatusReason == "Page_Not_Found") {
+		return "<a class='am-document-alert' href='#'>" + "	<div class='am-document-alert-wrapper alert-page'>" + "		<h6>Page Not Found</h6>" + "		A page with that name cannot be found." + "	</div>" + "</a>";
+	} else if (document.foundStatus == false && document.foundStatusReason == "Attachment_Not_Found") {
+		return "<a class='am-document-alert' href='#'>" + "	<div class='am-document-alert-wrapper alert-doc'>" + "		<h6>Document Not Found</h6>" + "		A document with that name cannot be found." + "	</div>" + "</a>";
+	} else if (document.foundStatus == false && document.foundStatusReason == "No_Attachment_Perm") {
+		return "<a class='am-document-alert' href='#'>" + "	<div class='am-document-alert-wrapper alert-perm'>" + "		<h6>Permission Denied</h6>" + "		You do not have permission to access that document." + "	</div>" + "</a>";
+	} else {
+		return "";
+	}
+
+}
+
+/**
+ * Called when an attachment has a disabled attachment.
+ * 
+ * @param element
+ * @param model
+ */
+community.plugins.advDocAssemble.confirmAssembleWithoutMissing = function(element, model) {
+	var dialog = jQuery("<div></div>");
+	var dialogConfig = new JQUERYUI_DIALOG_MODAL_HASH;
+
+	dialogConfig.buttons = {
+		"Cancel": function() {
+			community.plugins.advDocAssemble.removeLoadingSpinner(community.plugins.advDocAssemble.spinnerID);
+			jQuery(this).dialog("close");
+		},
+		"OK": function() {
+			community.plugins.advDocAssemble.onModelFetch(element, model, false);
+			jQuery(this).dialog("close");
+		}
+	}
+
+	dialogConfig.closeOnEscape = false;
+	dialogConfig.height = 300; // windowHeight * 0.8; // take 80%
+	dialogConfig.width = 430; // windowWidth * 0.8; // take 80%
+	dialogConfig.title = "Confirm Document Assembly";
+
+	dialogConfig.resizable = false;
+	dialog.append("<div>The following problems exist with your document assembly configuration:</div>");
+
+	var disabledList = model.get('attachments').disabledAttachments();
+	var ul = jQuery("<ul>");
+
+	_.each(disabledList, function(attachment) {
+		var li = jQuery("<li>");
+
+		li.text(attachment.errorTitle() + ' for ' + attachment.get('filename') + ' on page ' + attachment.get('title'));
+
+		ul.append(li);
+	});
+
+	dialog.append(ul);
+	dialog.append("<div style='margin-top:10px;'>Click OK to continue document assembly without the missing document(s).</div>")
+	dialog.dialog(dialogConfig);
+
+	jQuery(dialog).parent().find(".ui-dialog-titlebar-close").hide();
+
+	return false;
+}
+
+community.plugins.advDocAssemble.attemptServiceAction = function(eventObject) {
+	// call another function
+	community.plugins.advDocAssemble.serviceAction(jQuery(this).parent(), true);
+}
+
+/**
+ * @param element
+ *                Element to place the loading spinner in.
+ * 
+ * @return Returns the unique ID for the spinner.
+ */
+community.plugins.advDocAssemble.showLoadingSpinner = function(element) {
+	var id = _.uniqueId('spinner-');
+
+	// append spinner to element button.
+	community.plugins.advDocAssemble.currentlyRunning = true;
+	$(element).find('span.mds-spinner').attr('id', id).empty();
+	MDSComponent.spinner(id, 6, 1, 5, 2, "#000");
+
+	return id;
+}
+
+/**
+ * @param id
+ *                String containing the ID of the spinner to remove.
+ */
+community.plugins.advDocAssemble.removeLoadingSpinner = function(id) {
+	// remove spinner by id.
+	community.plugins.advDocAssemble.currentlyRunning = false;
+	$('#' + id).empty();
+}
+
+/**
+ * 
+ */
+community.plugins.advDocAssemble.spinnerID = undefined;
+community.plugins.advDocAssemble.serviceAction = function(element, warn) {
+	var id = element.attr("id");
+
+	if (community.plugins.advDocAssemble.currentlyRunning && warn) {
+		// assert: do not make call again -- we are not continuing onward from the dialog popup.
+		return false;
+	}
+
+	// show loading spinner
+	community.plugins.advDocAssemble.spinnerID = community.plugins.advDocAssemble.showLoadingSpinner(element);
+
+	if (element.find("input[name=isSpreadsheetConsolidate]").val() == "true") {
+		// actionUrl = contextPath + community.plugins.advDocAssemble.spreadsheetConsolidateActionUrl
+	}
+
+	getModel(community.plugins.advDocAssemble.getMode(element), AJS.params.pageId, id).fetch({
+		success: function(model) {
+			
+				// complete work.
+				community.plugins.advDocAssemble.onModelFetch(element, model, warn);
+		}
+	});
+
+	return false;
+};
+
+/**
+ * Uses the fetched document model to perform an assemble/compare.
+ * 
+ * @param element
+ *                Main component for assemble or compare action.
+ * @param model
+ *                MDSModel just fetched.
+ * @param warn
+ *                True if the user should be warned for disabled attachments.
+ */
+community.plugins.advDocAssemble.onModelFetch = function(element, model, warn) {
+	var list = model.get('attachments'), disabledList = list.disabledAttachments();
+
+	if (disabledList.length && list.length !== disabledList.length && warn) {
+		// display a warning about an attachment being disabled.
+		community.plugins.advDocAssemble.confirmAssembleWithoutMissing(element, model);
+	} else if (list.length) {
+		// there is at least one document to assemble/compare.
+		community.plugins.advDocAssemble.onFetchModelSuccess(model, true, community.plugins.advDocAssemble.spinnerID, element);
+	} else {
+		//Only show alert if no error
+		if(!model.attributes.hasError) {
+			// no documents to assemble.
+			alert('Document list is empty or not setup yet.');
+		}
+
+		// remove spinner
+		community.plugins.advDocAssemble.removeLoadingSpinner(community.plugins.advDocAssemble.spinnerID);
+	}
+}
+
+/**
+ * @param domain
+ *                An optional String indicating a domain collect resides on.
+ * @return A URL to post collect information to.
+ */
+community.plugins.advDocAssemble.getCollectURL = function(domain) {
+	var result = '';
+
+	if (window.location.hostname.indexOf("test") > -1) {
+		result = "https://test.max.gov" + community.plugins.advDocAssemble.assembleIndependentPDFs;
+	} else if (window.location.hostname.indexOf("devl") > -1) {
+		result = "https://devl.max.gov" + community.plugins.advDocAssemble.assembleIndependentPDFs;
+	} else if (domain === 'stage') {
+		// stage env.
+		result = "https://stage.max.gov" + community.plugins.advDocAssemble.assembleIndependentPDFs;
+	} else {
+		// production
+		result = "https://max.gov" + community.plugins.advDocAssemble.assembleIndependentPDFs;
+	}
+
+	return result;
+}
+
+/**
+ * Determine the domain for the specified component.
+ * 
+ * @param component
+ *                Component to determine domain for.
+ */
+community.plugins.advDocAssemble.getDomain = function(component) {
+	var domain = component.find("input[name=domain]").val();
+
+	if (domain === 'prod' && window.location.hostname.indexOf("test") >= 0) {
+		// turn into test.
+		domain = 'test';
+	}
+
+	return domain;
+};
+
+/**
+ * Called after the model has been successfully loaded. Determines if POST goes to collect or community.
+ * 
+ * @param model
+ * @param altList
+ *                Use list of non-disabled attachment.
+ * @param spinnerID
+ * @param element
+ */
+community.plugins.advDocAssemble.onFetchModelSuccess = function(model, altList, spinnerID, element) {
+	var mergeType = $("input[name=mergeType]").val();
+	var wordAssembleDocumentsAsync = element.find('input[name="wordAssembleDocumentsAsync"]').is(":checked");
+	var wordCompareDocumentsAsync = element.find('input[name="wordCompareDocumentsAsync"]').is(":checked");
+	var attachmentObjs = element.find("input[name='attachmentObjs']").val();
+	var attachmentInfos = community.plugins.advDocAssemble.instance[model.id].attachmentList;
+	var domain = community.plugins.advDocAssemble.getDomain(element);
+	var isSpreadsheet = false;
+	var isCompare = false;
+	var actionUrl;
+
+	if (element.find("input[name=isDocumentCompare]").val() == "true") {
+		// document compare URL.
+		actionUrl = contextPath + community.plugins.advDocAssemble.documentCompareActionUrl;
+		isCompare = true;
+	} else if (element.find("input[name=isSpreadsheetConsolidate]").val() == "true") {
+		// spreadsheet consolidate
+		isSpreadsheet = true;
+		actionUrl = contextPath + community.plugins.advDocAssemble.spreadsheetConsolidateActionUrl
+	} else {
+		// document assemble URL.
+		actionUrl = contextPath + community.plugins.advDocAssemble.documentAssemblyActionUrl;
+	}
+
+	if (altList) {
+		//
+		attachmentInfos = community.plugins.advDocAssemble.instance[model.id].attachmentListWithoutMissing;
+	}
+
+	if (attachmentInfos.substring(attachmentInfos.length - 1) == ",") {
+		//
+		attachmentInfos = attachmentInfos.substring(0, attachmentInfos.length - 1);
+	}
+
+	if (model.get('type') === DocumentAssemble.TYPE.PDF && !isSpreadsheet && !isCompare) {
+		// post fetched model to collect.
+		// append pageTitle to the JSON too - used in the e-mails to indiicate the page the user clicked the
+		// assemble button.
+		window.open(community.plugins.advDocAssemble.getCollectURL($('#' + model.id + ' [name="domain"]').val()) + '?pageId=' + model.get('pageId') + '&id=' + model.get('id'));
+
+		// remove spinner
+		community.plugins.advDocAssemble.removeLoadingSpinner(community.plugins.advDocAssemble.spinnerID);
+	} else {
+		// community call - word document
+		$.ajax({
+			type: "GET",
+			url: actionUrl,
+			data: {
+				attachmentInfos: attachmentInfos,
+				downloadName: community.plugins.advDocAssemble.instance[model.id].downloadName,
+				id: model.id,
+				mergeType: mergeType,
+				wordAssembleDocumentsAsync: wordAssembleDocumentsAsync,
+				wordCompareDocumentsAsync: wordCompareDocumentsAsync,
+				mergeAsPDF: false,
+				pageTitle: AJS.params.pageTitle,
+				domain: domain,
+				pageId: model.get('pageId'),
+				altList: altList
+			},
+			dataType: "json",
+			complete: function(jqXHR, textStatus) {
+				// done
+				community.plugins.advDocAssemble.removeLoadingSpinner(community.plugins.advDocAssemble.spinnerID);
+				community.plugins.advDocAssemble.loadComplete(jqXHR, textStatus, element.find("input[name=isDocumentCompare]").val() == "true")
+			}
+		});
+	}
+};
+
+community.plugins.advDocAssemble.loadComplete = function(jqXHR, textStatus, isDocCompare) {
+	if (jqXHR.status == 200) // Success
+		community.plugins.advDocAssemble.loadSuccess(jqXHR.responseText);
+	else if (jqXHR.status == 500) // Server Error
+		community.plugins.advDocAssemble.loadError(jqXHR, textStatus);
+	else if (jqXHR.readyState == 4 && (jqXHR.status == 0 || jqXHR.status == 12017)) // Session
+		// Timeout
+		community.plugins.advDocAssemble.loadError(jqXHR, textStatus);
+	else
+		// Unknown Error
+		community.plugins.advDocAssemble.loadError(jqXHR, textStatus);
+
+	community.plugins.advDocAssemble.currentlyRunning = false;
+};
+
+community.plugins.advDocAssemble.loadSuccess = function(data) {
+	// hide spinner
+	jQuery("img.assemble-document-waiting-image").remove();
+
+	var rpcJsonResponse = JSON.parse(data);
+
+	// check for error
+	if (rpcJsonResponse.error) {
+		var dialog = jQuery("<div></div>");
+		var dialogConfig = new JQUERYUI_DIALOG_ERROR_HASH;
+		var p = jQuery("<p></p>");
+
+		dialogConfig.title = "Error has occured";
+		dialogConfig.buttons.OK = function() {
+			jQuery(this).dialog("destroy");
+		};
+
+		dialogConfig.height = 300
+		dialogConfig.width = 450
+
+		p.text("Please try your request again. If this problem persists, please contact MAX Support.");
+		console.error(rpcJsonResponse.errorMessage);
+		dialog.append(p);
+		dialog.dialog(dialogConfig);
+		return false;
+	}
+
+	if (rpcJsonResponse.finalDocumentPath) {
+		window.location = rpcJsonResponse.finalDocumentPath;
+	}
+};
+
+community.plugins.advDocAssemble.loadError = function(jqXHR, textStatus, isDocCompare) {
+	// hide spinner
+	jQuery("img.assemble-document-waiting-image").remove();
+
+	var dialog = jQuery("<div></div>");
+	var dialogConfig = new JQUERYUI_DIALOG_ERROR_HASH;
+	var processName;
+	if (isDocCompare) {
+		processName = "Compare";
+	} else {
+		processName = "Assembly";
+	}
+	var p = jQuery("<p>There Was a Problem With the Document " + processName + " Process.<br><br>" + "Please select the 'Email Results' checkbox and rerun the process.<br><br>" + "When the job completes, you will be emailed the results within a few minutes (depending on your email). "
+			+ "If the 'Email Results' option does not work, please contact MAX Support.</p>");
+	// p.attr("style","background:url('images/icon-error-alert.jpg') left
+	// 15px
+	// no-repeat;");
+	dialogConfig.title = jQuery("<div class='doc-assemble-error' style='color: #3A81C3 !important;'></div>").text("Document Assembly Error");
+	dialogConfig.buttons.OK = function() {
+		jQuery(this).dialog("destroy");
+	};
+
+	dialogConfig.height = 300
+	dialogConfig.width = 450
+
+	// p.text("An unexpected error has occurred.");
+	dialog.append(p);
+	dialog.dialog(dialogConfig);
+};
+
+community.plugins.advDocAssemble.bindMergePdfCheckbox = function() {
+
+	jQuery("input[name='wordAssembleDocumentsAsync']").each(function() {
+		jQuery(this).live('click', function() {
+
+			if (jQuery(this).is(':checked')) {
+				console.log("wordAssembleDocumentsAsync is checked");
+				jQuery(this).parent().find("input[name='wordAssembleDocumentAsyncUserSet']").val(true);
+			} else {
+				console.log("wordAssembleDocumentsAsync is not checked");
+				jQuery(this).parent().find("input[name='wordAssembleDocumentAsyncUserSet']").val(false);
+			}
+		});
+
+	});
+
+};
+
+// bind on load
+jQuery(document).ready(function() {
+	jQuery(".jquery-adv-doc-assemble").each(community.plugins.advDocAssemble.init);
+
+	jQuery("#documents-assemble-link").click(function() {
+		community.plugins.advDocAssemble.loadAssembleConfigureUI("assemble");
+		return false;
+	});
+
+	jQuery("#documents-compare-link").click(function() {
+		community.plugins.advDocAssemble.loadAssembleConfigureUI("compare");
+		return false;
+	});
+
+	jQuery("#spreadsheet-consolidate-link").click(function() {
+		// deprecate this call.
+		community.plugins.advDocAssemble.loadOldMDS(undefined, false);
+		return false;
+	});
+
+	community.plugins.advDocAssemble.bindMergePdfCheckbox();
+
+});
+
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/model/MDSModel.js' */
+var MDS = Backbone.Model.extend({
+	List: AttachmentList,
+
+	// store the original raw JSON
+	rawOriginalJSON: undefined,
+
+	defaults: {
+		attachments: undefined,
+		buttonLabel: 'Click Here',
+		hasError: false
+	},
+
+	initialize: function() {
+		var list = new this.List();
+
+		list.pageId = this.get('pageId');
+		list.id = this.id;
+
+		this.set('attachments', list);
+	},
+
+	/**
+	 * @return True if the model has unsaved changes for the backend, otherwise false. Override in subclasses.
+	 */
+	isDirty: function() {
+		return false;
+	},
+
+	/**
+	 * @return Returns true if there are no attachments.
+	 */
+	isEmpty: function() {
+		return this.get('attachments').length === 0;
+	},
+
+	/**
+	 * The server returns 200 OK with error message set. Helper method to check for error message.
+	 * 
+	 * @param response
+	 *                Data from backend.
+	 */
+	_errorCheck: function(response) {
+		if (response && response.hasError) {
+			// error condition.
+			alert('Your session has been lost due to inactivity, please refresh and try again.');
+			return true;
+		}
+
+		return false;
+	},
+
+	parse: function(response) {
+		// store copy of original response.
+		this.rawOriginalJSON = _.clone(response);
+		this.rawOriginalJSON.attachmentList = _.map(this.rawOriginalJSON.attachmentList, function(definition) {
+			return _.omit(definition, 'statusCode');
+		});
+
+		return {
+			buttonLabel: response.buttonLabel,
+			attachments: this.get('attachments').reset(response.attachmentList, {
+				parse: true
+			})
+		};
+	},
+
+	toJSON: function() {
+		return {
+			pageId: this.get('pageId'),
+			id: this.get('id')
+		};
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/model/Attachment.js' */
+var Attachment = Backbone.Model.extend({
+	defaults: function() {
+		return {
+			// title is the Page title.
+			title: '',
+			pageId: -1,
+			filename: '',
+			spaceKey: '',
+			status: 0,
+			include: true
+		};
+	},
+
+	/**
+	 * Update the attachment status code.
+	 */
+	fetchStatus: function() {
+		var context = this;
+
+		$.get('/pages/getupdateddocumentjson.action?pageName=' + encodeURIComponent(this.get('title')) + '&fileName=' + encodeURIComponent(this.get('filename')) + '&spaceKey=' + encodeURIComponent(this.get('spaceKey'))).done(function(response) {
+			// update status code.
+			context.set('status', parseInt(response.attachmentDataObject.statusCode, 10));
+		});
+	},
+
+	/**
+	 * @return A String containing the error title.
+	 */
+	errorTitle: function() {
+		switch (this.get('status')) {
+		case 1:
+			return 'Page Not Found';
+		case 2:
+			return 'Attachment not found';
+		case 3:
+			return 'Permission Denied';
+		default:
+			return '';
+		}
+	},
+
+	/**
+	 * @return A String with the error message.
+	 */
+	errorMessage: function() {
+		switch (this.get('status')) {
+		case 1:
+			return 'A page with that name cannot be found.';
+		case 2:
+			return 'A document with that name cannot be found.';
+		case 3:
+			return 'You do not have permission to access that document.';
+		default:
+			return '';
+		}
+	},
+
+	/**
+	 * Calculates the current attachment's page number.
+	 * 
+	 * @return The page number for the current attachment.
+	 */
+	page: function() {
+		if (this.collection) {
+			// lookup this model's location in the containing collection.
+			return this.collection.indexOf(this) + 1;
+		}
+
+		return -1;
+	},
+
+	parse: function(response) {
+		return {
+			title: response.pageTitle,
+			pageId: response.pageId,
+			filename: response.fileName,
+			spaceKey: response.spaceKey,
+			status: parseInt(response.statusCode, 10),
+			include: response.include === true
+		};
+	},
+
+	toJSON: function() {
+		return {
+			spaceKey: this.get('spaceKey'),
+			fileName: this.get('filename'),
+			pageTitle: this.get('title'),
+			pageId: this.get('pageId'),
+			include: this.get('include')
+		};
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/model/AttachmentList.js' */
+var AttachmentList = Backbone.Collection.extend({
+	model: Attachment,
+
+	/**
+	 * @return An array containing disabled attachments.
+	 */
+	disabledAttachments: function() {
+		return this.filter(function(model) {
+			// status is not OK.
+			return model.get('status') !== 0;
+		});
+	},
+	
+	/**
+	 * Resets the Collection with the specified valid Attachment string.
+	 * 
+	 * @param value
+	 *                A String to construct the Attachment models from.
+	 * @param includeSpreadsheets
+	 * @return True if valid syntax, otherwise false.
+	 */
+	advancedModels: function(value, includeSpreadsheets) {
+		$.ajax({
+			type: 'POST',
+			url: '/pages/backbonegetadvancedadddocuments.action',
+			data: {
+				pageId: AJS.params.pageId,
+				advAttachmentsList: value.replace(/(\r\n|\n|\r)/gm, ';'),
+				includeSpreadsheets: true
+			},
+			dataType: 'json',
+			complete: $.proxy(this.onAdvancedModelsResponse, this)
+		});
+
+		return true;
+	},
+
+	/**
+	 * 
+	 */
+	onAdvancedModelsResponse: function(jqXHR, textStatus) {
+		var rpcJsonResponse = JSON.parse(jqXHR.responseText), result = [], toc;
+
+		if (typeof rpcJsonResponse.assembleDataObject != 'undefined') {
+			// check for loss of session
+
+			if (rpcJsonResponse.errorMessage) {
+				alert("Your session has been lost due to inactivity, please refresh and try again.");
+				return false;
+			}
+
+			if (rpcJsonResponse.assembleDataObject.error != undefined) {
+				alert("An error occured during the add. Message: " + rpcJsonResponse.assembleDataObject.error);
+				return false;
+			}
+
+			_.each(rpcJsonResponse.assembleDataObject.advancedAddDocuments, function(record, index) {
+				// build attachment models.
+				result.push(new this.model(record, {
+					parse: true
+				}));
+			}, this);
+
+			// cache TOC model to readd.
+			toc = this.get('toc');
+
+			if (toc && this.indexOf(toc) <= result.length) {
+				// keep TOC. place in same index.
+				result.splice(this.indexOf(toc), 0, toc);
+			} else if (toc) {
+				// keep TOC. place at first index.
+				result.unshift(toc);
+			}
+
+			// reset collection with new models.
+			this.reset(result);
+		} else {
+			alert("An error occured while loading the data.");
+		}
+	},
+
+	/**
+	 * @return Returns the advanced add/edit string for the current list's models.
+	 */
+	advancedText: function() {
+		return _.map(this.filter(function(model) {
+			return model.id !== 'toc';
+		}), this._buildText, this).join('\n');
+	},
+
+	/**
+	 * Helper method to generate advanced text string.
+	 * 
+	 * @param model
+	 *                Backbone model to generate advanced edit string for.
+	 */
+	_buildText: function(model) {
+		return model.get('title') + ':' + model.get('filename');
+	},
+
+	/**
+	 * Filter out the TOC model.
+	 */
+	toJSON: function() {
+		return this.filter(function(model) {
+			return model.id !== 'toc';
+		});
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/model/assemble/TOCEntry.js' */
+var TOCEntry = Backbone.Model.extend({
+	defaults: {
+		headingLevel: 1,
+		headingText: ''
+	},
+
+	parse: function(response) {
+		return response;
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/model/assemble/TOCEntryList.js' */
+var TOCEntryList = Backbone.Collection.extend({
+	model: TOCEntry,
+
+	parse: function(response) {
+		return response;
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/model/assemble/AssembleAttachment.js' */
+var AssembleAttachment = Attachment.extend({
+	defaults: function() {
+		return _.extend(_.result(Attachment.prototype, 'defaults'), {
+			tocList: new TOCEntryList()
+		});
+	},
+
+	/**
+	 * Used to generate friendly text for the table of contents column.
+	 */
+	tocReadableList: function() {
+		var result = '';
+
+		this.get('tocList').each(function(toc, index) {
+			if (index > 0) {
+				// line break on second or greater entry.
+				result += '<br/>';
+			}
+
+			if (parseInt(toc.get('headingLevel'), 10) === 2) {
+				// indent heading level two
+				result += '&nbsp;&nbsp;&nbsp;&nbsp;';
+			}
+
+			result += toc.get('headingText');
+		});
+
+		return result;
+	},
+
+	/**
+	 * @return String containing the filename for the attachment.
+	 */
+	filename: function() {
+		return this.get('filename');
+	},
+
+	/**
+	 * @return String containing the page title for the attachment.
+	 */
+	title: function() {
+		if (this.id === 'toc' && this.get('filename') !== 'Table of Contents') {
+			// custom table of contents title.
+			return '(TOC Title)';
+		}
+
+		return this.get('title');
+	},
+
+	parse: function(response) {
+		return _.extend(Attachment.prototype.parse.apply(this, arguments), {
+			tocList: new TOCEntryList(response.tocEntryList, {
+				parse: true
+			})
+		});
+	},
+
+	toJSON: function() {
+		// invoke toJSON so _.isEqual may be used to check if model has been changed.
+		return _.extend(Attachment.prototype.toJSON.apply(this, arguments), {
+			tocEntryList: this.get('tocList').invoke('toJSON')
+		});
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/model/assemble/AssembleAttachmentList.js' */
+var AssembleAttachmentList = AttachmentList.extend({
+	model: AssembleAttachment,
+
+	/**
+	 * Helper method to generate advanced text string.
+	 * 
+	 * @param model
+	 *                Backbone model to generate advanced edit string for.
+	 */
+	_buildText: function(model) {
+		var result = AttachmentList.prototype._buildText.apply(this, arguments);
+
+		if (model.get('tocList').length) {
+			// more information follows (toc)
+			result += ':';
+		}
+
+		model.get('tocList').each(function(toc, index) {
+			// build headings
+			result += 'h' + toc.get('headingLevel') + '_' + toc.get('headingText');
+
+			if (index + 1 < model.get('tocList').length) {
+				// not the last heading. delimited by '/' character.
+				result += '/';
+			}
+		});
+
+		return result;
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/model/assemble/DocumentAssemble.js' */
+var DocumentAssemble = MDS.extend({
+	List: AssembleAttachmentList,
+
+	url: function() {
+		var result = '/ajax/getdocumentassemblejson.action?pageId=' + this.get('pageId');
+
+		if (this.id) {
+			// append page ID - this is an edit/delete.
+			result += '&id=' + this.id;
+		}
+
+		return result;
+	},
+
+	defaults: _.extend(_.clone(MDS.prototype.defaults), {
+		buttonLabel: 'Click to Assemble Documents',
+
+		type: 'pdf',
+		orientation: 'portrait',
+
+		printPageNumbers: false,
+		printPageNumbersAt: 1,
+		startPageNumberAt: 1,
+
+		trackChanges: false,
+		generateTOC: false,
+		addWatermark: false,
+		headerWatermark: "",
+		footerWatermark: "",
+		diagonalWatermark: ""
+
+	}),
+
+	parse: function(response) {
+		if (this._errorCheck(response)) {
+			// error condition.
+			return response;
+		}
+
+		var data = response.assembleDataObject.documentAssembleJson, result = _.extend(MDS.prototype.parse.call(this, data), {
+			type: data.type === 'WORD' ? DocumentAssemble.TYPE.WORD : DocumentAssemble.TYPE.PDF,
+			orientation: data.orientation,
+
+			printPageNumbers: data.printPageNumbers,
+
+			trackChanges: data.showCommentsAndTrackChanges === true,
+			generateTOC: data.generateTOCEntryList === true,
+			addWatermark: data.addWatermark === true,
+			headerWatermark: data.headerWatermark,
+			footerWatermark: data.footerWatermark,
+			diagonalWatermark: data.diagonalWatermark
+		});
+
+		if (data.printPageNumbers) {
+			// page numbers needed.
+			result.printPageNumbersAt = data.printPageNumbersBeginningAtAttachment;
+			result.startPageNumberAt = data.startPageCountAtAttachment;
+		} else {
+			// default values.
+			result.printPageNumbersAt = 1;
+			result.startPageNumberAt = 1;
+		}
+
+		if (data.generateTOCEntryList === true) {
+			// add toc to attachment list
+			this.get('attachments').add({
+				id: 'toc',
+				filename: data.tocTitle
+			}, {
+				at: data.tocIndex
+			});
+		}
+
+		return result;
+	},
+
+	toJSON: function() {
+		var result = MDS.prototype.toJSON.apply(this, arguments), toc = this.get('attachments').get('toc');
+
+		// call collection's toJSON and then invoke toJSON on each model so _.isEqual may be used
+		// to check if model has been changed.
+		result.documentAssembleJson = {
+			attachmentList: _.invoke(this.get('attachments').toJSON(), 'toJSON'),
+			buttonLabel: this.get('buttonLabel'),
+			type: this.get('type') === DocumentAssemble.TYPE.WORD ? 'WORD' : 'PDF',
+			orientation: this.get('orientation'),
+
+			showCommentsAndTrackChanges: this.get('trackChanges'),
+			addWatermark: this.get('addWatermark')
+		};
+
+		if (toc) {
+			// table of contents is set.
+			result.documentAssembleJson.tocIndex = this.get('attachments').indexOf(toc);
+			result.documentAssembleJson.tocTitle = toc.get('filename');
+		}
+
+		if (this.isPDF()) {
+			// pdf options.
+			result.documentAssembleJson.generateTOCEntryList = (toc !== undefined);
+			result.documentAssembleJson.printPageNumbers = this.get('printPageNumbers');
+
+			// page numbers needed
+			result.documentAssembleJson.printPageNumbersBeginningAtAttachment = parseInt(this.get('printPageNumbersAt'), 10);
+			result.documentAssembleJson.startPageCountAtAttachment = parseInt(this.get('startPageNumberAt'), 10);
+
+			//watermarks
+			result.documentAssembleJson.addWatermark = this.get('addWatermark');
+			result.documentAssembleJson.headerWatermark = this.get('headerWatermark');
+			result.documentAssembleJson.footerWatermark = this.get('footerWatermark');
+			result.documentAssembleJson.diagonalWatermark = this.get('diagonalWatermark');
+		}
+
+		return result;
+	},
+
+	/**
+	 * @return True if the type is PDF otherwise false.
+	 */
+	isPDF: function() {
+		return this.get('type') === DocumentAssemble.TYPE.PDF;
+	},
+
+	/**
+	 * @return True if the model has unsaved changes for the backend, otherwise false.
+	 */
+	isDirty: function() {
+		if (this.rawOriginalJSON && !this.rawOriginalJSON.generateTOCEntryList) {
+			// remove attributes from b/e response.
+			delete this.rawOriginalJSON.tocIndex;
+			delete this.rawOriginalJSON.tocTitle;
+		}
+
+		return !_.isEqual(this.toJSON().documentAssembleJson, this.rawOriginalJSON);
+	},
+
+	validate: function(attributes) {
+		if (attributes.orientation != 'landscape' && attributes.orientation != 'portrait') {
+			return 'Orientation must be portrait or landscape.';
+		}
+	}
+}, {
+	TYPE: {
+		WORD: 'word',
+		PDF: 'pdf'
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/model/compare/CompareAttachment.js' */
+var CompareAttachment = Attachment.extend({
+	defaults: _.extend(_.result(Attachment.prototype, 'defaults'), {
+		attribution: 'document',
+		replaceWith: '',
+		userSpecifiedReplaceWith: '',
+
+		suffix: '',
+		prefix: ''
+	}),
+
+	parse: function(response) {
+		var replaceWith = '';
+
+		switch (response.attribution) {
+		case 1:
+			replaceWith = CompareAttachment.ATTRIBUTION.DOCUMENT;
+			break;
+
+		case 2:
+			replaceWith = CompareAttachment.ATTRIBUTION.COMMUNITY;
+			break;
+
+		case 3:
+			replaceWith = CompareAttachment.ATTRIBUTION.USER_SPECIFIED;
+			break;
+
+		default:
+			replaceWith = CompareAttachment.ATTRIBUTION.DOCUMENT;
+		}
+
+		// adding all documents initially does not have useCurrentAttribution set and we want the default
+		// to use document settings.
+		return _.extend(Attachment.prototype.parse.apply(this, arguments), {
+			replaceWith: replaceWith,
+			attribution: (response.useCurrentAttribution === true || _.isUndefined(response.useCurrentAttribution)) ? CompareAttachment.REPLACE_WITH.CURRENT : CompareAttachment.REPLACE_WITH.REPLACE,
+			userSpecifiedReplaceWith: response.replacement,
+
+			suffix: response.suffix,
+			prefix: response.prefix
+		});
+	},
+
+	toJSON: function() {
+		var attr;
+
+		switch (this.get('replaceWith')) {
+		case CompareAttachment.ATTRIBUTION.DOCUMENT:
+			attr = 1;
+			break;
+
+		case CompareAttachment.ATTRIBUTION.COMMUNITY:
+			attr = 2;
+			break;
+
+		case CompareAttachment.ATTRIBUTION.USER_SPECIFIED:
+			attr = 3;
+			break;
+
+		default:
+			attr = 1;
+		}
+
+		return _.extend(Attachment.prototype.toJSON.apply(this, arguments), {
+			attribution: attr,
+			useCurrentAttribution: this.get('attribution') === CompareAttachment.REPLACE_WITH.CURRENT,
+			replacement: this.get('userSpecifiedReplaceWith'),
+
+			prefix: this.get('prefix'),
+			suffix: this.get('suffix'),
+		});
+	}
+}, {
+	REPLACE_WITH: {
+		CURRENT: 'current',
+		REPLACE: 'replace'
+	},
+
+	ATTRIBUTION: {
+		DOCUMENT: 'document',
+		USER_SPECIFIED: 'specified',
+		COMMUNITY: 'community'
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/model/compare/CompareAttachmentList.js' */
+var CompareAttachmentList = AttachmentList.extend({
+	model: CompareAttachment
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/model/compare/DocumentCompare.js' */
+var DocumentCompare = MDS.extend({
+	List: CompareAttachmentList,
+
+	defaults: _.extend(_.clone(MDS.prototype.defaults), {
+		buttonLabel: 'Click to Compare Documents',
+
+		attribution: 'document',
+		replaceWith: '',
+		userSpecifiedReplaceWith: '',
+
+		suffix: '',
+		prefix: ''
+	}),
+
+	url: function() {
+		var result = '/pages/getdocumentcomparejson.action?pageId=' + this.get('pageId');
+
+		if (this.id) {
+			// append page ID - this is an edit/delete.
+			result += '&id=' + this.id;
+		}
+
+		return result;
+	},
+
+	parse: function(response) {
+		if (this._errorCheck(response)) {
+			// error condition.
+			return {};
+		}
+
+		return MDS.prototype.parse.call(this, response.compareDataObject.documentCompareJson);
+	},
+
+	/**
+	 * @return True if the model has unsaved changes for the backend, otherwise false.
+	 */
+	isDirty: function() {
+		return !_.isEqual(this.toJSON().documentCompareJson, this.rawOriginalJSON);
+	},
+
+	toJSON: function() {
+		var result = MDS.prototype.toJSON.apply(this, arguments);
+
+		// call collection's toJSON and then invoke toJSON on each model so _.isEqual may be used
+		// to check if model has been changed.
+		result.documentCompareJson = {
+			attachmentList: _.invoke(this.get('attachments').toJSON(), 'toJSON'),
+			buttonLabel: this.get('buttonLabel')
+		}
+
+		return result;
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/view/AttachmentRenderer.js' */
+var $ = jQuery, AttachmentRenderer = Backbone.View.extend({
+	templateID: '',
+	tagName: 'li',
+
+	isFullScreen: false,
+
+	events: {
+		'click .edit-button': 'onEditClick',
+		'click .delete-button.attachment': 'onDeleteClick',
+
+		'click .accept-button': 'onSaveClick',
+		'click .cancel-button': 'onUndoClick',
+
+		'mouseenter .alert-button': 'onAlertMouseEvent',
+		'mouseout .alert-button': 'onAlertMouseEvent',
+
+		'change .include-page': 'onIncludeChange'
+	},
+
+	initialize: function(options) {
+		if (!AttachmentRenderer.template[this.templateID]) {
+			// define only a single template function. performing
+			// this in initialize since the template
+			// isn't loaded into the web browser when this file is
+			// loaded (todo: look into that).
+			AttachmentRenderer.template[this.templateID] = _.template($(this.templateID).html().replace(/\t/g, ''));
+		}
+
+		// initialize isFullScreen
+		this.isFullScreen = options.isFullScreen;
+
+		// list for property changes.
+		this.model.on('change', this.render, this);
+	},
+
+	/**
+	 * Cleanup event listeners.
+	 */
+	remove: function() {
+		this.model.off('change', this.render);
+		return Backbone.View.prototype.remove.apply(this, arguments);
+	},
+
+	/**
+	 * @param event
+	 *                MouseEvent that triggers the mouse in/mouse out.
+	 */
+	onAlertMouseEvent: function(event) {
+		var tooltip = $($(event.currentTarget).children()[0]);
+
+		if (event.type === 'mouseenter') {
+			// mouseenter
+			tooltip.show();
+		} else {
+			// mouseout
+			tooltip.hide();
+		}
+	},
+
+	/**
+	 * User changed include checkbox.
+	 * 
+	 * @param event
+	 */
+	onIncludeChange: function(event) {
+		// update the model.
+		this.model.set('include', $(event.currentTarget).is(':checked'));
+	},
+
+	/**
+	 * 
+	 */
+	render: function() {
+		// render from template.
+		this.$el.html(AttachmentRenderer.template[this.templateID](_.extend({
+			model: this.model
+		}, this.model.attributes)));
+
+		if (this.isFullScreen) {
+			// size
+			this.updateSize();
+		}
+
+		if (this.model.get('status') !== 0) {
+			// assert: error state - attach error class.
+			this.$el.addClass('error');
+		} else {
+			// assert: not error state.
+			this.$el.removeClass('error');
+		}
+
+		// set include option.
+		this.$el.find('input.include-page').prop('checked', this.model.get('include'));
+
+		// default to view mode.
+		this.$el.find('.view-mode').show();
+		this.$el.find('.edit-mode').hide();
+
+		return this;
+	},
+
+	/**
+	 * @return Return true if the attachment is visible, otherwise false.
+	 */
+	isViewMode: function() {
+		return this.$el.find('.view-mode').is(':visible');
+	},
+
+	/**
+	 * Place renderer into view mode.
+	 */
+	viewMode: function() {
+		// call render so the text (toc/page title/etc) is rendered into the appropriate places.
+		this.render();
+
+		this.trigger('view-mode', {
+			view: this
+		});
+	},
+
+	/**
+	 * Place renderer into edit mode.
+	 */
+	editMode: function() {
+		this.$el.find('.edit-mode').show();
+		this.$el.find('.view-mode').hide();
+
+		this.updateSize();
+
+		this.trigger('edit-mode', {
+			view: this
+		});
+	},
+
+	/**
+	 * User clicked the edit pencil, place renderer in edit mode. Dispatch an event 'attachment-edit' to indicate the attachment is in the process of being edited.
+	 * 
+	 * @param event
+	 */
+	onEditClick: function(event) {
+		this.editMode();
+
+		this.trigger('attachment-edit', {
+			model: this.model
+		});
+	},
+
+	/**
+	 * User clicked the delete button, remove the attachment from the list.
+	 * 
+	 * @param event
+	 */
+	onDeleteClick: function(event) {
+		// remove the model from the collection.
+		this.model.collection.remove(this.model);
+	},
+
+	/**
+	 * Enable/disable automatic resizing. If true, size the component to be 100% width and 100% height.
+	 * 
+	 * @param enable
+	 *                True if the component should resize based on parent container.
+	 */
+	fullScreen: function(enable) {
+		this.isFullScreen = enable;
+
+		if (enable) {
+			// resize automatically - dynamic.
+			$(window).resize($.proxy(this.updateSize, this));
+		} else {
+			// default - static sized columns.
+			$(window).off('resize', this.updateSize);
+		}
+
+		this.updateSize();
+	},
+
+	/**
+	 * Called to update the size of columns.
+	 */
+	updateSize: function() {
+		var value = this._leftoverColumnWidth();
+
+		// edit mode
+		this.$el.find('.column.attachment-edit').width((value - 14) + 'px');
+	},
+
+	/**
+	 * Calculate the remaining pixels for the colums.
+	 * 
+	 * @return Pixels leftover in the attachment renderer (after controls, page number, and include).
+	 */
+	_leftoverColumnWidth: function() {
+		var selector, columns, total;
+
+		if (this.isViewMode()) {
+			// columns are static width.
+			lookup = '.view-mode .column:not(.attachment-edit):not(.file-name):not(.toc-entry)';
+		} else {
+			// dynamic sizing columns.
+			lookup = '.edit-mode .column:not(.attachment-edit):not(.file-name):not(.toc-entry)';
+		}
+
+		columns = this.$el.find(lookup);
+		total = _.reduce(columns, function(memo, element) {
+			return $(element).width() + memo;
+		}, 0);
+
+		return (this.$el.width() - total); // 202px
+	},
+
+	/**
+	 * Save attachment renderer settings.
+	 */
+	onSaveClick: function(event) {
+		this.save();
+
+		if (this.model.id !== 'toc') {
+			// update model status
+			this.model.fetchStatus();
+		}
+
+		// return to view mode
+		this.viewMode();
+
+		this.trigger('attachment-save', {
+			model: this.model
+		});
+	},
+
+	/**
+	 * Save the current values to the model.
+	 */
+	save: function() {
+		// save changes to model.
+		var file = this.$el.find('input.file-name').val(), page = this.$el.find('input.page-name').val();
+
+		// call this towards the end so re-rendering is not triggered.
+		this.model.set({
+			filename: file,
+			title: page
+		});
+	},
+
+	/**
+	 * 
+	 */
+	onUndoClick: function(event) {
+		this.editMode();
+	}
+}, {
+	/* hashmap of template functions */
+	template: {}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/view/AttachmentView.js' */
+var $ = jQuery, AttachmentView = Backbone.View.extend({
+	Renderer: undefined,
+
+	// list of renderers
+	children: [],
+
+	// for drag and drop.
+	startIndex: undefined,
+
+	initialize: function(options) {
+		// make list sortable/drag and drop reording.
+		this.$el.sortable({
+			revert: true,
+			axis: 'y',
+			placeholder: 'am-item-insert-highlight',
+			opacity: 0.7,
+			cancel: 'input,a',
+			start: $.proxy(this.onStartDrag, this),
+			stop: $.proxy(this.onStopDrag, this)
+		}).disableSelection();
+
+		// listen for collection reset and render collection of attachments
+		this.collection.on('reset', $.proxy(this.onCollectionReset, this)).on('remove', $.proxy(this.onCollectionRemove, this)).on('add', $.proxy(this.onCollectionAdd, this));
+	},
+
+	/**
+	 * Enable/disable automatic resizing. If true, size the component to be 100% width and 100% height.
+	 * 
+	 * @param enable
+	 *                True if the component should resize based on parent container.
+	 */
+	fullScreen: function(enable) {
+		// mark all child attachments as full screen mode.
+		_.invoke(this.children, 'fullScreen', enable);
+		this.isFullScreen = enable;
+	},
+
+	/**
+	 * @param event
+	 *                MouseEvent
+	 * @param object
+	 *                Object from the jQuery draggable plugin. Contains information about the element currently dragged.
+	 */
+	onStartDrag: function(event, object) {
+		// cache start index.
+		this.startIndex = object.item.index();
+	},
+
+	/**
+	 * @param event
+	 *                MouseEvent
+	 * @param object
+	 *                Object from the jQuery draggable plugin. Contains information about the element currently dragged.
+	 */
+	onStopDrag: function(event, object) {
+		var models = this.collection.models, stopIndex = object.item.index();
+
+		if (this.startIndex !== stopIndex) {
+			// swap models around and trigger reset.
+			models.splice(stopIndex, 0, models.splice(this.startIndex, 1).pop());
+			this.collection.reset(models);
+		}
+
+		this.startIndex = undefined;
+	},
+
+	/**
+	 * Hide all attachment options until the edited attachment is saved or canceled.
+	 * 
+	 * @param event
+	 *                The event containing the model/options for the attachment edit.
+	 */
+	onAttachmentEdit: function(event) {
+		// hide all option buttons until this attachment is saved.
+		// commenting out (for now)
+		// this.$el.find('.column.options').css('visibility', 'hidden');
+	},
+
+	/**
+	 * Display all attachment options after save or cancel operation.
+	 * 
+	 * @param event
+	 *                The event containing the model/options for the attachment save/cancel.
+	 */
+	onAttachmentSave: function(event) {
+		// show all option buttons -- attachment saved.
+		this.$el.find('.column.options').css('visibility', 'visible');
+	},
+
+	/**
+	 * Call save on all attachments.
+	 */
+	save: function() {
+		_.each(this.children, function(child) {
+			if (!child.isViewMode()) {
+				// save values.
+				child.save();
+			}
+		});
+	},
+
+	render: function() {
+		this._removeAllViews();
+
+		// listen for collection reset and render collection of attachments
+		this.collection.each(this.createAttachment, this);
+
+		return this;
+	},
+
+	/**
+	 * Cleanup view.
+	 */
+	remove: function() {
+		// cleanup event listeners
+		this._removeAllViews();
+		this.collection.off();
+
+		Backbone.View.prototype.remove.apply(this, arguments);
+	},
+
+	/**
+	 * All items in the collection removed. Rerender the list.
+	 * 
+	 * @param event
+	 */
+	onCollectionReset: function(event) {
+		this.render();
+	},
+
+	/**
+	 * @param model
+	 * @param collection
+	 * @param options
+	 */
+	onCollectionAdd: function(model, collection, options) {
+		// create an attachment renderer for this model.
+		this.createAttachment(model, options.index);
+	},
+
+	/**
+	 * Called when a model is removed from the collection. Will update the attachment view accordingly.
+	 * 
+	 * @param model
+	 * @param collection
+	 * @param options
+	 */
+	onCollectionRemove: function(model, collection, options) {
+		this.children[options.index].remove();
+		this.children.splice(options.index, 1);
+		this.render();
+	},
+
+	/**
+	 * Iterate through all the views and remove them.
+	 */
+	_removeAllViews: function() {
+		while (this.children.length) {
+			// while there are child attachment views, pop them off,
+			// removes them, and stops listening to all events.
+			this.children.pop().remove().off();
+		}
+	},
+
+	/**
+	 * Called for each attachment to render it.
+	 * 
+	 * @param attachment
+	 *                Model to render.
+	 * @param index
+	 *                Index the renderer should go in the list.
+	 * @return An AttachmentRenderer to display.
+	 */
+	createAttachment: function(attachment, index) {
+		var renderer = new this.Renderer({
+			isFullScreen: this.isFullScreen,
+			model: attachment
+		});
+
+		// listen for add/edit events
+		renderer.on('attachment-edit', $.proxy(this.onAttachmentEdit, this)).on('attachment-save', $.proxy(this.onAttachmentSave, this)).on('view-mode', $.proxy(this.onAttachmentView, this)).on('edit-mode', $.proxy(function(event) {
+			// disable drag and drop.
+			this.$el.sortable('disable');
+		}, this));
+
+		if (index < this.$el.children().length) {
+			// add element at specified index if it fits in the
+			// list.
+			this.children.splice(index, 0, renderer);
+			this.$el.children().eq(index).before(renderer.$el);
+		} else {
+			// create attachment renderer - append to end.
+			this.children.push(renderer);
+			this.$el.append(renderer.$el);
+		}
+
+		return renderer.render();
+	},
+
+	/**
+	 * Enable drag and drop.
+	 * 
+	 * @param event
+	 *                Edit event that triggered the call.
+	 */
+	onAttachmentView: function(event) {
+		// enable drag and drop.
+		this.$el.sortable('enable');
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/view/MDSComponent.js' */
+//Adding trim if it doesnt exist (IE8)
+if(typeof String.prototype.trim !== 'function') {
+  String.prototype.trim = function() {
+    return this.replace(/^\s+|\s+$/g, '');
+  }
+}
+
+var supportedFileExts = [".doc", ".docx", ".xls", ".xlsx", ".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".gif", ".wmf", ".ppt", ".pptx", ".pdf"];
+
+var MDSComponent = Backbone.View.extend({
+	AttachmentView: AttachmentView,
+
+	events: {
+		'click .document-assemble-buttons .add-all-word': 'onAddAllWordDocuments',
+		'click .document-assemble-buttons .add-all-supported': 'onAddAllSupportedDocuments',
+		'click .document-assemble-buttons .add-single-document': 'onAddSingleDocument',
+		'click .document-assemble-buttons .advanced-single-add': 'onAdvancedSingleAdd',
+		'click .document-assemble-buttons .advanced-edit': 'onAdvancedEdit'
+	},
+
+	// add button drop down menu
+	menu: undefined,
+
+	// download button reference
+	downloadButton: undefined,
+
+	// templates
+	attachments: undefined,
+
+	selectAttachmentDialog: undefined,
+
+	initialize: function(options) {
+		// note: there is a strange issue with this current version of
+		// _.template where it's not replacing \t characters and the
+		// template will not compile -- replacing \t
+		// characters is required.
+
+		// render and append the HTML template.
+		this.$el.html(_.template($('#document-assemble-component').html().replace(/\t/g, ''), _.extend(this.model.attributes, {
+			mode: options.mode
+		})));
+
+		// listen for collection size change to disable/enable download button.
+		this.model.get('attachments').on('reset', $.proxy(this.onCollectionSizeChange, this)).on('add', $.proxy(this.onCollectionSizeChange, this)).on('remove', $.proxy(this.onCollectionSizeChange, this));
+
+		// create jquery buttons
+		this.setupButtonLabelLink();
+		this.setupDownloadButton();
+		this.setupAddButton();
+		this.setupClearButton();
+	},
+
+	/**
+	 * Listen for add/remove/reset events from the collection and enable/disable the download button accordingly.
+	 * 
+	 * @param event
+	 */
+	onCollectionSizeChange: function(event) {
+		if (this.model.get('attachments').length === 0 || this.model.isNew()) {
+			// disable download button if there are no attachments.
+			this.downloadButton.button('disable');
+		} else {
+			// enable download button if there are no attachments.
+			this.downloadButton.button('enable');
+		}
+	},
+
+	/**
+	 * Render the DocumentAssembleComponent based on the specified DocumentAssembly model.
+	 */
+	render: function() {
+		// attachment controller - render list of attachments
+		this.attachments = new this.AttachmentView({
+			el: this.$el.find('.document-assemble-attachments .am-item-list'),
+			collection: this.model.get('attachments')
+		}).render();
+
+		// load model data into form
+		this.populateData(this.model);
+
+		// start with standard settings.
+		this.standardSettings();
+
+		return this;
+	},
+
+	/**
+	 * @return True if the component is in other settings mode, otherwise false.
+	 */
+	isOtherSettingsMode: function() {
+		return this.$el.find('.other-settings').is(':visible');
+	},
+
+	/**
+	 * @return True if the component is in advanced add/edit mode, otherwise false.
+	 */
+	isAdvancedMode: function() {
+		return this.$el.find('.advanced-add-edit').is(':visible');
+	},
+
+	/**
+	 * Display the other settings page.
+	 */
+	otherSettings: function() {
+		// show correct panel.
+		this.$el.find('.advanced-add-edit').hide();
+		this.$el.find('.other-settings').show();
+		this.$el.find('.standard-settings').hide();
+
+		// populate button field with model value.
+		this.$el.find('input.button-label').val(this.model.get('buttonLabel'));
+
+		// trigger mode event.
+		this.trigger('mode', 'other');
+	},
+
+	/**
+	 * Display the standard settings page.
+	 * 
+	 * @param save
+	 *                True if the other settings page should save, otherwise false.
+	 */
+	standardSettings: function(save) {
+		if (save && this.isAdvancedMode()) {
+			// generate models from the advanced text.
+			this.model.get('attachments').advancedModels(this.$el.find('textarea.advanced-add').val());
+		} else if (save && this.isOtherSettingsMode()) {
+			this.model.set({
+				buttonLabel: this.$el.find('input.button-label').val()
+			});
+		}
+
+		// show correct panel.
+		this.$el.find('.advanced-add-edit').hide();
+		this.$el.find('.other-settings').hide();
+		this.$el.find('.standard-settings').show();
+
+		// trigger mode event.
+		this.trigger('mode', 'standard');
+	},
+
+	/**
+	 * 
+	 */
+	advancedSettings: function() {
+		// show correct panel
+		this.$el.find('.advanced-add-edit').show();
+		this.$el.find('.other-settings').hide();
+		this.$el.find('.standard-settings').hide();
+
+		// load attachment text into the text area.
+		this.$el.find('textarea.advanced-add').val(this.model.get('attachments').advancedText());
+
+		// trigger mode event.
+		this.trigger('mode', 'advanced');
+	},
+
+	_getAddAllDocuments: function(event, includeAll, finalCallback, pageId) {
+		var includeSpreadsheets = includeAll;
+		var that = this;
+
+		$.ajax({
+			type: 'GET',
+			url: '/pages/getallpagedocuments.action?convertToBackbone=true',
+			data: {
+				pageId: pageId,
+				includeSpreadsheets: includeSpreadsheets
+			},
+			dataType: 'json',
+			complete: function(jqXHR, textStatus){
+				that.onGetAllDocumentsResponse(jqXHR, textStatus, finalCallback, that);
+			}
+			
+		});
+
+		// hide the drop down menu.
+		this.menu.hide();
+
+		return false;
+	},
+
+	/**
+	 * Called when the user clicks the add all word documents button.
+	 * 
+	 * @param event
+	 *                MouseEvent triggered from the button click.
+	 */
+	onAddAllWordDocuments: function(event) {
+		return this._getAddAllDocuments(event, false, this.addToDocList, this.model.get('pageId'));
+	},
+
+	/**
+	 * Called when the user clicks the add all supported documents button.
+	 * 
+	 * @param event
+	 *                MouseEvent triggered from the button click.
+	 */
+	onAddAllSupportedDocuments: function(event) {
+		return this._getAddAllDocuments(event, true, this.addToDocList, this.model.get('pageId'));
+	},
+	
+	/**
+	 * Called when the user clicks the add single document button.
+	 * 
+	 * @param event
+	 *                MouseEvent triggered from the button click.
+	 */
+	onAddSingleDocument: function(event) {
+		if (typeof this.selectAttachmentDialog == 'undefined') {
+			this.selectAttachmentDialog = this._initAttachementDialog(this);
+		}
+
+		//Clear selected attachment
+		$('#select-attachment-dialog .selected-file-name').html("");
+		this.selectAttachmentDialog.selectedAttachment = null;
+
+		//Set loading text
+		$('#page-attachments-panel-list-target').html("Loading...");
+
+		//Get this page's attachments
+		this._getAddAllDocuments(event, true, this._loadPageAttachmentsPanel, this.model.get('pageId'));
+
+		this.selectAttachmentDialog.gotoPage(0);
+    	this.selectAttachmentDialog.gotoPanel(0);
+   	 	this.selectAttachmentDialog.show();
+	},
+
+	onAdvancedSingleAdd: function(event){
+		var thisSpaceKey = $('meta[name=ajs-space-key]').first().attr('content');
+		var blankDoc = {
+			fileName: "", 
+			include: true, 
+			pageId: 0, 
+			pageTitle: "", 
+			spaceKey: thisSpaceKey,
+			lastModDate: null,
+			lastModifierEmail: null,
+			lastModifierFullName: null,
+			comment: null,
+			statusCode: "1" //Set to page does not exist at first (will update when props changes)	
+		};
+		this.addToDocList(this, true, blankDoc)
+	},
+
+	onAdvancedEdit: function(event){
+		this.advancedSettings();
+	},
+
+	createAttachmentsTable: function(context, docs) {
+		var table = $('<table class="aui"></table>');
+		var tableHead = _.template(jQuery('#document-assembly-page-attachments-header').html().replace(/\t/g, ''), docs);
+		jQuery(table).append(tableHead);
+
+		var tableBody = $('<tbody></tbody>');
+
+		_.each(docs, function(doc, i) {
+			//Set the panel this table is on to pass to the template
+			doc.panel=docs.panel;
+			var row = _.template(jQuery('#document-assembly-page-attachments-row').html().replace(/\t/g, ''), doc);
+			var rowAdded = jQuery(row).appendTo(tableBody);
+
+			$(rowAdded).click([doc, context], function(event) {
+				//Change selected to current element
+				$('#select-attachment-dialog .attachment-row.selected').removeClass("selected");
+				$(event.currentTarget).addClass("selected");
+				context.updateSelectAttachment(doc);
+
+				//Return false to prevent following links
+				return false;
+			});
+
+			//Set double click on a file to select and close dialog
+			$(rowAdded).dblclick([doc, context], function(event) {
+				$(event.currentTarget).click();
+				$('#select-attachment-dialog .button-panel-submit-button').click();
+			});
+
+		});
+
+		//Insert table body
+		jQuery(table).append(tableBody);
+		return table;
+	},
+	
+	/**
+	 * Accepts the supported assembly docs from the page and loads the dialog panel
+	 * 
+	 * @param context
+	 * @param hasDocs
+	 *               Boolean value whether there are supported docs
+	 * @param docs
+	 *               Supported docs on page.
+	 */
+	_loadPageAttachmentsPanel : function(context, hasDocs, docs){
+		if(hasDocs) {
+			//Set panel name to pass to template
+			docs.panel = "pageAttachments";
+			var docTable = context.createAttachmentsTable(context, docs);
+
+			//Replace loading placeholder with data
+			$('#page-attachments-panel-list-target').html(docTable);
+		}
+		else {
+			$('#page-attachments-panel-list-target').html("<div>No supported documents found.</div>");
+		}
+	},
+
+	/**
+	 * Accepts the supported assembly docs from the page and loads the page search panel
+	 * 
+	 * @param context
+	 * @param hasDocs
+	 *               Boolean value whether there are supported docs
+	 * @param docs
+	 *               Supported docs on page.
+	 */
+	_loadPageSearchAttachments : function(context, hasDocs, docs){
+		if(hasDocs) {
+			docs.panel = "pageSearch";
+			var docTable = context.createAttachmentsTable(context, docs);
+
+			//Replace loading placeholder with data
+			jQuery('#page-search-panel-list-target').html(docTable);
+		}
+		else {
+			$('#page-search-panel-list-target').html("<div>No supported documents found.</div>")
+		}
+	},
+
+	updateSelectAttachment: function(doc) {
+		this.selectAttachmentDialog.selectedAttachment = doc;
+		var nameText = doc.fileName;
+		if(nameText.length >= 50) {
+			nameText = nameText.substring(0, 45) + "...";
+		}
+		$('#select-attachment-dialog .selected-file-panel .selected-file-name').text(nameText).removeClass("error");
+	},
+
+
+	_initAttachementDialog: function(context) {
+		//Will likley need updated to use dialog2 in future Confluence version. -AWP
+
+		var dialogWidth = 840;
+		var dialogHeight = 590;
+
+		var dialog = AJS.ConfluenceDialog({
+            width : dialogWidth,
+            height: dialogHeight,
+            id: "select-attachment-dialog"
+		});
+
+		//Get panel shells from temapltes
+		var pagePanel =  _.template(jQuery('#document-assembly-page-attachments-panel').html().replace(/\t/g, ''))();
+		var fileSearchPanel = _.template(jQuery('#document-assembly-file-search-panel').html().replace(/\t/g, ''))();
+		var pageSearchPanel = _.template(jQuery('#document-assembly-page-search-panel').html().replace(/\t/g, ''))();
+
+		//Add header and panels to dialog
+		dialog.addHeader("Add File");
+		dialog.addPanel("Page Attachments", pagePanel, "page-attachments");
+		dialog.addPanel("Search by Filename", fileSearchPanel, "file-search");
+		dialog.addPanel("Search by Page", pageSearchPanel, "page-search");
+
+		dialog.context = context;
+
+		dialog.addSubmit("Add Attachment", function (dialog) {
+	    	var selectedDoc = dialog.context.selectAttachmentDialog.selectedAttachment;
+	    	if(selectedDoc !== null){
+		    	dialog.context.addToDocList(dialog.context, true, [selectedDoc]);
+		   	 	dialog.hide();
+		    	return true;
+		    }
+		    else{
+		    	console.log("Error: select file.")
+		    	$('#select-attachment-dialog .selected-file-panel .selected-file-name').html("<b>Please select a file to add</b>").addClass("error");
+		    }
+		});
+
+		dialog.addLink("Cancel", function (dialog) {
+	   	 dialog.hide();
+		}, "#");
+
+		//Add selected file panel
+		var selectedFilePanel = "<div class='selected-file-panel'><b>Selected File: </b><span class='selected-file-name'></span></div>"
+		$('#select-attachment-dialog .dialog-button-panel').prepend(selectedFilePanel);
+
+		//get spacekey
+		var spaceKey = $('meta[name=ajs-space-key]').first().attr('content');
+
+		//Set up listeners for search
+		$('#doc-assemble-page-search-query').autocomplete({
+			minLength: 2,
+			source : function(request, response) {
+				$.ajax({
+					type: 'GET',
+					url: '/ajax/sitesearch.action',
+					data: {
+						queryString: "((title:"+request.term.trim()+"*) AND type:page AND (spacekey:"+spaceKey+"))"
+					},
+					dataType: 'json',
+					complete: function(jqXHR, textStatus){
+						var resultList = [];
+
+						var searchResponse = $.parseJSON(jqXHR.responseText);
+						if(searchResponse.fieldErrors) {
+							//Error returned
+							console.log("Error: " + searchResponse.fieldErrors.queryString);
+							resultList.push({label: searchResponse.fieldErrors.queryString, value: response.term, hasNone: true, hasError: true});
+						}
+						else {
+							resultList = searchResponse.customResults;
+							if(resultList.length > 0) {
+								//Add label and value to returned docs to display in autocomplete
+								_.each(resultList, function(page, i){
+									page.label = page.title;
+									page.value = page.title; 
+								});
+							}
+							else {
+								resultList.push({label: 'No pages found', value: response.term, hasNone: true, hasError: false});
+							}
+						}
+					response(resultList);
+					}			
+				});
+			},
+			open: function () {
+        		$(this).data("autocomplete").menu.element.addClass("page-search-autocomplete-list").css("max-width", "535px");
+    		},
+			select : $.proxy(function(event, ui){
+	 			this._getAddAllDocuments(event, true, this._loadPageSearchAttachments, ui.item.id);
+	 			$('#doc-assemble-page-search-query').val(ui.item.label);
+				return false;
+			}, context)
+		}).data( "autocomplete" )._renderItem = function(ul, item) {
+				var listItem;
+				if(!item.hasNone) {
+					listItem =_.template($('#document-assembly-page-search-results-entry').html().replace(/\t/g, ''), item);
+				}
+				else if(item.hasError) {
+					listItem = $("<li class='invalid=search-li'>"+item.label+"</li>");
+				}
+				else{
+					listItem = $("<li class='no=pages-found-li'>No pages found</li>");
+				}
+				return $(listItem).appendTo(ul).data("item.autocomplete", item);
+		};
+
+		var fileSearchInput = $('#doc-assemble-file-search-query');
+		$(fileSearchInput).keyup($.proxy(function(event) {
+			var context = this;
+			var input = $(fileSearchInput).val();
+			if(input.length > 1){
+				context.searchAttachments(input, spaceKey, fileSearchInput);
+			}
+			//If or less chars, clear results list
+			else {
+				jQuery('#file-search-panel-list-target').html("");
+			}
+		}, context));
+
+		//File search state variables (to only accept most recent search)
+		dialog.fileSearchRequestIndex = 0;
+		dialog.currentFileSearch;
+
+		return dialog;
+	},
+
+	/**
+	 * Handle response to Download All Assemble Docs Note: this was copied from the soon-to-be-legacy Document Assemble functionality. The backend should be modified/rewritten to not return 200s
+	 * that are actually errors.
+	 * 
+	 * @param jqXHR
+	 * @param textStatus
+	 * @returns {boolean}
+	 */
+	_onGetDownloadAllResponse: function(jqXHR, textStatus) {
+		if (jqXHR.status == 200) { // Success
+
+			var rpcJsonResponse = JSON.parse(jqXHR.responseText);
+			console.log(rpcJsonResponse);
+			// check for error
+			if (rpcJsonResponse.error) {
+				var dialog = jQuery("<div></div>");
+				var dialogConfig = new JQUERYUI_DIALOG_ERROR_HASH;
+				var p = jQuery("<p></p>");
+
+				dialogConfig.title = "Error has occured";
+				dialogConfig.buttons.OK = function() {
+					jQuery(this).dialog("destroy");
+				};
+
+				dialogConfig.height = 300
+				dialogConfig.width = 450
+
+				p.text("Please try your request again. If this problem persists, please contact MAX Support.");
+				console.error(rpcJsonResponse.errorMessage);
+				dialog.append(p);
+				dialog.dialog(dialogConfig);
+				return false;
+			}
+
+			if (rpcJsonResponse.finalDocumentPath) {
+				window.location = rpcJsonResponse.finalDocumentPath;
+			}
+		} else if (jqXHR.status == 500) { // Server Error
+			alert("A server error has occurred.");
+		} else if (jqXHR.readyState == 4 && (jqXHR.status == 0 || jqXHR.status == 12017)) { // Session Timeout
+			alert("An error has occurred.");
+		} else { // Unknown Error
+			alert("An unknown error has occurred.");
+		}
+	},
+
+	/**
+	 * Handle the backend reply to add all Word documents.
+	 * 
+	 * @param jqXHR
+	 * @param textStatus
+	 * @param callback
+	 *					Function to call with final list of valid docs
+	 * @param context
+	 *					value for 'this' (replaces .proxy call)
+	 */
+	onGetAllDocumentsResponse: function(jqXHR, textStatus, callback, context) {
+		var rpcJsonResponse = JSON.parse(jqXHR.responseText);
+
+		// check for loss of session
+		if (rpcJsonResponse.errorMessage) {
+			alert('Your session has been lost due to inactivity, please refresh and try again.');
+			return false;
+		}
+
+		if (rpcJsonResponse.assembleDataObject.allPageDocuments && rpcJsonResponse.assembleDataObject.allPageDocuments.length) {
+			var assemblyDocs = rpcJsonResponse.assembleDataObject.allPageDocuments
+
+			//Moved to java action, only non-hidden files are returned (COP-3434) -AWP
+			// Determine which attachments are hidden - 4 is hidden.
+			/* var pageDocs = attachmentsDataObject.attachments, indexesToRemove = [];
+
+			_.each(assemblyDocs, function(record, i) {
+				// locate files.
+				attToInspect = _.where(pageDocs, {
+					title: record.fileName
+				})[0];
+
+				if (attToInspect.checkOutType === 4) {
+					indexesToRemove.push(i);
+				}
+			});
+
+			while (indexesToRemove.length) {
+				// remove hidden file.
+				assemblyDocs.splice(indexesToRemove.pop(), 1);
+			}*/
+			callback(context, true, assemblyDocs);
+
+		} else if (!rpcJsonResponse.assembleDataObject.allPageDocuments.length) {
+			// no "documents" found on page
+
+			//Moved to addToDocList to only occur when click "addAll" links -COP-3434
+			// alert('No valid documents attached to this page. Only *.doc and .docx Microsoft Word files are currently supported.');
+			callback(context, false, []);
+		} else {
+			alert('An error occured while loading the data.');
+		}
+	},
+
+	/**
+	 * Adds documents to the list to assemble
+	 * @param context
+	 * @param hasDocs
+	 *			Boolean whether there are supported docs to add.
+	 * @param docs
+	 *			Documents to add
+	 */
+	addToDocList: function(context, hasDocs, docs){
+		if(hasDocs) {
+			context.model.get('attachments').add(docs, {
+					parse: true
+			});
+		}
+		else {
+			alert('No valid documents attached to this page.');
+		}
+	},
+
+	 /**
+	 * Conducts search for attachments
+	 * @param query
+	 * 				The input search query
+	 * @param space
+	 * 				The space to search (currently only this one)
+	 * @param inputElement
+	 * 				Element input was entered
+	 */
+	 searchAttachments: function(query, space, inputElement) {
+	 	var thisRequestIndex = ++this.selectAttachmentDialog.fileSearchRequestIndex;
+	 	var context = this;
+
+	 	setTimeout(function() {
+		 	if(thisRequestIndex == context.selectAttachmentDialog.fileSearchRequestIndex) {
+		 		//If a file search is currently running, abort it
+			 	if(context.selectAttachmentDialog.currentFileSearch){
+			 		context.selectAttachmentDialog.currentFileSearch.abort();
+			 	}
+
+			 	//Form supported file list search query
+			 	var fileExtsString = supportedFileExts[0];
+			 	_.each(supportedFileExts, function(ext, i){
+			 		//Skip first one to properly place "OR"s
+			 		if (i!=0) fileExtsString += " OR " + ext;
+			 	});
+
+				 //Set currently running search
+				 context.selectAttachmentDialog.currentFileSearch = $.ajax({
+					type: 'GET',
+					url: '/ajax/sitesearch.action',
+					data: {
+						queryString: "((filename:"+query.trim()+"*(" + fileExtsString +")) AND type:attachment AND (spacekey:"+space+"))"
+					},
+					dataType: 'json',
+					success: function(jqXHR, textStatus){
+						//Only show most recent search, determined by index
+						if(thisRequestIndex == context.selectAttachmentDialog.fileSearchRequestIndex) {
+							//Check if error is returned
+							if(jqXHR.fieldErrors) {
+								//Error returned
+								console.log("Error: " + jqXHR.fieldErrors.queryString);
+								jQuery('#file-search-panel-list-target').html("<div class='file-search-error'>"+jqXHR.fieldErrors.queryString+"</div>");
+							}
+							else{
+								context.updateFileSearch(jqXHR, textStatus, context);
+							}
+							$(inputElement).removeClass('ui-autocomplete-loading');
+							context.selectAttachmentDialog.currentFileSearch = null;
+						}
+					}	
+				});
+				//Add loading class to input
+				$(inputElement).addClass('ui-autocomplete-loading');	
+			 }
+		 }, 300);
+	 },
+
+	/**
+	* Updates ui for page search results
+	*/
+	updateFileSearch: function(jqXHR, textStatus, context) {
+		// var response = $.parseJSON(jqXHR.responseText);
+		var docs = [];
+
+		if(jqXHR.customResults.length > 0) {
+			
+			//Create array of documents to match return of getalldoc action
+			_.each(jqXHR.customResults, function(doc, i){
+				docs.push(
+				{
+					fileName: doc.title, 
+					include: true, 
+					pageId: doc.extraFields.containingContentId, 
+					pageTitle: doc.extraFields.containingContentDisplayTitle, 
+					spaceKey: doc.spaceKey,
+					lastModDate: doc.date + ' ' + doc.dateAMPM,
+					lastModifierEmail: doc.lastModifier,
+					lastModifierFullName: null,
+					comment: null,
+					statusCode: 0 //I think we can assume 0 since the file exists to show up in search
+				})
+			});
+			docs.panel = "fileSearch";
+			var docTable = context.createAttachmentsTable(context, docs);
+
+			//Replace loading placeholder with data
+			jQuery('#file-search-panel-list-target').html(docTable);
+		}
+		else {
+			jQuery('#file-search-panel-list-target').html("<div>No documents found.</div");
+		}
+	 },
+
+
+	/**
+	 * Update models.
+	 */
+	save: function() {
+		if (this.attachments) {
+			// call save on the attachment view.
+			this.attachments.save();
+		}
+	},
+
+	/**
+	 * 
+	 */
+	setupClearButton: function() {
+		this.$el.find("a.am-button-clearall").button().click($.proxy(function(event) {
+			if (this.attachments.children.length) {
+				// there are attachments to remove.
+				this.onConfirmClear(event);
+			}
+
+			return false;
+		}, this));
+	},
+
+	/**
+	 * 
+	 */
+	onConfirmClear: function(event) {
+		var dialog = $('<div><p>Are you sure you want to clear all the attachments from the list?</p></div>'), context = this;
+
+		dialog.dialog({
+			buttons: [ {
+				text: 'Cancel',
+				click: function() {
+					// close.
+					$(this).dialog('close');
+				},
+			},
+			{
+				text: 'OK',
+				click: function() {
+					// close and reset
+					$(this).dialog('close');
+					context.model.get('attachments').reset();
+				}
+			} ],
+			closeOnEscape: false,
+			height: 200,
+			width: 400,
+			title: 'Clear Attachments?',
+			resizable: false
+		});
+	},
+
+	/**
+	 * Enable/disable automatic resizing. If true, size the component to be 100% width and 100% height.
+	 * 
+	 * @param enable
+	 *                True if the component should resize based on parent container.
+	 */
+	fullScreen: function(enable) {
+		this.isFullScreen = enable;
+
+		if (enable) {
+			// listen for window resize - update attachment view height. scroll to top of page.
+			$(window).resize($.proxy(this.onWindowResize, this));
+		} else {
+			// stop listening for window resizes
+			$(window).off('resize', this.onWindowResize);
+		}
+
+		if (this.attachments) {
+			// only call fullScreen if the attachment view is initialized.
+			this.attachments.fullScreen(enable);
+		}
+
+		this.updateSize();
+	},
+
+	/**
+	 * @return Number indicating the height of the attachment list in pixels.
+	 */
+	attachmentListHeight: function() {
+		// dialogs aren't destroyed completely. assume the last dialog in the stack is the most recent.
+		// subtract pixels for common header/footer content.
+		return $('.configure-mds-dialog').last().height() - 150;
+	},
+
+	/**
+	 * Update the size of the component element.
+	 */
+	updateSize: function() {
+		var columns = this.$el.find('.document-assemble-attachments .document-assemble-headers .column'), value = (this.$el.width() - 250);
+
+		// resize the document attachment window
+		this.$el.find('.document-assemble-attachments').height(this.attachmentListHeight() + 'px');
+
+		if (this.isFullScreen) {
+			// split the width in half.
+			this.$el.find('.document-assemble-headers .column.file-name').width((value / 2) + 'px');
+			this.$el.find('.document-assemble-headers .column.toc-entry').width((value / 2) + 'px');
+		} else {
+			// reset
+			this.$el.find('.document-assemble-headers .column.file-name').width('230px');
+			this.$el.find('.document-assemble-headers .column.toc-entry').width('250px');
+		}
+	},
+
+	/**
+	 * Called when the window is resized and full screen mode is enabled.
+	 * 
+	 * @param event
+	 *                Window resize event.
+	 */
+	onWindowResize: function(event) {
+		this.updateSize();
+	},
+
+	setupButtonLabelLink: function() {
+		var link = $('<a class="edit-button-label" href="#" onclick="return false;">Change Button Label</a>');
+
+		$('.ui-dialog-buttonset').prepend(link);
+
+		link.click($.proxy(function() {
+			// switch to other settings view and hide the other settings button.
+			this.otherSettings();
+			link.hide();
+		}, this));
+	},
+	/**
+	 * Create the download all button
+	 */
+	setupDownloadButton: function() {
+		// the download button is disabled if the model is new or there are no attachments.
+		$('.ui-dialog-buttonset').prepend('<button class="download-all" title="Download All Files"><span></span>&nbsp;</button>');
+
+		this.downloadButton = $('.ui-dialog-buttonset').find('.download-all').button({
+			text: false,
+			icons: {
+				primary: 'ui-icon-arrowthickstop-1-s'
+			}
+		}).click($.proxy(this.downloadFiles, this));
+
+		if (this.model.isNew() || this.model.isEmpty()) {
+			// disable download button if the model does not exist on the b/e.
+			this.downloadButton.button('disable');
+		}
+	},
+
+	/**
+	 * Create the add file drop down button.
+	 */
+	setupAddButton: function() {
+		var callback = $.proxy(this.onDisplayAddFileMenu, this);
+
+		this.$el.find('#add-file').button().click(callback).next().button({
+			text: false,
+			icons: {
+				primary: 'ui-icon-triangle-1-s'
+			}
+		}).click(callback).parent().buttonset().next().hide().menu();
+	},
+
+	/**
+	 * Triggers an AJAX call to download the associated MDS files.
+	 * 
+	 * @return False to prevent any mouse event action.
+	 */
+	downloadFiles: function() {
+		if (!this.model.isNew() && !this.model.isEmpty()) {
+			// download all is available only on edits!
+			$.ajax({
+				type: 'GET',
+				url: '/ajax/downloadallassemble.action',
+				data: {
+					pageId: this.model.get('pageId'),
+					id: this.model.get('id')
+				},
+				dataType: 'json',
+				complete: this._onGetDownloadAllResponse
+			});
+		}
+
+		return false;
+	},
+
+	/**
+	 * Display the add file menu.
+	 * 
+	 * @param event
+	 *                MouseEvent which triggered the function call.
+	 */
+	onDisplayAddFileMenu: function(event) {
+		this.menu = $(event.currentTarget).parent().next().show();
+
+		$(document).one('click', $.proxy(function() {
+			// hide the menu
+			this.menu.hide();
+		}, this));
+
+		return false;
+	},
+
+	/**
+	 * @param model
+	 */
+	populateData: function(model) {
+		// load model values.
+	}
+}, {
+	spinner: function spinner(holderid, R1, R2, count, stroke_width, colour) {
+		var sectorsCount = count || 12, color = colour || "#fff", width = stroke_width || 15, r1 = Math.min(R1, R2) || 35, r2 = Math.max(R1, R2) || 60, cx = r2 + width, cy = r2 + width, r = Raphael(holderid, r2 * 2 + width * 2, r2 * 2 + width * 2),
+
+		sectors = [], opacity = [], beta = 2 * Math.PI / sectorsCount,
+
+		pathParams = {
+			stroke: color,
+			"stroke-width": width,
+			"stroke-linecap": "round"
+		};
+		Raphael.getColor.reset();
+		for (var i = 0; i < sectorsCount; i++) {
+			var alpha = beta * i - Math.PI / 2, cos = Math.cos(alpha), sin = Math.sin(alpha);
+			opacity[i] = 1 / sectorsCount * i;
+			sectors[i] = r.path([ [ "M", cx + r1 * cos, cy + r1 * sin ], [ "L", cx + r2 * cos, cy + r2 * sin ] ]).attr(pathParams);
+			if (color == "rainbow") {
+				sectors[i].attr("stroke", Raphael.getColor());
+			}
+		}
+		var tick;
+		(function ticker() {
+			opacity.unshift(opacity.pop());
+			for (var i = 0; i < sectorsCount; i++) {
+				sectors[i].attr("opacity", opacity[i]);
+			}
+			r.safari();
+			tick = setTimeout(ticker, 1000 / sectorsCount);
+		})();
+		return function() {
+			clearTimeout(tick);
+			r.remove();
+		};
+	}
+});
+
+/* Utility function originally used to validate search input*/
+// var isValidSearchTerm = function(term) {
+// 	var validCharsRegex = /^([A-Za-z\s0-9\._()])*$/;
+// 	return validCharsRegex.test(term);
+// }
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/view/assemble/TOCView.js' */
+var TOCView = Backbone.View.extend({
+	tagName: 'li',
+	className: 'toc-item',
+
+	events: {
+		'click .delete-button.toc': 'onDeleteClick'
+	},
+
+	initialize: function() {
+		if (!TOCView.template) {
+			// define only a single template function. performing
+			// this in initialize since the template
+			// isn't loaded into the web browser when this file is
+			// loaded (todo: look into that).
+			TOCView.template = _.template($('#document-assemble-attachment-toc-renderer').html().replace(/\t/g, ''));
+		}
+	},
+
+	render: function() {
+		this.$el.html(TOCView.template(this.model.attributes));
+		this.$el.find('.attachment-heading-renderer').val(this.model.get('headingLevel'));
+		this.$el.find('.toc-header-title').val(this.model.get('headingText'));
+		return this;
+	},
+
+	/**
+	 * @return True if the level if the configuration is valid, otherwise false.
+	 */
+	validateLevel: function() {
+		var level = parseInt(this.$el.find('.attachment-heading-renderer').val(), 10);
+
+		if (level < 1 || level > 2) {
+			return false;
+		}
+
+		return true;
+	},
+
+	/**
+	 * Update the TOC model with user entered values.
+	 */
+	save: function() {
+		// update the TOC model with form values.
+		this.model.set({
+			headingLevel: this.$el.find('.attachment-heading-renderer').val(),
+			headingText: this.$el.find('.toc-header-title').val()
+		});
+	},
+
+	/**
+	 * Remove the model from the collection.
+	 * 
+	 * @param event
+	 *                MouseEvent from clicking on the delete button.
+	 */
+	onDeleteClick: function(event) {
+		// remove the model from the collection.
+		this.model.collection.remove(this.model);
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/view/assemble/AssembleAttachmentRenderer.js' */
+var AssembleAttachmentRenderer = AttachmentRenderer.extend({
+	templateID: '#document-assemble-attachment-renderer',
+
+	// used to store the original TOC list in case user cancels changes.
+	originalTOCList: undefined,
+	children: undefined,
+
+	tocAddButton: undefined,
+	tocHeadingList: undefined,
+
+	events: _.extend({
+		'click .add-toc-heading': 'onAddTOCClick'
+	}, AttachmentRenderer.prototype.events),
+
+	initialize: function() {
+		var tocList = this.model.get('tocList');
+
+		AttachmentRenderer.prototype.initialize.apply(this, arguments);
+
+		// instantiate array
+		this.children = [];
+
+		// listen for new TOC items to be added or removed from list and
+		// model attribute changes.
+		this.model.on('change', this.render, this);
+		tocList.on('add', this.onTOCAdd, this);
+		tocList.on('remove', this.onTOCRemove, this);
+	},
+
+	updateSize: function() {
+		var value;
+		
+		if (!this.isFullScreen) {
+			// static column widths!
+			this.$el.find('.column.attachment-edit').width('605px');
+			this.$el.find('.column.file-name').width('230px');
+			this.$el.find('.column.toc-entry').width('250px');
+			return;
+		}
+
+		value = this._leftoverColumnWidth();
+		
+		// two columns
+		this.$el.find('.column.file-name').width(Math.floor(value / 2) - 10 + 'px');
+		this.$el.find('.column.toc-entry').width(Math.floor(value / 2) - 10 + 'px');
+		
+		AttachmentRenderer.prototype.updateSize.apply(this, arguments);
+	},
+	
+	/**
+	 * Include TOC views in cleanup.
+	 */
+	remove: function() {
+		var tocList = this.model.get('tocList');
+
+		// cleanup all child TOC views.
+		this.model.off('change', this.render);
+		tocList.off('add', this.onTOCAdd);
+		tocList.off('remove', this.onTOCRemove);
+
+		this._removeAllChildren();
+
+		return AttachmentRenderer.prototype.remove.apply(this, arguments);
+	},
+
+	render: function() {
+		// cleanup all child TOC views.
+		this._removeAllChildren();
+
+		AttachmentRenderer.prototype.render.apply(this, arguments);
+
+		// find commonly used elements.
+		this.tocHeadingList = this.$el.find('.toc-heading-list');
+		this.tocAddButton = this.$el.find('.add-toc-heading');
+
+		return this;
+	},
+
+	/**
+	 * 
+	 */
+	onUndoClick: function(event) {
+		// return to view mode - revert TOC list to original list.
+		this.model.get('tocList').reset(this.originalTOCList);
+		this.originalTOCList = undefined;
+		AttachmentRenderer.prototype.onUndoClick.apply(this, arguments);
+	},
+
+	/**
+	 * 
+	 */
+	save: function() {
+		this.originalTOCList = undefined;
+
+		if (_.filter(this.children, function(view) {
+			// return a list of invalid TOC views.
+			return !view.validateLevel();
+		}).length) {
+			// error condition - do not continue to save.
+			alert("Your TOC Level is not 1 or 2.");
+			return;
+		}
+
+		// update TOC models.
+		_.invoke(this.children, 'save');
+
+		// super call
+		AttachmentRenderer.prototype.save.apply(this, arguments);
+	},
+
+	/**
+	 * Place renderer into edit mode.
+	 */
+	editMode: function() {
+		this._removeAllChildren();
+
+		AttachmentRenderer.prototype.editMode.apply(this, arguments);
+
+		this.$el.find('input.file-name').val(this.model.get('filename'));
+		this.$el.find('input.page-name').val(this.model.get('title'));
+
+		// store the original list of TOC element so this may be undone.
+		this.originalTOCList = this.model.get('tocList').models.concat();
+
+		// build TOC heading list.
+		_.each(this.originalTOCList, function(model, index) {
+			// call method to create TOC view.
+			this.addTOCView(model, this.children, this.tocHeadingList);
+		}, this);
+	},
+
+	/**
+	 * Create and append the TOC header view to an element.
+	 * 
+	 * @param model
+	 *                The model to create a TOCView for.
+	 * @param siblings
+	 *                An array to hold the ordered list of sibling views.
+	 * @param element
+	 *                The element to append the TOC view to.
+	 */
+	addTOCView: function(model, siblings, element) {
+		var view = new TOCView({
+			model: model
+		});
+
+		// add to element, store reference in sibling array.
+		siblings.push(view);
+		element.append(view.render().$el);
+	},
+
+	/**
+	 * Remove all the child TOC views.
+	 */
+	_removeAllChildren: function() {
+		while (this.children.length) {
+			// ensure there aren't any TOC views when entering view
+			// mode -- these are rendered when entering edit mode.
+			this.children.pop().remove();
+		}
+	},
+
+	/**
+	 * Create a TOC heading view.
+	 * 
+	 * @param event
+	 *                MouseEvent from the user's click on the add TOC heading button.
+	 */
+	onAddTOCClick: function(event) {
+		// add new model to the list.
+		this.model.get('tocList').add(new TOCEntry());
+	},
+
+	/**
+	 * Remove the view from the renderer since it has been removed from the list.
+	 * 
+	 * @param model
+	 * @param collection
+	 * @param options
+	 */
+	onTOCRemove: function(model, collection, options) {
+		// splice out of array too.
+		this.children[options.index].remove();
+		this.children.splice(options.index, 1);
+	},
+
+	/**
+	 * Listen for models to be added to the TOC list, and when a model is added instantiate a new TOC view and append to renderer.
+	 * 
+	 * @param model
+	 * @param collection
+	 * @param options
+	 */
+	onTOCAdd: function(model, collection, options) {
+		if (this.isViewMode()) {
+			// update view mode renderer - toc list has new element.
+			this.render();
+		} else {
+			// call method to create TOC view.
+			this.addTOCView(model, this.children, this.tocHeadingList);
+		}
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/view/assemble/AssembleAttachmentView.js' */
+var AssembleAttachmentView = AttachmentView.extend({
+	Renderer: AssembleAttachmentRenderer,
+
+	onCollectionAdd: function(event) {
+		AttachmentView.prototype.onCollectionAdd.apply(this, arguments);
+
+		// show/hide TOC section.
+		this.renderTOCSection();
+	},
+
+	onCollectionRemove: function(event) {
+		AttachmentView.prototype.onCollectionRemove.apply(this, arguments);
+
+		// show/hide TOC section.
+		this.renderTOCSection();
+	},
+
+	onAttachmentView: function(event) {
+		AttachmentView.prototype.onAttachmentView.apply(this, arguments);
+
+		// show/hide TOC section.
+		this.renderTOCSection();
+	},
+
+	render: function() {
+		AttachmentView.prototype.render.apply(this, arguments);
+
+		// show/hide TOC section.
+		this.renderTOCSection();
+
+		return this;
+	},
+
+	/**
+	 * 
+	 */
+	renderTOCSection: function() {
+		var hide = this.collection.get('toc') === undefined;
+
+		if (hide) {
+			this.collection.each(function(model) {
+				// clear out all Table of Contents headers
+				model.get('tocList').reset();
+			});
+
+			// TOC not enabled. Do not display applicable sections.
+			$('.toc-entry').css('visibility', 'hidden');
+			$('.toc-edit-entry').hide();
+		} else {
+			// TOC enabled. Display applicable sections.
+			$('.toc-entry').css('visibility', 'visible');
+			$('.toc-edit-entry').show();
+		}
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/view/assemble/AssembleComponent.js' */
+var AssembleComponent = MDSComponent.extend({
+	AttachmentView: AssembleAttachmentView,
+
+	events: _.extend({
+		'change select[name=export-file-type]': 'onExportTypeChange',
+		'change .pdf-include-table-of-contents': 'onIncludeTableOfContents',
+		'change .pdf-include-page-numbers': 'onIncludePageNumbersChange',
+		'change input[name=page-orientation]': 'renderAside',
+		'change .track-changes': 'renderAside',
+		'change #add-watermark-checkbox': 'onAddWatermarkChange'
+	}, MDSComponent.prototype.events),
+
+	// pdf options
+	startPageNumberAt: undefined,
+	startPageCount: undefined,
+	tocTitle: undefined,
+
+	initialize: function() {
+		MDSComponent.prototype.initialize.apply(this, arguments);
+
+		// pdf
+		this.startPageNumberAt = this.$el.find('.start-page-number-at');
+		this.startPageCount = this.$el.find('.start-page-count');
+	},
+
+	renderAside: function() {
+		var documentSettings = this.$el.find('input[name=page-orientation]:checked').next().text(), result = [];
+
+		result.push(documentSettings);
+
+		if (this.$el.find('input.track-changes').is(':checked')) {
+			// append text to indicate changes are tracked.
+			result.push('Track Changes');
+		}
+
+		this.$el.find('.document-settings > h2 > span').text('(' + result.join(', ') + ')');
+
+		result = [];
+
+		if (this.$el.find('.pdf-include-page-numbers').is(':checked')) {
+			// append text indicating print page numbers is checked.
+			result.push('Print Page Numbers')
+		}
+
+		if (this.$el.find('.pdf-include-table-of-contents').is(':checked')) {
+			// append text indicating table of contents is checked.
+			result.push('Generate Table of Contents');
+		}
+
+
+		if (this.$el.find('input.add-watermark-checkbox').is(':checked')) {
+			result.push('Watermark');
+		}
+
+		this.pdf().find('> h2 > span').text(result.length ? '(' + result.join(', ') + ')' : '');
+	},
+
+	render: function() {
+		MDSComponent.prototype.render.apply(this, arguments);
+		
+		// Remove advanced edit for doc assemble (replaced with add single advanced option)
+		// this.$el.parents('.configure-mds-dialog').find('#advanced-edit-button').remove();
+
+		// setup accordions
+		this.$el.find('.document-settings').accordion({
+			collapsible: true,
+			header: '> h2:first-child',
+			heightStyle: 'content',
+			active: false,
+			change: $.proxy(this.onAccordionActivate, this)
+		});
+
+		this.pdf().accordion({
+			collapsible: true,
+			header: '> h2',
+			heightStyle: 'content',
+			active: false,
+			change: $.proxy(this.onAccordionActivate, this)
+		});
+
+		this.renderAside();
+	},
+
+	/**
+	 * Called when the user expands or collapses an according and resizes the elements appropriately.
+	 */
+	onAccordionActivate: function(event, ui) {
+		this.updateSize();
+	},
+
+	onCollectionSizeChange: function(event) {
+		MDSComponent.prototype.onCollectionSizeChange.apply(this, arguments);
+
+		// update the table of contents setting based on if the TOC model is in the attachment list.
+		this.setIncludeTableOfContents(this.model.get('attachments').get('toc') !== undefined);
+	},
+
+	/**
+	 * Override from child. Include the accordion elements' heights.
+	 * 
+	 * @return Number indicating the height of the attachment list.
+	 */
+	attachmentListHeight: function() {
+		var pdfHeight;
+
+		if (!this.isFullScreen) {
+			// static height for non-full screen mode - 310px.
+			return 310;
+		}
+
+		// pdf height
+		pdfHeight = this.pdf().is(':visible') ? this.pdf().height() : 0;
+
+		return MDSComponent.prototype.attachmentListHeight.apply(this, arguments) - 30 - this.$el.find('.document-settings').height() - pdfHeight;
+	},
+
+	/**
+	 * @return True if the table of contents is enabled, otherwise false.
+	 */
+	isTableOfContentsEnabled: function() {
+		return this.$el.find('.pdf-include-table-of-contents').is(':checked');
+	},
+
+	/**
+	 * Called when the user enables or disables the print page number option for PDFs.
+	 * 
+	 * @param event
+	 */
+	onIncludePageNumbersChange: function(event) {
+		this.enablePageNumbers($(event.currentTarget).is(':checked'));
+
+		// the jQuery accordion sets the height after expanding and this becomes to small when print page numbers is checked.
+		this.pdf().find('> ul').height('initial');
+	},
+
+	/**
+	 * Called when the user enables or disables the table of contents.
+	 * 
+	 * @param event
+	 *                An event object from the checkbox.
+	 */
+	onIncludeTableOfContents: function(event) {
+		var enabled = this.isTableOfContentsEnabled();
+
+		this.setIncludeTableOfContents(enabled);
+
+		if (!enabled) {
+			// nothing more to do.
+			return;
+		}
+
+		// append TOC information
+		this.model.get('attachments').each(function(attachment) {
+			if (attachment.id !== 'toc' && !attachment.get('tocList').length) {
+				// create default TOC entry matching filename.
+				attachment.get('tocList').add({
+					headingLevel: 1,
+					headingText: attachment.get('filename')
+				});
+			}
+		}, this);
+	},
+
+	/**
+	 * Called when the user changes the document assembly export type.
+	 * 
+	 * @param event
+	 *                An event object from the radio button change.
+	 */
+	onExportTypeChange: function(event) {
+		this.setExportType($(event.currentTarget).val());
+	},
+
+	/**
+	 * Called when the user changes the add watermark option.
+	 * 
+	 * @param event
+	 *                An event object from the radio button change.
+	 */
+	onAddWatermarkChange: function(event) {
+		this.enableWatermarks($(event.currentTarget).is(':checked'));
+	},
+
+	/**
+	 * @param enable
+	 */
+	setIncludeTableOfContents: function(enable) {
+		this.$el.find('.pdf-include-table-of-contents').prop('checked', enable);
+
+		if (enable) {
+			// show the table of contents title option.
+			this.tocModel = new AssembleAttachment({
+				id: 'toc',
+				filename: 'Table of Contents'
+			});
+
+			// add as first item in the list.
+			this.model.get('attachments').add(this.tocModel, {
+				at: 0
+			});
+		} else {
+			// hide the table of contents title option.
+			this.model.get('attachments').remove(this.tocModel);
+			this.tocModel = undefined;
+		}
+
+		this.renderAside();
+	},
+
+	/**
+	 * @param enable
+	 *                True if page numbers should be included in the document, otherwise false.
+	 */
+	enablePageNumbers: function(enable) {
+		this.$el.find('.pdf-include-page-numbers').prop('checked', enable);
+
+		if (enable) {
+			// show the page related options.
+			this.$el.find('.print-page-numbers > ul').show();
+		} else {
+			// hide the page related options.
+			this.$el.find('.print-page-numbers > ul').hide();
+		}
+
+		// the accordion for PDF options must be automagically resized.
+		this.updateSize();
+
+		this.renderAside();
+	},
+
+		/**
+	 * @param enable
+	 *                True if watermarks should be added to document, otherwise false.
+	 */
+	enableWatermarks: function(enable) {
+		this.$el.find('#add-watermark-checkbox').prop('checked', enable);
+
+		if (enable) {
+			// show the watermark inputs.
+			this.$el.find('.doc-assemble-watermarks').show();
+		} else {
+			// hide the watermark inputs.
+			this.$el.find('.doc-assemble-watermarks').hide();
+		}
+
+		// the accordion for PDF options must be automagically resized.
+		this.updateSize();
+
+		this.renderAside();
+	},
+
+	/**
+	 * Update accordion size as part of sizing.
+	 */
+	updateSize: function() {
+		// force the accordion to resize on type change -- note that this comes from jQuery UI 1.8.
+		this.pdf().accordion('resize');
+		MDSComponent.prototype.updateSize.apply(this, arguments);
+	},
+
+	/**
+	 * Update model.
+	 */
+	save: function() {
+		this.model.set({
+			trackChanges: this.$el.find('input.track-changes').is(':checked'),
+			orientation: this.$el.find('input[name="page-orientation"]:checked').val(),
+			printPageNumbers: this.$el.find('.pdf-include-page-numbers').is(':checked'),
+			printPageNumbersAt: this.startPageNumberAt.val(),
+			startPageNumberAt: this.startPageCount.val(),
+			addWatermark: this.$el.find('input#add-watermark-checkbox').is(':checked'),
+			headerWatermark: this.$el.find('input#header-watermark-textbox').val(),
+			footerWatermark: this.$el.find('input#footer-watermark-textbox').val(),
+			diagonalWatermark: this.$el.find('input#diagonal-watermark-textbox').val()
+		});
+
+		MDSComponent.prototype.save.apply(this, arguments);
+	},
+
+	/**
+	 * @return Returns the PDF element.
+	 */
+	pdf: function() {
+		return this.$el.find('.document-assemble-pdf-options');
+	},
+
+	/**
+	 * Update the GUI options for the specified export file type.
+	 * 
+	 * @param type
+	 *                A String indicating the export file type for document assembly.
+	 */
+	setExportType: function(type) {
+		var word = this.$el.find('.document-assemble-word-options');
+
+		// update model type.
+		this.model.set({
+			type: type
+		});
+
+		switch (type) {
+		case 'word':
+			this.$el.find()
+			// this.$el.find('option[name=export-file-type]').prop('checked', false);
+			// this.$el.find('option[name=export-file-type][value=word]').prop('checked', true);
+			this.$el.find('option[name=export-file-type][value=word]').prop('selected', true);
+			this.setIncludeTableOfContents(false);
+
+			this.pdf().hide();
+			word.show();
+			break;
+
+		case 'pdf':
+			// this.$el.find('option[name=export-file-type]').prop('checked', false);
+			// this.$el.find('option[name=export-file-type][value=pdf]').prop('checked', true);
+			this.$el.find('option[name=export-file-type][value=pdf]').prop('selected', true);
+
+			word.hide();
+			this.pdf().show();
+			break;
+		}
+
+		this.updateSize();
+	},
+
+	/**
+	 * Helper method to prepopulate TOC for add all attachments or enable generate TOC.
+	 * 
+	 * @param record
+	 *                JSON attachment record
+	 */
+	onGetDocumentResponse: function(jqXHR, textStatus) {
+		MDSComponent.prototype.onGetDocumentResponse.apply(this, arguments);
+
+		if (this.isTableOfContentsEnabled()) {
+			this.model.get('attachments').each(function(model) {
+				if (model.id !== 'toc' && !model.get('tocList').length) {
+					// auto populate the easy add all files with a TOC header matching the filename.
+					model.get('tocList').push({
+						headingText: model.get('filename'),
+						headingLevel: 1
+					});
+				}
+			}, this);
+		}
+	},
+
+	/**
+	 * @param model
+	 */
+	populateData: function(model) {
+		// load model values.
+		this.setExportType(this.model.get('type'));
+		this.setIncludeTableOfContents(this.model.get('generateTOC'));
+
+		this.enablePageNumbers(this.model.get('printPageNumbers'));
+		this.enableWatermarks(this.model.get('addWatermark'))
+		this.startPageNumberAt.val(this.model.get('printPageNumbersAt'));
+		this.startPageCount.val(this.model.get('startPageNumberAt'));
+
+		this.$el.find('.track-changes').prop('checked', this.model.get('trackChanges'));
+		this.$el.find('input[name="page-orientation"][value="' + this.model.get('orientation') + '"]').prop('checked', true);
+
+		//Fill in watermark inputs (regardless whether the "addWatermark' is enabled")
+		this.$el.find('input#header-watermark-textbox').prop('value', this.model.get('headerWatermark'));
+		this.$el.find('input#footer-watermark-textbox').prop('value', this.model.get('footerWatermark'));
+		this.$el.find('input#diagonal-watermark-textbox').prop('value', this.model.get('diagonalWatermark'));
+
+		MDSComponent.prototype.populateData.apply(this, arguments);
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/view/compare/CompareAttachmentRenderer.js' */
+var CompareAttachmentRenderer = AttachmentRenderer.extend({
+	templateID: '#document-compare-attachment-renderer',
+
+	events: _.extend({
+		'click input[name=attribution-replacement]': 'onAttributionChange',
+		'change select.attribution-select': 'onDefaultAttributionChange'
+	}, AttachmentRenderer.prototype.events),
+
+	/**
+	 * 
+	 */
+	save: function() {
+		// save changes to model.
+		var file = this.$el.find('input.file-name').val(), page = this.$el.find('input.page-name').val();
+
+		// call this towards the end so re-rendering is not triggered.
+		this.model.set({
+			attribution: this.$el.find('input[name=attribution-replacement]:checked').val(),
+			replaceWith: this.$el.find('.attribution-select').val(),
+			userSpecifiedReplaceWith: this.$el.find('.specified-input').val(),
+
+			suffix: this.$el.find('.suffix').val(),
+			prefix: this.$el.find('.prefix').val()
+		}, {
+			silent: true
+		});
+
+		// super call
+		AttachmentRenderer.prototype.save.apply(this, arguments);
+	},
+
+	updateSize: function() {
+		var value;
+
+		if (!this.isFullScreen) {
+			// static column widths!
+			this.$el.find('.column.attachment-edit').width('620px');
+			this.$el.find('.column.file-name').width('500px');
+			return;
+		}
+
+		value = this._leftoverColumnWidth();
+
+		// single columns
+		this.$el.find('.column.file-name').width(value - 10 + 'px');
+
+		AttachmentRenderer.prototype.updateSize.apply(this, arguments);
+	},
+
+	/**
+	 * Called when the user changes the default attribution behavior.
+	 * 
+	 * @param event
+	 *                Change event.
+	 */
+	onDefaultAttributionChange: function(event) {
+		this.setDefaultAttribution(this.$el.find('.attribution-select').val());
+	},
+
+	/**
+	 * 
+	 */
+	setDefaultAttribution: function(setting) {
+		if (setting === CompareAttachment.ATTRIBUTION.USER_SPECIFIED) {
+			// show specified input
+			this.$el.find('.specified-input').show();
+		} else {
+			// hide specified input
+			this.$el.find('.specified-input').hide();
+		}
+	},
+
+	/**
+	 * Update the set attribution option. Can either replace all attributions or only missing ones.
+	 * 
+	 * @param setting
+	 */
+	setAttribution: function(setting) {
+		var describe = this.$el.find('.attribution-replacement > label');
+
+		this.$el.find('input[name=attribution-replacement]').prop('checked', false);
+		this.$el.find('input[name=attribution-replacement][value=' + setting + ']').prop('checked', true);
+
+		if (setting === 'current') {
+			// current attribution
+			describe.text('Whenever no attribution exists use:');
+		} else {
+			// replace all
+			describe.text('Attribute all document changes to:');
+		}
+	},
+
+	/**
+	 * Called when the user changes the default attribution option.
+	 * 
+	 * @param event
+	 */
+	onAttributionChange: function(event) {
+		this.setAttribution($(event.currentTarget).val());
+	},
+
+	/**
+	 * Place renderer into edit mode.
+	 */
+	editMode: function() {
+		AttachmentRenderer.prototype.editMode.apply(this, arguments);
+
+		var specified = this.$el.find('.specified-input');
+
+		this.$el.find('input.file-name').val(this.model.get('filename'));
+		this.$el.find('input.page-name').val(this.model.get('title'));
+
+		// check the correct attribution
+		this.setAttribution(this.model.get('attribution'));
+
+		// no attribution option
+		this.$el.find('.attribution-select').val(this.model.get('replaceWith'));
+
+		specified.val(this.model.get('userSpecifiedReplaceWith'));
+		this.setDefaultAttribution(this.model.get('replaceWith'));
+
+		// prefix/suffix
+		this.$el.find('.prefix').val(this.model.get('prefix'));
+		this.$el.find('.suffix').val(this.model.get('suffix'));
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/view/compare/CompareAttachmentView.js' */
+var CompareAttachmentView = AttachmentView.extend({
+	Renderer: CompareAttachmentRenderer
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/script/view/compare/CompareComponent.js' */
+var CompareComponent = MDSComponent.extend({
+	className: 'mds-compare',
+	AttachmentView: CompareAttachmentView,
+
+	render: function() {
+		MDSComponent.prototype.render.apply(this, arguments);
+		// assert: hide the drop down button - only word documents do compare!
+		this.$el.find('.document-assemble-buttons .add-all-supported').hide();
+		//Hide single document options for now (COP-3497) -AWP
+		this.$el.find('.document-assemble-buttons .add-single-document').hide();
+		this.$el.find('.document-assemble-buttons .advanced-single-add').hide();
+	},
+
+	/**
+	 * Override from child. Include the accordion elements' heights.
+	 * 
+	 * @return Number indicating the height of the attachment list.
+	 */
+	attachmentListHeight: function() {
+		if (!this.isFullScreen) {
+			// static height for non-full screen mode - 310px.
+			return 310;
+		}
+
+		return MDSComponent.prototype.attachmentListHeight.apply(this, arguments);
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;

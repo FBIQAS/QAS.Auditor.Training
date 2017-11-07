@@ -1,0 +1,26 @@
+;try {
+/* module-key = 'gov.eop.omb.confluence.resources.MAX-Resources:editor-keyboard-tooltip', location = 'gov/eop/omb/confluence/resources/design/scripts/editor-keyboard-tooltip.js' */
+jQuery(document).ready(function() {
+    
+    AJS.bind("show.dialog", function(e, data) {
+        //console.log("Dialog shown " + data.dialog.id);
+        if(data.dialog.id == "keyboard-shortcuts-dialog") {
+            if(jQuery(jQuery(".module")[3]).find(".new-line").length == 0) {
+                console.log("adding new-line");
+                jQuery(jQuery(".module")[3]).find(".mod-content li:first").before('<li class="item-details new-line"><strong class="item-description">Line Break</strong><span class="item-action"><kbd class="modifier-key">Shift</kbd><span class="key-separator">+</span><kbd class="modifier-key">Enter</kbd></span></li>');
+            }
+        }
+    });
+
+    if(jQuery("#hint-linebreak").length == 0) {
+        jQuery("#rte-toolbar .aui-toolbar2-primary .aui-buttons:last").after('<div id="hint-linebreak" style="float:left; font-size:11px; color: #666; margin-top:8px; margin-bottom:17px;">Hint: press Shift+Enter for a Line Break</div>')
+    }
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;

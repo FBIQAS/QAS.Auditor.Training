@@ -1,0 +1,671 @@
+;try {
+/* module-key = 'gov.eop.omb.confluence.resources.MAX-Resources:default-dialog-config', location = 'gov/eop/omb/confluence/resources/scripts/default-dialog-config.js' */
+function JQUERYUI_DIALOG_ERROR_HASH()
+{ 
+	return {	
+		disabled:		false, 
+		autoOpen:		true,
+		buttons: 		{ 
+						"OK":	function() {
+									jQuery(this).dialog("close"); 
+								}
+						},
+		closeOnEscape:	true,
+		closeText:		'close',
+		dialogClass:	'page-wrapper-modal-error',
+		draggable:		false,
+		height:			'auto',
+		hide:			null,
+		maxHeight:		false,
+		maxWidth:		false,
+		minHeight:		150,
+		minWidth:		150,
+		modal:			true,
+		position:		'center',
+		resizable:		false,
+		show:			null,
+		stack:			true,
+		title:			'Error',
+		width:			300,
+		zIndex:			1000
+	};
+};
+
+function JQUERYUI_DIALOG_WARNING_HASH()
+{ 
+	return {	
+		disabled:		false, 
+		autoOpen:		true,
+		buttons: 		{ 
+						"OK":	function() {
+									jQuery(this).dialog("close"); 
+								}
+						},
+		closeOnEscape:	true,
+		closeText:		'close',
+		dialogClass:	'page-wrapper-modal-warning',
+		draggable:		false,
+		height:			'auto',
+		hide:			null,
+		maxHeight:		false,
+		maxWidth:		false,
+		minHeight:		150,
+		minWidth:		150,
+		modal:			true,
+		position:		'center',
+		resizable:		false,
+		show:			null,
+		stack:			true,
+		title:			'Warning',
+		width:			300,
+		zIndex:			1000
+	};
+};
+
+function JQUERYUI_DIALOG_INFO_HASH()
+{ 
+	return {	
+		disabled:		false, 
+		autoOpen:		true,
+		buttons: 		{ 
+						"OK":	function() {
+									jQuery(this).dialog("close"); 
+								}
+						},
+		closeOnEscape:	true,
+		closeText:		'close',
+		dialogClass:	'page-wrapper-info',
+		draggable:		true,
+		height:			'auto',
+		hide:			null,
+		maxHeight:		false,
+		maxWidth:		false,
+		minHeight:		150,
+		minWidth:		150,
+		modal:			false,
+		position:		'center',
+		resizable:		true,
+		show:			null,
+		stack:			true,
+		title:			'Info',
+		width:			300,
+		zIndex:			1000
+	};
+};
+
+function JQUERYUI_DIALOG_MODAL_HASH()
+{ 
+	return {	
+		disabled:		false, 
+		autoOpen:		true,
+		buttons: 		{ 
+						"CANCEL":	function() {
+										jQuery(this).dialog("close"); 
+									},
+						"OK":		function() {
+										jQuery(this).dialog("close"); 
+									}
+						
+						},
+		closeOnEscape:	true,
+		closeText:		'close',
+		dialogClass:	'page-wrapper-info',
+		draggable:		true,
+		height:			'auto',
+		hide:			null,
+		maxHeight:		false,
+		maxWidth:		false,
+		minHeight:		400,
+		minWidth:		400,
+		modal:			true,
+		position:		'center',
+		resizable:		true,
+		show:			null,
+		stack:			true,
+		title:			'Info',
+		width:			600,
+		zIndex:			1000
+	};
+};
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.resources.MAX-Resources:default-dialog-config', location = 'gov/eop/omb/confluence/resources/scripts/moveContentDialog.js' */
+/**
+* This creates a move dialog for content that is on a page, currently just Comments and Attachments as of 8/12/16.
+* Customization of page-move-dialog.js in Core app.
+* Assumption is that content has an owning page.
+*/
+var MOVE_UNDERNEATH_ERROR = "You cannot move a page to be underneath itself or its children.";
+var MOVE_SAME_PAGE_ERROR = "The content you are moving is on this page.";
+
+var MoveContentDialog = function (options) {
+    var pageTitle = AJS.Meta.get('page-title');
+    var pageId = AJS.Meta.get('page-id');
+
+
+    options = jQuery.extend({
+        spaceKey: AJS.params.spaceKey,
+        spaceName: AJS.params.spaceName,
+        currentPageTitle: pageTitle,
+        currentPageId: pageId,
+        dialogDataStore: "",
+        title: "Move Content",
+        buttonName: "Move",
+        locationPanelInfo: "",
+        searchPanelInfo: "",
+        historyPanelInfo: "",
+        browsePanelInfo: "",
+        locationPanelLabel: "Advanced",
+        searchPanelLabel: "Search",
+        historyPanelLabel: "Recently Viewed",
+        browsePanelLabel: "Browse",
+        openedPanel: "Advanced",
+        moveHandler: function (dialog) {
+            AJS.log("No move handler defined. Closing dialog.");
+            dialog.remove();
+        },
+        cancelHandler: function (dialog) {
+            dialog.remove();
+        },
+        pageTitleAccessor: function () {
+            return AJS.params.currentPageTitle;
+        }
+    }, options);
+
+    var dialogWidth = 840;
+    var dialogHeight = 590;
+    var locationPanelHeight = 71;
+
+    var newSpaceKey = options.spaceKey;
+    var newSpaceName = options.spaceName;
+
+    //Parent of this content is the current
+    var originalParent = options.currentPageTitle;
+
+    //Changing to current page for moving content. -AWP
+    var newParentPage = options.currentPageTitle;
+
+
+    var structure = AJS.ConfluenceDialog({
+        width: dialogWidth,
+        height: dialogHeight,
+        id: "move-page-dialog"
+    });
+
+    var templateVars = {
+        spaceKey: newSpaceKey,
+        spaceName: newSpaceName,
+        parentPageTitle: newParentPage,
+
+        // canMoveBetweenSpaces: AJS.Meta.get("page-id") == 0 || AJS.Meta.getBoolean("can-remove-page") // remember that you move between drafts
+        
+        //Setting this to always true for now, since we allow page moves accross spaces regardless of delete space perm.
+        //Move wil not be allowed between spaces if there are restricted children (from user). WOuld be nice if we caught that here.
+        //Would need to place a meta tag that returns the value of userCanViewAllDescendantPages
+        canMoveBetweenSpaces: true
+    };
+    
+    structure.addHeader(options.title);
+    structure.addPanel(options.locationPanelLabel, Confluence.Templates.MovePage.movePageAdvancedPanel(templateVars), "location-panel", "location-panel-id");
+    structure.addPanel(options.searchPanelLabel, Confluence.Templates.MovePage.movePageSearchPanel(templateVars), "search-panel", "search-panel-id");
+    structure.addPanel(options.historyPanelLabel, Confluence.Templates.MovePage.historyPanel({pageTitle: AJS.Meta.get("page-title")}), "history-panel", "history-panel-id");
+    structure.addPanel(options.browsePanelLabel, Confluence.Templates.MovePage.browsePanel({pageTitle: AJS.Meta.get("page-title")}), "browse-panel", "browse-panel-id");
+
+    // panel switching logic
+    structure.get('#"' + options.locationPanelLabel + '"')[0].onselect = function () {
+        $("#new-space-key").val(newSpaceKey);
+        $("#new-space").val(newSpaceName);
+        $("#new-parent-page").val(newParentPage).select();
+    };
+    structure.get('#"' + options.searchPanelLabel + '"')[0].onselect = function () {
+        // always clear out the previous selection
+        $("#move-page-dialog .search-panel .search-results .selected").removeClass("selected");
+        $("#move-page-dialog input.search-query").focus();
+    };
+    structure.get('#"' + options.historyPanelLabel + '"')[0].onselect = function () {
+        // refresh the history panel every time it loads, in case the user has navigated elsewhere in another tab
+        $(".history-panel", dialog).movePageHistory(controls);
+    };
+    structure.get('#"' + options.browsePanelLabel + '"')[0].onselect = function () {
+        // always refresh the tree when loading the Browse tab, don't load it initially
+        AJS.debug("browse: " + [newSpaceKey, newSpaceName, newParentPage].join());
+        $(".browse-panel", dialog).movePageBrowse(controls, newSpaceKey, newSpaceName, newParentPage, originalParent, options.currentPageTitle);
+    };
+
+    var moveFunction = function (dialog) {
+        var space = $("#new-space:visible").val();
+        var spaceKey = $("#new-space-key").val();
+        var parentPage = $("#new-parent-page:visible").val();
+
+        //Start spinner
+        $('.button-spinner').each(function (i, val) {$(val).spin();});
+        //Disable all buttons
+        $("button", dialog).attr("disabled", "disabled");
+
+        if (space && (space != newSpaceName || spaceKey != newSpaceKey || parentPage != newParentPage)) {
+            Confluence.Dialogs.Breadcrumbs.defaultGetBreadcrumbs({
+                spaceKey: spaceKey,
+                pageTitle: parentPage
+            }, function () {
+                Confluence.PageLocation.set({
+                    spaceKey: spaceKey,
+                    spaceName: space,
+                    parentPageTitle: parentPage
+                });
+                options.moveHandler(dialog, spaceKey, parentPage, options.dialogDataStore, setErrors);
+            }, function (xhr) {
+                $('#new-parent-breadcrumbs').html(Templates.MovePage.breadcrumbError());
+                if (xhr.status === 404) {
+                    controls.error("The specified page was not found.");
+                }
+            });
+        } else {
+            Confluence.PageLocation.set({
+                spaceKey: newSpaceKey,
+                spaceName: newSpaceName,
+                parentPageTitle: newParentPage
+            });
+            options.moveHandler(dialog, newSpaceKey, newParentPage, options.dialogDataStore, setErrors);
+        }
+    };
+    
+    structure.addButton(options.buttonName, moveFunction, "move-button");
+    structure.addButton("Cancel", options.cancelHandler, "move-cancel-button");
+    
+    //This isn't needed for moving content that aren't pages
+    // Add the ordering page
+/*    structure.addPage();
+    structure.page[1].addHeader(options.title);
+    structure.page[1].addPanel(AJS.params.movePageDialogOrderingTitle, AJS.renderTemplate("orderingPagePanel"), "ordering-panel", "ordering-panel-id");
+    structure.page[1].addButton(AJS.params.movePageDialogBackButton, function(dialog) { dialog.prevPage(); }, "back left");
+    structure.page[1].addButton("Cancel" options.cancelHandler, "move-cancel-button");*/
+    
+    var moveButton = structure.get("button#" + options.buttonName)[0].item;
+    moveButton.before(Confluence.Templates.MovePage.spinnerButton());
+
+    jQuery("button.move-button").append();
+
+    jQuery(".location-panel .row.information").text(options.locationPanelInfo);
+    jQuery(".search-panel .row.information").text(options.searchPanelInfo);
+    jQuery(".history-panel .row.information").text(options.historyPanelInfo);
+    jQuery(".browse-panel .row.information").text(options.browsePanelInfo);
+    
+    structure.gotoPage(0);
+    
+    // The concept of the location panel does not fit into AUI's dialog, which applies inline styling to the panel bodies.
+    var dialog = $('#move-page-dialog');
+    var dialogPageMenus = dialog.find('.dialog-page-menu');
+    var dialogPageBodies = dialog.find('.dialog-page-body');
+
+    // first page (move) dimensions
+    var firstPageMenu = $(dialogPageMenus[0]);
+    var firstPageBody = $(dialogPageBodies[0]);
+
+    firstPageBody.height(firstPageMenu.height());
+    firstPageBody.width('75%');
+    firstPageBody.find('.dialog-panel-body').height(firstPageMenu.height() - locationPanelHeight);
+
+    // second page (reorder) dimensions
+    var secondPageMenu = $(dialogPageMenus[1]);
+    var secondPageBody = $(dialogPageBodies[1]);
+
+    secondPageMenu.width('0');
+    secondPageBody.width('100%');
+
+
+    structure.show();
+
+    // move breadcrumbs to the bottom of all pages on the first page of the dialog (location selection page)
+    $(".location-panel .location-info", dialog).appendTo($(".dialog-page-body:first", dialog));
+
+/*    // error messages next to the buttons
+    jQuery(".button-panel", dialog).prepend(AJS.renderTemplate("movePageErrors"));*/
+
+    //Override page move breadcrumbs since validation is different for content -AWP
+    var breadcrumbs = new ContentBreadcrumbs(jQuery('#new-parent-breadcrumbs'));
+
+    function setErrors(errors) {
+        var errorsContainer = $("#move-errors");
+        if (errorsContainer.length > 0) {
+            errorsContainer.remove();
+        }
+        errorsContainer = $(Confluence.Templates.MovePage.errorMessage());
+
+        var container = dialog.find(".browse-controls:visible");
+        if (!container.length) {
+            container = dialog.find(".dialog-panel-body:visible");
+            container.prepend(errorsContainer);
+        } else {
+            container.append(errorsContainer);
+        }
+
+        if (!errors || errors.length === 0) {
+            $(moveButton).prop("disabled", false);
+            return;
+        }
+
+        var errorMessageText = "The following error(s) occurred:";
+        errorMessageText += "<ul>\n<li>";
+
+        if ($.isArray(errors)) {
+            errorMessageText += errors.join("</li>\n<li>");
+        } else {
+            errorMessageText += errors;
+        }
+        errorMessageText += "</li>\n</ul>";
+
+        var errorMessage = aui.message.warning({'content': errorMessageText});
+        errorsContainer.html(errorMessage);
+        errorsContainer.removeClass('hidden');
+
+        $('.button-spinner').each(function (i, val) {$(val).spinStop();});
+        $("button", dialog.removeAttr("disabled"));  
+   } 
+    
+    var controls = {
+        moveButton: moveButton,
+        clearErrors: function () {
+            setErrors([]);
+        },
+        error: setErrors,
+
+        // called when a destination is selected on one of the panels
+        select: function (spaceKey, spaceName, parentPageTitle, parentPageId) {
+            AJS.debug("select: " + [spaceKey, spaceName, parentPageTitle].join());
+
+            if ($("#createpageform").length > 0 && isEditorAjaxSaveEnabled) {
+                if (typeof parentPageId !== 'undefined') {
+                    $("#parentPageId").val(parentPageId);
+                }
+            }
+
+            newSpaceKey = spaceKey;
+            newSpaceName = spaceName;
+            newParentPage = parentPageTitle || "";
+
+            $(moveButton).prop("disabled", true); // disable submission until the location is validated
+            breadcrumbs.update({spaceKey: newSpaceKey, title: newParentPage}, controls);
+
+        }
+    };
+    structure.overrideLastTab();
+    structure.get('#"' + options.openedPanel + '"').select();
+
+    // render the current breadcrumbs immediately
+    //using custom ContentBreadcrumb -AWP
+    var currentBreadcrumbs = new ContentBreadcrumbs($('#current-parent-breadcrumbs'));
+
+    currentBreadcrumbs.update({spaceKey:AJS.params.spaceKey, pageId: options.currentPageId}, controls);
+
+
+    jQuery(".location-panel", dialog).movePageLocation(controls);
+    jQuery(".search-panel", dialog).movePageSearch(controls);
+    jQuery(".history-panel", dialog).movePageHistory(controls);
+
+/*    structure.get("panel:2")[0].onselect = function () {
+        // refresh the history panel every time it loads, in case the user has navigated elsewhere in another tab
+        jQuery(".history-panel", dialog).movePageHistory(controls);
+    };
+    structure.get("panel:3")[0].onselect = function () {
+        // always refresh the tree when loading the Browse tab, don't load it initially
+		AJS.log("browse: " +[newSpaceKey, newSpaceName, newParentPage].join());
+        jQuery(".browse-panel", dialog).moveContentBrowse(controls, newSpaceKey, newSpaceName, newParentPage, originalParent, options.pageTitleAccessor());
+    };*/
+
+    $("#new-parent-page").select(); // focus the new parent page input
+    if (options.hint) {
+        structure.addHelpText(options.hint.template || options.hint.text, options.hint.arguments);
+    }
+
+    return dialog;
+};
+
+/**
+ * The 'Browse' panel with a tree view in the move page dialog.
+ *
+ * @param controls includes a 'select' and 'error' callback for handling those events on this panel
+ * @param newSpaceKey the space key selected by the user in another panel. The tree should change to show this space.
+ * @param newSpaceName the name of the space selected by the user
+ * @param newParentPage the parent page selected by the user in another panel. The tree should expand to show this page.
+ * @param originalParent the original parent page of the current page. The tree should also expand to show this page.
+ * @param pageTitle the current title for the page being moved (for display in the tree).
+ */
+
+jQuery.fn.moveContentBrowse = function (controls, newSpaceKey, newSpaceName, newParentPage, originalParent, pageTitle) {
+    var $ = jQuery;
+    var contextPath = $("#confluence-context-path").attr("content");
+    var container = this;
+
+    var treeContainer = $(".tree", container);
+    treeContainer.addClass("loading").html(AJS.renderTemplate("movePagePanelLoading"));
+
+    var tree,
+        onready = function () {
+            treeContainer.removeClass("rendering").addClass("expanding");
+            $("#parent-selection-tree .button-panel").remove();
+
+            expandToPage(AJS.params.spaceKey, originalParent, function (found) {
+                if (found && originalParent != "") {
+                    var parentPageNode = tree.findNodeBy("text", originalParent);
+                    if (parentPageNode) {
+                        parentPageNode.$.find("> a").addClass("current-parent");
+                    }
+                }
+
+                expandToPage(newSpaceKey, newParentPage, function (found) {
+                    if (found) {
+                        var selectedNode = tree.findNodeBy("text", newParentPage);
+                        if (selectedNode) {
+                            selectedNode.$.find("> a").addClass("highlighted");
+
+                            // scroll into view
+                            var topOffset = selectedNode.$.position().top;
+                            var containerHeight = treeContainer.height();
+                            if (topOffset < 0 || topOffset > containerHeight) {
+                                treeContainer.scrollTop(treeContainer.scrollTop() + topOffset - containerHeight / 3);
+                            }
+                        }
+                    }
+
+                    treeContainer.removeClass("expanding");
+                });
+            });
+        };
+
+    var clickHandler = function (e) {
+        e.preventDefault(); // don't follow the link that was clicked
+
+        $("a.highlighted", treeContainer).removeClass("highlighted");
+        $(this).addClass("highlighted");
+
+        newSpaceKey = $("#chosenSpaceKey").val();
+        newSpaceName = $("#chosenSpaceKey option:selected").text();
+        newParentPage = $(this).hasClass("root-node")
+            ? ""                           // clicked on space
+            : $(this).find("span").text(); // clicked on page
+        controls.select(newSpaceKey, newSpaceName, newParentPage);
+    };
+
+    var initialiseSpacePicker = function () {
+        // initialise the space selector (if there is one - if only one space available then it will be a hidden input)
+        $("select#chosenSpaceKey").val(newSpaceKey).change(function () {
+            var spaceKey = $(this).val();
+            var spaceName = $(this).find("option:selected").text();
+
+            $("#tree-root-node-item a").text(spaceName)
+                .toggleClass("highlighted", newSpaceKey == spaceKey && newParentPage == "")
+                .toggleClass("current-parent", AJS.params.spaceKey == spaceKey && originalParent == "");
+
+            treeContainer.addClass("rendering");
+            tree = tree.reload({
+                initUrl: contextPath + "/pages/children.action?spaceKey=" + encodeURIComponent(spaceKey) + "&node=root"
+            });
+        });
+
+        // create and initialise the treeRootDiv
+        $("#tree-root-div").html(AJS.renderTemplate("movePageBrowsePanelSpace", newSpaceName))
+            .find("a").click(clickHandler)
+                .toggleClass("highlighted", newParentPage == "")
+                .toggleClass("current-parent", AJS.params.spaceKey == newSpaceKey && originalParent == "");
+    };
+
+    var expandToPage = function (spaceKey, pageTitle, callback) {
+        if (spaceKey != $("#chosenSpaceKey").val()) {
+            callback(false);
+            return;
+        }
+        console.log("before breadcrumbs");
+        AJS.MoveDialog.getBreadcrumbs({spaceKey:spaceKey, title:pageTitle}, function (breadcrumbs) {
+            var toExpand = $.map(breadcrumbs.slice(1), function (o) {
+                return { text: o.title };
+            });
+            console.log("before expandPath");
+            tree.expandPath(toExpand, function () {
+                console.log("expandPath callback");
+                callback(true);
+            });
+        }, function () {
+            controls.error("Could not retrieve tree expansion information.");
+            callback(false);
+        });
+    };
+
+    treeContainer.load(
+        contextPath + "/panels/browsepagelocation.action",
+        {
+            panelName: "browse",
+            dialogMode: "view",
+            spaceKey: newSpaceKey,
+            parentPageString: newParentPage,
+            pageId: AJS.params.pageId
+        },
+        function () {
+            treeContainer.removeClass("loading").addClass("rendering");
+
+            initialiseSpacePicker();
+
+            tree = $("#parent-selection-tree").tree({
+                url: contextPath + "/pages/children.action",
+                initUrl: contextPath + "/pages/children.action?spaceKey=" + encodeURIComponent(newSpaceKey) + "&node=root",
+                parameters: ["pageId", "text"],
+                undraggable: true,
+                spinnerId: "move-page-dialog-spinner",
+                nodeId: "pageId",
+                click: clickHandler,
+                onready: onready,
+                oninsert: function () {
+                    var $li = this.$;
+                    if ($li.parents("li:first").attr("unclickable")) {
+                        this.makeUnclickable();
+                    }
+                }
+            });
+            AJS.MoveDialog.tree = tree;
+        }
+    );
+};
+
+/**
+ * Returns an object with an 'update' method, which can be called to render a breadcrumb
+ * with that location inside the breadcrumbsElement.
+ *
+ * @param breadcrumbsElement the element (usually a 'ul') where the breadcrumb will be
+ * rendered.
+ */
+ContentBreadcrumbs = function (breadcrumbsElement) {
+
+    var requestCount = 0;
+
+    function displayBreadcrumbs(pageTitle, breadcrumbs, controls) {
+        breadcrumbsElement.renderBreadcrumbs(breadcrumbs);
+        // var validLocation = pageTitle != AJS.params.pageTitle;
+
+        //Allowing any page for moving content. Maybe prevent the same page in future, but needs to be enforced on "Move" command. -AWP
+        var validLocation = true;
+
+        if (validLocation) {
+            controls.clearErrors();
+            //jQuery(controls.moveButton).attr("disabled", "");
+            jQuery(controls.moveButton).removeAttr("disabled");
+            jQuery(controls.moveButton).css("color","");
+        } else {
+            controls.error(AJS.params.movePageDialogInvalidLocation);
+            jQuery("li:last-child", breadcrumbsElement).addClass("warning");
+        }
+    }
+
+    return {
+        /**
+         * Updates the breadcrumb to the specified location. Any errors are handled by
+         * calling 'controls.error' with the message.
+         *
+         * @param options available options
+         * 
+         * spaceKey - The space key for the space containing the object you want breadcrumbs for. It can be the space by itself or an 
+	     *            object within the space
+	     * title - The page title for the page you want breadcrumbs for or a page with an attachment you want breadcrumbs for.
+	     * fileName - the name of the attachment you want breadcrumbs for. 
+	     * userName - the name of the User you want breadcrumbs for. If this option is specified, the others are ignored and the user
+	     *            breadcrumbs are returned. 
+         * @param controls should contain an 'error' function which is used to pass
+         * errors back to the caller, and a 'clearErrors' which indicates no errors
+         * occurred
+         */
+        update: function (options, controls) {
+            AJS.log("Breadcrumbs update: " + breadcrumbsElement.attr("id") + " to:");
+            AJS.log(options);
+            breadcrumbsElement.html(AJS.renderTemplate("movePageBreadcrumbLoading"));
+            var thisRequest = requestCount += 1;
+
+            // Breadcrumbs and errors should only be displayed for the latest request.
+            var isRequestStale = function() {
+                if (thisRequest != requestCount) {
+                    AJS.log("Breadcrumb response for ");
+                    AJS.log(options);
+                    AJS.log(" is stale, ignoring.");
+                    return true;
+                }
+                return false;
+            };
+            
+            AJS.MoveDialog.getBreadcrumbs(options,
+                function (breadcrumbs, textStatus) {
+                    if (isRequestStale()) return;
+
+                    if (textStatus != "success" || !breadcrumbs) {
+                        breadcrumbsElement.html(AJS.renderTemplate("movePageBreadcrumbError", textStatus));
+                        return;
+                    }
+                    //Remove the file name as the last element for attachments
+                    // if(breadcrumbs.type == "attachment"){
+                    // }
+
+                    displayBreadcrumbs(options.title, breadcrumbs, controls);
+                },
+                function (xhr) {
+                    if (isRequestStale()) return;
+
+                    breadcrumbsElement.html(AJS.renderTemplate("movePageBreadcrumbError"));
+                    if (xhr.status == 404) {
+                        controls.error(AJS.params.movePageDialogLocationNotFound);
+                    }
+                }
+            );
+        }
+    };
+};
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;

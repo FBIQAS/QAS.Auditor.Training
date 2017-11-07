@@ -1,0 +1,59 @@
+;try {
+/* module-key = 'gov.eop.omb.confluence.resources.MAX-Resources:countwatchers', location = 'gov/eop/omb/confluence/resources/design/scripts/macros/watchers.js' */
+var pageId;
+
+jQuery(document).ready(function() {
+		pageId = jQuery("meta[name=ajs-page-id]").attr("content");
+
+		//COP-3276: Refresh watcher count upon saving page restrictions.
+		$(window).on("permissions-dialog-close",  function(event){
+   			$('#menu-title-watcher-count').text("(...)");
+   			refreshWatcherCount();
+		});
+		
+		//Add (...) while watchers count loads in page edit mode
+		if(jQuery("#toolbar-group-minor-edit").length > 0) {
+			var linkUrl = "/pages/watchlist/showwatchlist.action?pageId="+pageId;
+			var watcherLink = jQuery("<a id='watcher-count-edit' target='_blank' href='"+linkUrl+"'><span id='pageWatchCountText'>(...)</span></a>")
+			jQuery("#toolbar-group-minor-edit").append(watcherLink);
+		}
+
+		refreshWatcherCount();
+	});
+
+function refreshWatcherCount() {
+		jQuery.ajax({
+			url:"/ajax/getpagewatchcount.action?pageId="+pageId,
+			type: "GET",
+			dataType: 'json',
+			success: function (data, textStatus, jqXHR) {
+				if(jQuery("#toolbar-group-minor-edit").length > 0) {
+					jQuery("#toolbar-group-minor-edit #pageWatchCountText").text("(" + data.pageWatchCount.numberOfWatchers + " of " + data.pageWatchCount.totalNumberOfWatchers + ")");
+				} else {
+					jQuery("#menu-title-watcher-count").html("("+data.pageWatchCount.numberOfWatchers + " of " + data.pageWatchCount.totalNumberOfWatchers + ")");
+					
+					if(data.pageWatchCount.totalNumberOfWatchers === "0") {
+						jQuery("#menu-item-watcher-count").text("Nobody is Watching this Page");
+					} else if (data.pageWatchCount.totalNumberOfWatchers === "1") {
+						jQuery("#menu-item-watcher-count").text(data.pageWatchCount.totalNumberOfWatchers+" Person is Watching this Page");
+					} else {
+						jQuery("#menu-item-watcher-count").text(data.pageWatchCount.totalNumberOfWatchers+" People are Watching this Page");
+					}
+				}
+			},
+			error: function (jqXHR, status, error) {
+				console.log("error retrieving page watch count... "+
+						"pageId: "+jQuery("meta[name=ajs-page-id]").attr("content") +
+						", status: "+status+", error: "+error);
+			}
+		});
+};
+		
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;

@@ -1,0 +1,1764 @@
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.Restrictions:restrictions', location = 'gov/eop/omb/confluence/plugins/Restrictions/scripts/overrides/autocomplete-user.js' */
+/**
+ * User Autocomplete Binder Component. <br>
+ * Copied from /confluence-5-2-5-src/src/confluence-5.2.3-source/confluence-project/confluence-core/confluence-webapp/src/main/webapp/includes/js/components/binders/autocomplete-user.js
+ */
+Confluence.Binder.autocompleteUserOrGroup = function(scope) {
+	scope = scope || document.body;
+	var $ = AJS.$;
+
+	var inviteButton = null;
+	var restrictButton = null;
+
+	var measureText = function(value) {
+		var o = $('<div>' + value + '</div>').css({
+			'white-space': 'nowrap',
+			'visibility': 'hidden',
+			'display': 'inline'
+		}).appendTo($('body')), w = o.width();
+
+		o.remove();
+
+		return w;
+	};
+
+	var isEmail = function(value) {
+		var pattern = new RegExp(
+				/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i);
+		return pattern.test(value);
+	};
+
+	/**
+	 * Show the invitation button and display the restriction button.
+	 */
+	var showInvite = function($this) {
+		if (!inviteButton) {
+			// initialize and add to DOM
+			inviteButton = $('<button class="aui-button">Invite</button>').click(addInvitation);
+			restrictButton = $this.siblings('#add-typed-names');
+
+			$this.siblings('button').after(inviteButton);
+
+			// invite button added - listen for a save click.
+			$('.permissions-update-button').click(onSaveClick);
+			$('#page-permissions-names-input').keyup(onEnterKeyPressed);
+		}
+
+		inviteButton.show();
+		restrictButton.hide();
+	};
+
+	/**
+	 * Check if the user is inviting a user on enter key press.
+	 */
+	var onEnterKeyPressed = function(event) {
+		if (event.keyCode === 13) {
+			// check if user is inviting user - enter key is 13.
+			addInvitation();
+			return false;
+		} else if (!isEmail(userInput().val())) {
+			// check if this is still an e-mail address.
+			hideInvite();
+		}
+
+		return true;
+	};
+
+	/**
+	 * Hide the invitation button and display the restriction button.
+	 */
+	var hideInvite = function($this) {
+		if (inviteButton) {
+			// since the button is initialized, ensure it is hidden.
+			inviteButton.hide();
+		}
+
+		if (restrictButton) {
+			// show the restrict button.
+			restrictButton.show();
+		}
+	};
+
+	/**
+	 * @return A jQuery reference to the user restriction input.
+	 */
+	var userInput = function() {
+		return $('#page-permissions-names-input');
+	};
+
+	/**
+	 * @return A string indicating the type of restriction to add.
+	 */
+	var restrictionType = function() {
+		return $('input[name=pagePermissionTypeRadio]:checked').val();
+	};
+
+	/**
+	 * User clicked the save button.
+	 */
+	var onSaveClick = function() {
+		var restrictions = makePermissionMap(), intersection = _.intersection(restrictions.email.view, restrictions.email.edit);
+
+		_.each(intersection, function(email) {
+			// view and edit
+			inviteUser('viewedit', email);
+		});
+
+		_.each(restrictions.email.view, function(email) {
+			// view only
+			if (!_.contains(intersection, email)) {
+				// invite user via email.
+				inviteUser('view', email);
+			}
+		});
+
+		_.each(restrictions.email.edit, function(email) {
+			// edit only
+			if (!_.contains(intersection, email)) {
+				// invite user via email.
+				inviteUser('edit', email);
+			}
+		});
+	};
+
+	/**
+	 * Helper method to invite user via e-mail.
+	 */
+	var inviteUser = function(type, email) {
+		var post = {
+			pageId: AJS.params.pageId,
+			restrictionType: type,
+			emailaddress: email,
+			addUserAsWatcher: false,
+			sendNotificationEmail: true,
+			atl_token: AJS.params.atlToken
+		};
+
+		AJS.safe.post(contextPath + "/pages/adduserrestriction.action", post, function(data) {
+			// make call to send invitation
+			AJS.safe.post(contextPath + "/pages/sendadduserrestrictionemail.action", {
+				emailaddress: email,
+				pageId: AJS.params.pageId,
+				pending: true,
+				restrictionType: type
+			}, function(data) {
+				// do nothing
+			});
+		}, 'json');
+	}
+
+	/**
+	 * Called when a user invites someone via e-mail. Clears the input field too.
+	 */
+	var addInvitation = function() {
+		if (!isEmail(userInput().val())) {
+			// nothing to do.
+			return;
+		}
+
+		// do not make actual backend call - only display in the table.
+		var usernames = _.map($('#page-permissions-tables tr.' + restrictionType() + '-permission-row .entity-container'), function(element) {
+			// extract the users' email address from the element.
+			return $(element).find('.permission-entity-name').text();
+		});
+
+		if (!_.contains(usernames, userInput().val())) {
+			// user is not already in the list. add them to it.
+			AJS.PagePermissions.addRow({
+				entity: {
+					fullName: 'Pending User',
+					name: userInput().val(),
+					profilePictureDownloadPath: '/images/icons/profilepics/default.png',
+					type: 'email-invitation'
+				}
+			}, restrictionType());
+		}
+
+		// clear out user entered text, swap buttons.
+		userInput().val('');
+		hideInvite();
+
+		// enable submit - ensure the suggestion dropdown is hidden.
+		$('.dialog-button-panel > button').enable()
+		$('#page-perms-name-dropdown-wrapper > .aui-dropdown').addClass('hidden');
+
+		// ensure makePermissionMap is overridden with modified makePermissionMap
+		AJS.PagePermissions.makePermissionMap = makePermissionMap;
+
+		// update page permissions table look.
+		AJS.PagePermissions.refresh();
+	};
+
+	/**
+	 * Override for page-permissions-table.js makePermissionMap Turns the table rows into a map of entity name arrays.
+	 * 
+	 * Modification skips over `email-invitation` type records.
+	 * 
+	 * @param getDisplayNames
+	 *                if true, the display names of the entities are returned instead of the internal names.
+	 * @Override
+	 */
+	var makePermissionMap = function(getDisplayNames) {
+		var permissions = {
+			email: {
+				view: [],
+				edit: []
+			},
+			user: {
+				view: [],
+				edit: []
+			},
+			group: {
+				view: [],
+				edit: []
+			}
+		};
+
+		// $table is not accessible from this scope.
+		$('#page-permissions-table').find("tr.view-permission-row, tr.edit-permission-row").each(function() {
+			var row = $(this);
+			var entityType;
+			var permissionType = row.is(".view-permission-row") ? "view" : "edit";
+
+			// modification - explicitly check type.
+			if (row.is(".user-permission")) {
+				entityType = "user";
+			} else if (row.is(".group-permission")) {
+				entityType = "group";
+			} else {
+				// invitation type permission.
+				entityType = "email";
+			}
+
+			// For summary get the "full name", else the "name"
+			var nameType = (getDisplayNames && (entityType == "user" || entityType == "email-invitation")) ? "display-name" : "name";
+			var entityName = row.find(".permission-entity-" + nameType).text();
+
+			permissions[entityType][permissionType].push(entityName);
+		});
+
+		return permissions;
+	};
+
+	/**
+	 * Add the user specified invitation to the restriction list.
+	 * 
+	 * @param event
+	 *                MouseEvent for user's click on the 'Invite' button.
+	 */
+	var onInviteClick = function(event) {
+		addInvitation();
+	};
+
+	var makeRestMatrixFromData = function(restObj) {
+		if (!restObj || !restObj.result) {
+			throw new Error("Invalid JSON format");
+		}
+
+		$.each(restObj.result, function(index, entry) {
+			entry.key = entry.username || entry.name;
+			if (entry.type === 'group') {
+				entry.title = entry.name;
+				entry.link = [];
+				entry.thumbnailLink = {
+					href: AJS.contextPath() + "/images/icons/avatar_group_48.png"
+				};
+			}
+		});
+
+		var matrix = [];
+		matrix.push(restObj.result);
+		return matrix;
+	};
+
+	$.each([ "user", "group", "user-or-group" ], function(index, type) {
+		$("input.autocomplete-" + type + "[data-autocomplete-user-or-group-bound!=\"true\"]", scope).each(function() {
+			var $this = $(this).attr("data-autocomplete-user-or-group-bound", "true").attr("autocomplete", "off");
+			var maxResults = $this.attr("data-max") || 10, alignment = $this.attr("data-alignment") || "left", dropDownTarget = $this.attr("data-dropdown-target"), dropDownPosition = null, targetSelector = $this.attr("data-target"), $target = targetSelector && $(targetSelector);
+
+			if (dropDownTarget) {
+				dropDownPosition = $(dropDownTarget);
+			} else {
+				dropDownPosition = $("<div></div>");
+				$this.after(dropDownPosition);
+			}
+
+			if ($this.attr("data-resize-to-input")) {
+				dropDownPosition.width($this.outerWidth());
+				dropDownPosition.addClass("resize-to-input");
+			}
+			dropDownPosition.addClass("aui-dd-parent autocomplete");
+
+			$this.quicksearch(AJS.REST.getBaseUrl() + "search/" + type + ".json", function() {
+				$this.trigger("open.autocomplete-user-or-group");
+				if (type === 'user') { // backwards compatibility
+					$this.trigger("open.autocomplete-user");
+				}
+			}, {
+				makeParams: function(val) {
+					return {
+						"max-results": maxResults,
+						query: val
+					};
+				},
+				dropdownPlacement: function(dd) {
+					// the assumption is that if this is invite via e-mail entry that there will be only one list item (li).
+					var item = dd.find('ol.last > li:first-child > a').last(), message = dd.find('a > span'), email = message.find('> span').data('email');
+
+					if (!email || email.toLowerCase() === $this.val()) {
+						// this is not a cached e-mail result. this component caches results and makes suggestions.
+						// i.e. user@domain.tld will be suggested if the user adds user@domain -- which is not what we want.
+						// therefore, we must do this trickery.
+						dropDownPosition.append(dd);
+					}
+
+					if (item.hasClass('no-results')) {
+						// autosize the dropdown menu to match text width and add 75px for padding (accounting for the image to the left).
+						dd.closest('.aui-dd-parent').width(measureText(message.text()) + 100);
+					} else {
+						// assert: reset to default width.
+						dd.closest('.aui-dd-parent').width(250);
+					}
+
+					if (email) {
+						// assert: the user has entered an e-mail address, there are no matches, and they wish to invite the user.
+						// display invite button.
+						showInvite($this);
+					} else {
+						// hide the invite button.
+						hideInvite($this);
+					}
+				},
+				makeRestMatrixFromData: makeRestMatrixFromData,
+				addDropdownData: function(matrix) {
+					if (!matrix.length) {
+						var noResults = 'No Matches.  Provide an e-mail to send invite.', classNames = "no-results";
+
+						if (noResults && isEmail($this.val())) {
+							// no results, but is an email -- update message and classes
+
+							// note: input-driven-dropdown truncates text that is too long.
+							// confluence-5.2.3-source/confluence-project/confluence-core/confluence-webapp/src/main/webapp/includes/js/components/input-driven-dropdown.js
+
+							noResults = 'No Matches.  Invite User (<span data-email="' + $this.val() + '">' + $this.val() + '</span>) to Community';
+							classNames += " invite-via-email";
+						}
+
+						if (noResults) {
+							matrix.push([ {
+								name: noResults,
+								className: classNames,
+								href: "#"
+							} ]);
+						}
+					}
+
+					return matrix;
+				},
+				ajsDropDownOptions: {
+					alignment: alignment,
+					displayHandler: function(obj) {
+						if (obj.restObj && obj.restObj.username) {
+							return obj.name + " (" + AJS.escapeHtml(obj.restObj.username) + ")";
+						}
+						return obj.name;
+					},
+					selectionHandler: function(e, selection) {
+
+						if (selection.find(".search-for").length) {
+							$this.trigger("selected.autocomplete-user-or-group", {
+								searchFor: $this.val()
+							});
+							if (type === 'user') { // backwards compatibility
+								$this.trigger("selected.autocomplete-user", {
+									searchFor: $this.val()
+								});
+							}
+							return;
+						}
+
+						// check for no results
+						if (selection.find(".no-results:not(.invite-via-email)").length) {
+							this.hide();
+							e.preventDefault();
+							return;
+						}
+
+						var contentProps = $("span:eq(0)", selection).data("properties");
+
+						// check for invite via email
+						if (selection.find(".invite-via-email").length) {
+							// add via email - build restObj.
+							// do not make call to add entity.
+							this.hide();
+							e.preventDefault();
+
+							// add the current invitation to the list.
+							addInvitation();
+							return;
+						}
+
+						if ($target) {
+							var displayName = contentProps.restObj.title;
+							if (contentProps.restObj.username) {
+								displayName += " (" + contentProps.restObj.username + ")";
+							}
+							$this.val(displayName);
+							$target.val(contentProps.restObj.key);
+						} else {
+							$this.val(contentProps.restObj.key);
+						}
+
+						$this.trigger("selected.autocomplete-user-or-group", {
+							content: contentProps.restObj
+						});
+						if (type === 'user') { // backwards compatibility
+							$this.trigger("selected.autocomplete-user", {
+								content: contentProps.restObj
+							});
+						}
+						this.hide();
+						e.preventDefault();
+					}
+				}
+			});
+		});
+	});
+
+	Confluence.Binder.autocompleteUser = function() {
+		// backwards compatibility
+	}
+};
+
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.Restrictions:restrictions', location = 'gov/eop/omb/confluence/plugins/Restrictions/scripts/Permission.js' */
+var Permission = Backbone.Model.extend({
+	/**
+	 * @param response
+	 *            Confluence user JSON object.
+	 * @returns Populated model properties.
+	 */
+	parse : function(response) {
+		if(response.entity.type == "user") {
+			return {
+				id : response.entity.userKey, // use user key in 5.9.9
+				type : response.entity.type
+			};
+		} else {
+			return {
+				id : response.entity.name, 
+				type : response.entity.type
+			};
+		}
+		
+	},
+
+	isInactive : function() {
+		return this.get('id').toLowerCase().indexOf('inactive') >= 0;
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.Restrictions:restrictions', location = 'gov/eop/omb/confluence/plugins/Restrictions/scripts/Group.js' */
+var Group = Permission.extend({
+	friendlyGroupName : function() {
+		return this.get('friendlyName');
+	},
+
+	/**
+	 * @returns {Boolean} True if the specified group name is Secure+, otherwise
+	 *          false.
+	 */
+	// isSecurePlus : function() {
+	// 	return this.id === 'SecurePlus-General(MultiFactor)' || this.id === 'SecurePlus-Advanced(NISTLevel3)'
+	// 			|| this.id === 'SecurePlus-Advanced(PIVOnly)';
+	// }
+	//Rewrite to use SecurePlusHelper.js, keeps gorup IDs in one location. -AWP COP-3289
+	isSecurePlus : function() {
+		return SecurePlusHelper.isSecurePlusGroup(this.id);
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.Restrictions:restrictions', location = 'gov/eop/omb/confluence/plugins/Restrictions/scripts/User.js' */
+var User = Permission.extend({
+	/**
+	 * @param response
+	 *            Confluence user JSON object.
+	 * @returns Populated model properties.
+	 */
+	parse : function(response) {
+		return _.extend(Permission.prototype.parse.apply(this, arguments), {
+			name : response.entity.fullName,
+			emailAddress : response.entity.name,
+			profilePicture : response.entity.profilePictureDownloadPath
+		});
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.Restrictions:restrictions', location = 'gov/eop/omb/confluence/plugins/Restrictions/scripts/PagePermissions.js' */
+var PagePermissions = Backbone.Model.extend({
+	url : function() {
+		return '/pages/getcontentpermissions.action?contentId=' + this.get('pageId') + '&spaceKey=' + this.get('spaceKey');
+	},
+
+	defaults : {
+		pageId : '',
+		spaceKey : '',
+		childPage : undefined,
+
+		securePlusLevel : 0,
+
+		users : undefined,
+		groups : undefined
+	},
+
+	/**
+	 * Helper method to return the page ID from a permission.
+	 */
+	_getPermissionPageId : function(permission) {
+		return permission[3];
+	},
+
+	/**
+	 * Helper method to return the permission action type (view or edit).
+	 */
+	_getPermissionAction : function(permission) {
+		return permission[0] === 'View' ? 'view' : 'edit';
+	},
+
+	/**
+	 * Helper method to get the permission's page name.
+	 */
+	_getPermissionPageName : function(permission) {
+		return permission[4];
+	},
+
+	/**
+	 * Helper method to get the permission type (user or group);
+	 */
+	_getPermissionType : function(permission) {
+		return permission[1];
+	},
+
+	/**
+	 * 
+	 */
+	_getPermissionValue : function(permission) {
+		return permission[2];
+	},
+
+	/**
+	 * 
+	 */
+	buildPage : function(users, groups, permission, pages) {
+		var pageId = this._getPermissionPageId(permission), type = this._getPermissionAction(permission);
+
+		if (!pages[pageId]) {
+			// new page.
+			pages[pageId] = new Page({
+				id : pageId,
+				name : this._getPermissionPageName(permission)
+			});
+		}
+
+		if (this._getPermissionType(permission) === 'user') {
+			// add user
+			pages[pageId].addPermission(users.get(this._getPermissionValue(permission)), type);
+		} else {
+			// add group
+			pages[pageId].addPermission(groups.get(this._getPermissionValue(permission)), type);
+		}
+
+		return pages[pageId];
+	},
+
+	/**
+	 * 
+	 */
+	parse : function(response) {
+		var users = new Backbone.Collection(_.values(response.users), {
+			model : User,
+			parse : true
+		}), groups = new Backbone.Collection(_.values(response.groups), {
+			model : Group,
+			parse : true
+		}), result = new Backbone.Collection(), pages = {};
+	
+		_.each(response.permissions, function(permission) {
+			// x-ref user and group array with data from permissions.
+			result.add(this.buildPage(users, groups, permission, pages));
+		}, this);
+
+		return {
+			users : users,
+			groups : groups,
+			pages : result
+		};
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.Restrictions:restrictions', location = 'gov/eop/omb/confluence/plugins/Restrictions/scripts/Page.js' */
+var Page = Backbone.Model.extend({
+	defaults : {
+		permission : undefined
+	},
+
+	initialize : function() {
+		this.set({
+			permissions : new Backbone.Collection()
+		});
+	},
+
+	getUsers : function() {
+		return this.get('permissions').where({
+			type : 'user'
+		});
+	},
+
+	getGroups : function() {
+		return this.get('permissions').where({
+			type : 'group'
+		});
+	},
+
+	addPermission : function(permission, action) {
+		var tmp = this.get('permissions').get(permission.id);
+
+		if (!tmp) {
+			// clone the permission.
+			tmp = permission.clone();
+			this.get('permissions').add(tmp);
+		}
+
+		// add attribute to indicate what type of permission this is.
+		tmp.set(action, true);
+	}
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.Restrictions:restrictions', location = 'gov/eop/omb/confluence/plugins/Restrictions/scripts/Restrictions.js' */
+var $ = jQuery, currentPage = {}, SECURE_PLUS_DISABLED_GROUP_NAME = "standard", permissions;
+
+/**
+ * Show only the restricted pages.
+ * 
+ * @return True if the user only wants to display pages with restrictions, otherwise false.
+ */
+function isOnlyRestrictedPages() {
+    // get value of checkbox.
+    return $('input[name="only-show-pages-with-restrictions"]').is(':checked');
+}
+
+/**
+ * @param level
+ *                Ancestor's level in the tree.
+ * @return Returns a jQuery ancestor page object from the restriction panel at the specified level.
+ */
+function getAncestorAtLevel(level) {
+    return $($('.inherited-restriction-list li.standard-page')[level]);
+}
+
+/**
+ * @param page
+ *                jQuery page object.
+ * @return Return the jQuery restriction list for the specified jQuery page object.
+ */
+function getRestrictions(page) {
+    return page.find('ul.restrictions-list');
+}
+
+/**
+ * Function used to iterate over page permissions in list and hide pages which do not have restrictions.
+ * 
+ * @param index
+ * @param element
+ */
+function hideUnrestrictedPages(index, item) {
+    var element = $(item), hasNoChildren = getRestrictions(element).children().length === 0, prevHasNoChildren;
+
+    if (hasNoChildren) {
+	// assert: not the parent page to this page.
+	prevHasNoChildren = getRestrictions(getAncestorAtLevel(index - 1)).children().length === 0;
+
+	if (index > 0 && prevHasNoChildren) {
+	    // there are no children to display, save space and hide the page.
+	    element.hide();
+	} else {
+	    // the first time create the dots
+	    element.addClass('dots').removeClass('page').find('.restriction-header').hide();
+	    element.append($('<span class="dots">...</span>'));
+	}
+    }
+}
+
+/**
+ * Show all ancestor pages.
+ * 
+ * @param index
+ */
+function showAllPages(index) {
+    var element = $(this);
+
+    element.show();
+
+    if (element.hasClass('dots')) {
+	element.find('.dots').remove();
+	element.removeClass('dots').addClass('page').find('.restriction-header').show();
+    }
+}
+
+/**
+ * Called when the user clicks the checkbox indicating if they wish to see pages without restrictions.
+ */
+function onDisplayRestrictionsChange(event) {
+    updateAncestorTree(isOnlyRestrictedPages());
+}
+
+/**
+ * @param all
+ *                True if all ancestors should be displayed; false if tree should hide ancestors which do not have permissions.
+ */
+function updateAncestorTree(all) {
+    var callFunction = all ? hideUnrestrictedPages : showAllPages, last;
+
+    // update the pages in the list.
+    $('.inherited-restriction-list li.standard-page').each(callFunction);
+}
+
+/**
+ * Bind plus/minus functionality.
+ * 
+ * @param event
+ */
+function onTogglePagePermissions(event) {
+    var element = $(this), val = element.find('input[name="restriction-header-open"]').val();
+
+    if (val === "true") {
+	element.closest(".page").find(".restrictions-list").addClass("hidden");
+	element.find("input[name='restriction-header-open']").val("false");
+	element.find(".restriction-header").removeClass("minus-icon");
+	element.find(".restriction-header").addClass("plus-icon");
+    } else if (val == "false") {
+	element.closest(".page").find(".restrictions-list").removeClass("hidden");
+	element.find("input[name='restriction-header-open']").val("true");
+	element.find(".restriction-header").removeClass("plus-icon");
+	element.find(".restriction-header").addClass("minus-icon");
+    }
+}
+
+/**
+ * Called to add a group to the group list. Must have group definition in scope.
+ * 
+ * @param element
+ * @param hide
+ *                True if the view/edit icons should not be displayed when applicable. Otherwise, false for default behavior.
+ * @param item
+ * @param hideSecurePlus
+ *                True if the Secure+ group should not be displayed if in the list, otherwise false.
+ */
+function addGroup(element, hide, item, hideSecurePlus) {
+    if (item.isSecurePlus() && !hideSecurePlus) {
+	// Secure+ groups go first.
+	element.prepend(createGroupLI(item, hide));
+	return;
+    } else if (item.isSecurePlus()) {
+	// Secure+ group should be hidden.
+	return;
+    }
+
+    if (item.get('inherited')) {
+	// do not add inherited groups.
+	return;
+    }
+
+    element.append(createGroupLI(item, hide));
+}
+
+/**
+ * Create a group list item.
+ * 
+ * @param item
+ * @param hide
+ *                True if the view/edit icons should not be displayed when applicable. Otherwise, false for default behavior.
+ * @returns A LI element populated with specified group information.
+ */
+function createGroupLI(item, hide) {
+    var li = $('<li class="group" />'), a = $('<a />'), groupNameSpan = $('<span class="group-name" />'), groupIdSpan = $('<span class="group-id" />');
+
+    groupNameSpan.html(item.friendlyGroupName());
+    groupIdSpan.html(item.get('id'));
+
+    if (item.isSecurePlus()) {
+	// secure plus special.
+	li.addClass('security-level');
+	li.append('<span class="avatar" title="Security Level">');
+    securityLevel = SecurePlusHelper.getSecurePlusLevelById(item.friendlyGroupName());
+	li.append(securityLevel.securityLevelText + ": " + securityLevel.permissionText);
+	return li;
+    }
+
+    // a.attr(
+	   //  'href',
+	   //  "javascript:community.restrictions.getGroupMembers('" + item.get('id') + "','" + item.friendlyGroupName() + "','"
+		  //   + $('meta[name="ajs-remote-user"]').attr('content') + "');").append(groupNameSpan).append(groupIdSpan);
+    
+    //Refactor to address issue with apostrphes in group names (COP-3518) -AWP
+    a.click(function(){
+        community.restrictions.getGroupMembers(item.get('id'), item.friendlyGroupName(), $('meta[name="ajs-remote-user"]').attr('content'));
+    });
+    a.append(groupNameSpan).append(groupIdSpan);
+
+    if (item.get('edit') && !hide) {
+	li.addClass('can-edit-icon');
+    }
+
+    if (item.get('view') && !hide) {
+	li.addClass('can-view-icon');
+    }
+
+    return li.append(a);
+}
+
+/**
+ * Create a user list item.
+ * 
+ * @param item
+ * @param hide
+ * @returns
+ */
+function createUserLI(item, hide) {
+    var li = $('<li class="user">'), a = $('<a>'), img = $('<img class="avatar">');
+
+    li.addClass('user');
+    img.attr('src', contextPath + item.get('profilePicture'));
+
+    // build link
+    a.append(img).append(item.get('name')).attr('href', '/community/display/~' + item.get("emailAddress"));
+    //Disable links of pending users, as no profile exists
+    if((item.get('name').toLowerCase().search("pending user") != -1)){
+        a.disable();
+    }
+
+    if (item.get('edit') && !hide) {
+	li.addClass('can-edit-icon');
+    }
+
+    if (item.get('view') && !hide) {
+	li.addClass('can-view-icon');
+    }
+
+    return li.append(a);
+}
+
+/**
+ * Called to add a user to the user list. Must have user definition in scope.
+ */
+function addUser(item) {
+    if (item.isInactive() || item.get('inherited')) {
+	// skip inactive or or inherited users.
+	return;
+    }
+
+    $('#restrictions-wrapper ul.users').append(createUserLI(item));
+}
+
+/**
+ * Update the visible keys.
+ */
+function updateKey() {
+    if ($('ul > li.can-view-icon').length === 0) {
+	// view key is hidden
+	$('span.can-view-icon').addClass('hidden');
+    } else {
+	// view key is visible
+	$('span.can-view-icon').removeClass('hidden');
+    }
+
+    if ($('ul > li.can-edit-icon').length === 0) {
+	// edit key is hidden
+	$('span.can-edit-icon').addClass('hidden');
+    } else {
+	// edit key is visible
+	$('span.can-edit-icon').removeClass('hidden');
+    }
+}
+
+/**
+ * Add a page to the inheritance section.
+ * 
+ * @param page
+ * @param index
+ * @param collection
+ */
+function addPage(page, index, collection) {
+    if (page.id === getPageId()) {
+	// do not include current page.
+	return;
+    }
+
+    var li = $('<li class="standard-page page">'), header = $('<div class="restriction-header">'), list = $('<ul class="restrictions-list">');
+
+    if (page.get('permissions').length > 0) {
+	// show minus icon for pages with permissions.
+	header.addClass('minus-icon');
+	header.append('<input type="hidden" name="restriction-header-open" value="true">');
+    }
+
+    // add header and append to li.
+    header.append('<a href="/pages/viewpage.action?pageId=' + page.id + '">' + page.get('name') + '</a>');
+
+    li.css('margin-left', (index * 5)).append(header).append(list);
+
+    if ((index + 1) >= collection.length - 1) {
+	// add parent-page class
+	list.addClass('parent-page');
+    }
+
+    _.each(page.getGroups(), function(item) {
+	// 
+	addGroup(list, true, item);
+    }, this);
+
+    _.each(page.getUsers(), function(item) {
+	//
+	list.append(createUserLI(item, true));
+    }, this);
+
+    $('ul.inherited-restriction-list').append(li);
+}
+
+/**
+ * Handle the response containing the permissions.
+ * 
+ * @param pages
+ *                Collection of Pages.
+ */
+function onPermissionsFetch(pages) {
+    // fetch the ancestor pages too, merge them into the page list so we have a
+    // complete tree.
+    $.get('/plugins/restrictions/details.action?pageId=' + getPageId()).done($.proxy(function(response) {
+	onDetailsFetch(pages, response.ancestors, response.groups);
+    }, this));
+}
+
+/**
+ * Generate the inherited permissions tree in the overlay. Update the friendly name of groups.
+ * 
+ * @param pages
+ *                Collection of Pages with permissions.
+ * @param ancestors
+ *                Array of ancestor pages.
+ * @param groups
+ *                Hash map containing group to friendly group name information.
+ */
+function onDetailsFetch(pages, ancestors, groups) {
+    var pageList = pages.get('pages'), currentPage = pageList.get(getPageId());
+
+    pageList.each(function(page) {
+	// each page with permissions needs the friendly group name added.
+	page.get('permissions').each(function(permission) {
+	    // update the group's friendly name.
+	    permission.set('friendlyName', groups[permission.id]);
+	});
+    });
+
+    // must merge in ancestor pages w/o permissions separately.
+    _.each(ancestors, function(ancestor, index) {
+	if (!pageList.get(ancestor.id)) {
+	    // add page at the specified index
+	    pageList.add(new Page({
+		id : ancestor.id,
+		name : ancestor.title
+	    }), {
+		at : index
+	    });
+	}
+    });
+
+    if (currentPage) {
+	var securePlusGroup = null;
+
+	// current page has permissions - build visible list of permission.
+	_.each(currentPage.getGroups(), function(item) {
+	    addGroup($('#restrictions-wrapper ul.groups'), false, item, true);
+	    // Check if group is a secure plus group. Store to set in permissions dropdown
+	    if (item.isSecurePlus())
+		securePlusGroup = item.get('id');
+	}, this);
+
+	_.each(currentPage.getUsers(), addUser, this);
+    }
+
+    // iterate through the page list and add inherited permissions.
+    pageList.each(addPage, this);
+
+    // only display applicable key information.
+    updateKey();
+    updateAncestorTree(isOnlyRestrictedPages());
+
+    // Set securePLus level
+    var securePlusLevel = SecurePlusHelper.getSecurePlusLevelById(securePlusGroup);
+    setSecurePlusText(securePlusLevel);
+
+    if ($('#restrictions li.group, #restrictions li.user').length === 0) {
+	// assert: there are no permissions (group or user) so
+	// uncheck the "Show only pages with restrictions" and
+	// hide the options (it's useless in this case).
+	$('input[name="only-show-pages-with-restrictions"]').attr('checked', false)
+	$('.restrictions-collapse label').addClass('hidden');
+    }
+
+    // listen for plus/minus click.
+    $('.inherited-restriction-list .page').click(onTogglePagePermissions);
+
+    if ($('#restrictions-wrapper').height() > $(window).height()) {
+	// size overlay to fit the window.
+	$('#restrictions-wrapper').css('height', $(window).height() - 50);
+    }
+}
+
+/**
+ * @returns The current page ID as a String.
+ */
+function getPageId() {
+    var result = AJS.params.pageId || '0';
+
+    if (!result.length || result == '0') {
+	// page not found
+	result = $('meta[name=ajs-content-id]').attr('content');
+    }
+
+    return result;
+}
+
+/**
+ * @returns The current page's space key.
+ */
+function getSpaceKey() {
+    var result = AJS.params.spaceKey || '';
+
+    if (!result.length) {
+	// page not found
+	return $('#alt-space-key').attr('content');
+    }
+
+    return result;
+}
+
+/**
+ * Called when the user cancels or saves the page permissions.
+ * 
+ * @param event
+ */
+function onPermissionWindowClose(event) {
+    // mark permission refresh as true. the next time the user browses into the
+    // overlay it will trigger a refresh.
+    // community.restrictions.permissionsRefresh = true;
+}
+
+function onDocumentReady() {
+    // listen for the hide/show only pages with permissions checkbox clicks.
+    $('input[name="only-show-pages-with-restrictions"]').click(onDisplayRestrictionsChange);
+    $(window).on('permissions-dialog-close', onPermissionWindowClose);
+
+    permissions = new PagePermissions({
+	pageId : getPageId(),
+	spaceKey : getSpaceKey()
+    });
+
+    community.restrictions.initialize();
+
+    if (getPageId() === '0') {
+	// no permissions to page.
+	$('#restrictions-wrapper .restrictions-no-permission').show()
+	$('#restrictions-wrapper .permitted').hide();
+	return;
+    }
+}
+
+/**
+ * Update the restriction bar color based on the restriction parameters.
+ * 
+ * @param spacePermissions
+ *                Valid values are: `limited`, `executive`, or `all` of the MAX community.
+ * @param hasViewRestrictions
+ *                True if there are view restrictions on the current page, otherwise false.
+ * @param securePlusLevel
+ *                Object representing Secure+ level looked up from secure plus helper.
+ */
+function setRestrictionLevel(spacePermissions, hasViewRestrictions, securePlusLevel) {
+    var restrictionBar = $('#jquery-restrictions-menu .restrictions-menu-span');
+
+    if (securePlusLevel.levelNum > 1) {
+	// assert: Secure+ enabled - Display Icon.
+	restrictionBar.find('.secure-plus-indicator').removeClass('hidden');
+    //Update secure plus number -COP-3484
+    restrictionBar.find('.secure-plus-number').text(securePlusLevel.levelNum).show();
+    } else {
+	// assert: Secure+ disabled - Hide Icon.
+	restrictionBar.find('.secure-plus-indicator').addClass('hidden');
+    }
+
+    // reset all banners.
+    restrictionBar.removeClass('green-banner').removeClass('grey-banner').removeClass('blue-banner').removeClass('yellow-banner');
+
+    if (hasViewRestrictions) {
+	// assert: Secure+ disabled but there are view restrictions.
+	restrictionBar.find('.restrictions-permissions-extended').text('Restricted');
+	restrictionBar.addClass('blue-banner');
+    } else if (spacePermissions === 'limited') {
+	// assert: grey
+	restrictionBar.find('.restrictions-permissions-extended').text('Collaboration Specific');
+	restrictionBar.addClass('grey-banner');
+    } else if (spacePermissions === 'all') {
+	// assert: yellow banner
+	restrictionBar.find('.restrictions-permissions-extended').text('Open-All Max Users');
+	restrictionBar.addClass('yellow-banner');
+    } else {
+	// assert: no restrictions.
+	restrictionBar.find('.restrictions-permissions-extended').text('Open-Executive Branch');
+	restrictionBar.addClass('green-banner');
+    }
+}
+
+/**
+ * Set text of Secure Plus info inside permissions dropdown.
+ *
+ * @param securePlusLevel
+ *                Object representing Secure+ level looked up from secure plus helper.
+ */
+function setSecurePlusText(securePlusLevel) {
+    var securityLevelText = securePlusLevel.securityLevelText;
+    var securityLevelPermission = securePlusLevel.permissionText;
+
+    var restricitonsLevelDiv = jQuery('.restrictions-security-level');
+    var restrictionsLevelDetail = jQuery('<p class="restrictions-security-level-detail"></p>');
+
+    jQuery(restrictionsLevelDetail).append("<span>" + securityLevelText + "</span>&nbsp;")
+    jQuery(restrictionsLevelDetail).append('<aside class="grey" style="display: inline-block;">' + securityLevelPermission + '</aside>');
+    jQuery(restricitonsLevelDiv).empty();
+    jQuery(restricitonsLevelDiv).append(restrictionsLevelDetail);
+
+    // Add "learn more" link
+    jQuery(restricitonsLevelDiv).append('<p class="blue learn-more"><a href="https://community.max.gov/x/1wJSM">Learn more</a></p>');
+
+}
+
+/**
+ * Called when the permissions dialog closes. Updates the permission bar based on the restriction level.
+ * 
+ * @param event
+ * @param additional
+ *                An object containing additional parameters such as the Secure+ group if it has been changed.
+ */
+function onPermissionsDialogClose(event, additional) {
+    var securePlusLevel = additional.securePlusGroup;
+
+ //    if (additional.securePlusGroup && additional.securePlusGroup === SECURE_PLUS_DISABLED_GROUP_NAME) {
+	// // assert: Secure+ setting changed and it is now disabled.
+	// level = 0;
+ //    } else if (additional.securePlusGroup) {
+	// // assert: Restriction setting changed. Set Secure+ to the
+	// // lowest level for now. We don't really have a good way to determine
+	// // the current level at the moment.
+	// level = 1;
+ //    }
+
+    if (additional.hasViewRestriction !== undefined && securePlusLevel !== undefined && additional.spacePermissions) {
+	// update restriction level.
+	setRestrictionLevel(additional.spacePermissions, additional.hasViewRestriction, securePlusLevel);
+    }
+
+    //Only refresh permissions if restrictions macro is present. COP-3840
+    if($('#jquery-restrictions-menu').size() > 0) {
+        refreshPermissions();
+    }
+}
+
+/**
+ * 
+ */
+function refreshPermissions() {
+    console.log("Refreshing permissions lists");
+    // Set the space name and URL to the root page URL (first item in the tree).
+    $('.space-title').text($('meta[name="space-full-title"]').attr('content'));
+    $('.space-name > a').attr('href', $('.standard-page.page a').first().attr('href'));
+
+    // Clear permissions lists
+    $('.restrictions-description-detail .groups').empty();
+    $('.restrictions-description-detail .users').empty();
+    $('.inherited-restriction-list').empty();
+
+    $('.restrictions-security-level').empty();
+    // Add temp p tag for formatting until loaded
+    $('.restrictions-security-level').append('<p class="restrictions-security-level-detail"></p>');
+
+    permissions.fetch({
+	success : $.proxy(onPermissionsFetch, this),
+	error : $.proxy(onPermissionsFetchError, this)
+    });
+}
+
+/**
+ * Display an error message in the permission dialog.
+ * 
+ * @param message
+ */
+function setError(message) {
+    // hide the manage/view button and display an error.
+    $('#viewInfoLink').hide();
+    $('#restrictions-wrapper').height('inherit');
+    $('#restrictions-wrapper .restrictions-no-permission').html(message).show();
+    $('#restrictions-wrapper .permitted').hide();
+}
+
+/**
+ * Unable to retrieve the permissions -- display an error message.
+ */
+function onPermissionsFetchError() {
+    setError('Unable to retrieve page permissions.');
+}
+
+// Make sure community namespace exists.
+if (typeof community == 'undefined')
+    community = {};
+
+community.restrictions = {};
+
+community.restrictions.filterAvailable = true;
+community.restrictions.previousFilter = {};
+
+// These properties will get populated on page load.
+community.restrictions.menuId = "jquery-restrictions-menu";
+community.restrictions.dropdownId = "restrictions";
+community.restrictions.wrapperId = "restrictions-wrapper";
+
+community.restrictions.wrapperHeight = 0;
+community.restrictions.dropdownOffset = 65;
+community.restrictions.wrapperResizeOffset = 28;
+
+community.restrictions.permissionsRefresh = true;
+community.restrictions.constants = {};
+
+// Constants
+community.restrictions.constants.resultLimit = 1000;
+community.restrictions.constants.timeout = 60000;
+community.restrictions.constants.minFilterLength = 1;
+
+community.restrictions.initialize = function() {
+    var menu = $("#" + community.restrictions.menuId);
+
+    if (menu.size() == 0) {
+	return; // shouldnt run.. no menu found.
+    }
+
+    var dropdown = menu.find("#" + community.restrictions.dropdownId);
+    var wrapper = menu.find("#" + community.restrictions.wrapperId);
+    var collapse = wrapper.find("span.restrictions-collapse");
+
+    var windowHeight = $(window).height();
+    var offset = menu.offset().top;
+    var barHeight = menu.find("span.restrictions-menu-span").height();
+
+    community.restrictions.wrapperHeight = windowHeight - offset - barHeight - community.restrictions.dropdownOffset;
+
+    // Page Restrictions Menu
+    menu.hoverIntent($.proxy(function() {
+	if (community.restrictions.permissionsRefresh) {
+	    // fetch the page permissions.
+	    community.restrictions.permissionsRefresh = false;
+	    refreshPermissions();
+	}
+
+	// display
+	dropdown.removeClass("hidden");
+
+	menu.addClass("active");
+	menu.children("span").addClass("active");
+    }, this), function() {
+	dropdown.addClass("hidden");
+
+	menu.removeClass("active");
+	menu.children("span").removeClass("active");
+    });
+};
+
+//Called when list is initiailized for first time
+community.restrictions.initGroupMembersList = function(data, groupName, groupId) {
+    var dialog = jQuery_142("#restriction-dialog-" + community.restrictions.cleanGroupId(data.group));
+
+    //Fill in member count next to Group ID (COP-3523) 
+    var countNoun = (data.count == 1) ? "user" : "users";
+    dialog.parent().find('.group-id-member-count').html("&nbsp("+data.count+" "+countNoun+")").removeClass('hidden');
+
+    //Store count
+    var metaSize = dialog.find("meta[name='member-list-count']");
+    metaSize.attr("content", data.count);
+        
+    community.restrictions.addGroupMemberData(data, groupName, groupId, true);
+}
+
+community.restrictions.addGroupMemberData = function(data, groupName, groupId, isInit) {
+    var dialog = jQuery_142("#restriction-dialog-" + community.restrictions.cleanGroupId(data.group));
+    var memberTable = jQuery_142("#group-members-table-" + community.restrictions.cleanGroupId(data.group));
+    var tableBody = memberTable.find("tbody");
+    var count = dialog.find("div.group-member-count");
+    var info = dialog.find("div.group-member-info");
+    var loading = dialog.find("div.member-list-loading");
+
+    var totalNumMembers = dialog.find("meta[name='member-list-count']").attr("content");
+
+    var updateCount = function(newCount) {
+        count.text("Displaying " + newCount + " of " + totalNumMembers + " group members in " + groupName);
+    }
+
+    tableBody.empty();
+    info.empty();
+
+    if (!community.restrictions.restrictionData) {
+	// initialize object.
+	   community.restrictions.restrictionData = {};
+    }
+    if (community.restrictions.restrictionData[data.group] == undefined) {
+	   community.restrictions.restrictionData[data.group] = data;
+    }
+
+    if (data.count > 0) {
+	var template = jQuery("#restrictions-member-template");
+
+    updateCount(data.count);
+
+	var timer = new Date();
+	var counter = 0;
+
+	jQuery_142.each(data.membershipList, function() {
+	    if (counter >= community.restrictions.constants.resultLimit) {
+		// info.text("Your search returned a large number of results.
+		// Narrow your search by using the filter.");
+        updateCount(counter);
+
+		return false;
+	    }
+
+        //Only append admin link if first time loading list -COP-3528
+        if(isInit){
+    	    var email = this.userEmailAddress;
+    	    var userEmail = jQuery("[name='ajs-remote-user']").attr("content");
+    	    var userName = this.userFullName;
+    	    if (email.toUpperCase() == userEmail.toUpperCase() && userName.indexOf("(Admin)") !== -1) {
+        		var administerGroup = jQuery_142(" <a></a>");
+        		administerGroup.attr("href", "https://max.omb.gov/maxportal/sa/maxhome/groupAdmin/manageGroup.action?groupId=" + groupId + "");
+        		administerGroup.attr("target", "_blank");
+        		administerGroup.html("Administer Group");
+        		administerGroup.addClass("administer-group");
+        		dialog.find(".table-filter .email-list").prev().after(administerGroup);
+    	    }
+        }
+	    tableBody.append(template.jqote(this));
+
+	    counter++;
+	});
+
+	jQuery_142(tableBody).find("tr:odd").addClass("odd");
+	jQuery_142(tableBody).find("tr:even").addClass("even");
+
+	memberTable.append(tableBody);
+
+	loading.addClass("hidden");
+	memberTable.removeClass("hidden");
+    } else {
+	var div = dialog.find("div.group-member-info");
+
+	div.text("No group members found. Please revise your filter or refresh the page.");
+
+	dialog.append(div);
+    updateCount(0);
+    }
+};
+
+community.restrictions.cleanGroupId = function(id) {
+    var cleanId = id;
+
+    cleanId = cleanId.replace(/\./g, "\\.");
+    cleanId = cleanId.replace(/\(/g, "\\(");
+    cleanId = cleanId.replace(/\)/g, "\\)");
+    cleanId = cleanId.replace(/\&/g, "\\&");
+
+    return cleanId;
+};
+
+community.restrictions.getGroupMembers = function(groupId, groupName, email) {
+    var dialog = $("#restriction-dialog-" + community.restrictions.cleanGroupId(groupId));
+    var params = {};
+
+    if (dialog.size() != 0)
+	dialog.remove();
+
+    params.group = groupId;
+
+    $.ajax({
+	type : "GET",
+	url : contextPath + '/json/getgroupmemberlist.action',
+	data : params,
+	dataType : 'json',
+	timeout : community.restrictions.constants.timeout,
+	success : function(data) {
+	    community.restrictions.initGroupMembersList(data, groupName, groupId);
+	},
+	error : function(jqXHR, textStatus, errorThrown) {
+	    dialog.find("div.group-member-info").text(
+		    "An error has occurred while retrieving the member list. Please make sure you are logged into the system and try again.");
+	}
+    });
+
+    community.restrictions.generateGroupMembersDialog(groupName, groupId);
+};
+
+function getEmailList(dialog) {
+    var instructions = jQuery("<span></span>");
+    instructions.addClass("instructions");
+    instructions
+	    .text("Highlight and Copy (Ctrl+C) the email addresses in this list. Then paste (Ctrl+V) them into the addressee field of your e-mail application ");
+
+    var instructionsList = jQuery("<span></span>");
+    instructionsList.addClass("instructions-list");
+    instructionsList.text("(very large lists may need to be broken up)");
+    instructions.append(instructionsList);
+    instructions.append(".");
+    var t1 = "";
+    var includeNamesChecked = dialog.find(".includeNames:visible").is(':checked');
+
+    if (includeNamesChecked) {
+	dialog.find(".user-full-name:visible, .user-email:visible").each(function() {
+	    if (jQuery(this).is(".user-full-name")) {
+		t1 += "\"" + jQuery(this).text() + "\" ";
+	    } else {
+		t1 += "&lt;" + jQuery(this).text() + "&gt;; ";
+	    }
+	});
+    } else {
+	dialog.find(".user-email:visible").each(function() {
+	    t1 += jQuery(this).text() + "; ";
+	});
+    }
+
+    // return t1;
+
+    dialog.find('.email-list:visible').html(instructions).append(" " + t1);
+}
+
+function getEmailListRefresh(dialog) {
+    var isListEmpty = jQuery(".email-list:visible").is(":empty");
+
+    if (!isListEmpty) {
+	getEmailList(dialog);
+    }
+}
+community.restrictions.filterMembersNoId = function() {
+    var id = jQuery_142(this).closest("div.group-members-dialog").find("meta[name='member-list-groupId']").attr("content");
+
+    community.restrictions.filterMembers(id);
+};
+
+community.restrictions.filterMembers = function(id) {
+    var dialog = jQuery_142("#restriction-dialog-" + community.restrictions.cleanGroupId(id));
+    var filter = dialog.find("div.table-filter input").val().toLowerCase();
+    var metaCount = dialog.find("meta[name='member-list-count']").attr("content");
+    var metaGroup = dialog.find("meta[name='member-list-group']").attr("content");
+
+    var data = community.restrictions.restrictionData[id];
+    var filteredData = {};
+
+    // TODO: Not Needed
+    var filteredList;
+    var table = dialog.find("table.group-members-table");
+
+    if (community.restrictions.filterAvailable && (filter.length >= community.restrictions.constants.minFilterLength || filter.length == 0)) {
+	community.restrictions.filterAvailable = false;
+	community.restrictions.previousFilter[id] = filter;
+
+	filteredData.membershipList = {};
+	filteredData.group = id;
+	filteredData.count = 0;
+
+	jQuery_142.each(data.membershipList, function() {
+	    if (this.userFullName.toLowerCase().indexOf(filter) >= 0 || this.userEmailAddress.indexOf(filter) >= 0
+		    || this.userPhoneNumber.indexOf(filter) >= 0) {
+		filteredData.membershipList[filteredData.count] = this;
+		filteredData.count++;
+	    }
+	});
+
+	community.restrictions.addGroupMemberData(filteredData, metaGroup, id, false);
+
+	setTimeout("community.restrictions.resetFilter('" + id + "');", 500);
+    }
+};
+
+community.restrictions.resetFilter = function(id) {
+    var filter = jQuery_142("#restriction-dialog-" + community.restrictions.cleanGroupId(id) + " div.table-filter input");
+
+    community.restrictions.filterAvailable = true;
+
+    if (filter.val() != community.restrictions.previousFilter[id])
+	community.restrictions.filterMembers(id);
+};
+
+community.restrictions.generateGroupMembersDialog = function(groupName, groupId) {
+    var dialog = jQuery("<div class ='group-member-list-dialog'></div>");
+    var groupCode = jQuery_142("<span class='title-group-id'></span>");
+    var memberCountById = jQuery("<span class='group-id-member-count hidden'</span>"); //Keep hidden until populated
+    var dialogConfig = new JQUERYUI_DIALOG_INFO_HASH;
+
+    var filter = jQuery_142("<div></div>");
+    var filterText = jQuery_142("<input />");
+    var emailGroup = jQuery_142(" <a></a>");
+    var emailList = jQuery_142("<div></div>");
+    var includeNamesSpan = jQuery("<span class='include-names-wrapper'></span>");
+    var emailIncludeNames = jQuery_142("<input />");
+    var emailIncludeNamesLabel = jQuery_142("<label></label>");
+
+    var count = jQuery_142("<div></div>");
+    var info = jQuery_142("<div></div>");
+    var loading = jQuery_142("<div></div>");
+    var metaSize = jQuery_142("<meta />");
+    var metaGroup = jQuery_142("<meta />");
+    var metaGroupId = jQuery_142("<meta />");
+
+    var memberTable = jQuery_142("<table></table>");
+    var tableHead = jQuery_142("<thead></thead>");
+    var tableBody = jQuery_142("<tbody></tbody>");
+
+    var headRow = jQuery_142("<tr></tr>");
+    var headFullName = jQuery_142("<th></th>");
+    var headEmail = jQuery_142("<th></th>");
+    var headPhone = jQuery_142("<th></th>");
+
+    dialog.attr("id", "restriction-dialog-" + groupId);
+    dialog.addClass("group-members-dialog");
+
+    dialogConfig.title = groupName;
+    dialogConfig.width = 600;
+    var windowHeight = jQuery(window).height();
+    dialogConfig.height = windowHeight * 0.75;// take 75%;
+
+    count.addClass('group-member-count');
+    info.addClass('group-member-info');
+    loading.addClass('member-list-loading');
+
+    var randomNum = Math.floor(Math.random() * 100);
+
+    // Build Filter
+    filterText.attr("type", "text");
+    filterText.keyup(community.restrictions.filterMembersNoId);
+    emailIncludeNames.attr("type", "checkbox");
+    emailIncludeNames.attr("id", "includeNames" + randomNum);
+    emailIncludeNames.addClass("includeNames");
+    emailIncludeNames.change(function(){
+        getEmailListRefresh(dialog)
+    });
+    emailIncludeNamesLabel.attr("for", "includeNames" + randomNum);
+    emailIncludeNamesLabel.attr("id", "includeNamesLabel" + randomNum);
+    emailIncludeNamesLabel.addClass("includeNamesLabel");
+    emailIncludeNamesLabel.html("Include names?");
+    emailGroup.attr("href", "#");
+    emailGroup.click(function(){ 
+        getEmailList(dialog)
+    });
+    emailGroup.html("Email Group");
+    emailGroup.addClass("email-group");
+    emailGroup
+	    .attr(
+		    "title",
+		    "Outlook e-mail distributions are limited to 1550 characters. Lists longer than 1550 characters will need to be split up into the To: and Cc: fields or into multiple e-mails.");
+    emailList.addClass("email-list");
+    filter.addClass("table-filter");
+    filter.text("Filter");
+    filter.append(filterText);
+
+    if (groupId != "COMMUNITY.ADMIN") {
+		filter.append(emailGroup);
+	}
+
+    includeNamesSpan.append(emailIncludeNames);
+    includeNamesSpan.append(emailIncludeNamesLabel);
+	filter.append(includeNamesSpan);
+
+    filter.append(emailList);
+
+    metaSize.attr("name", "member-list-count");
+    metaSize.attr("content", "");
+    metaGroup.attr("name", "member-list-group");
+    metaGroup.attr("content", groupName);
+    metaGroupId.attr("name", "member-list-groupId");
+    metaGroupId.attr("content", groupId);
+
+    // Build Table
+    memberTable.addClass("group-members-table");
+    memberTable.addClass("hidden");
+    memberTable.attr("id", "group-members-table-" + groupId);
+    memberTable.attr("cellspacing", "0");
+
+    headFullName.text("Full Name");
+    headEmail.text("E-Mail");
+    headPhone.text("Phone Number");
+
+    headRow.append(headFullName);
+    headRow.append(headEmail);
+    headRow.append(headPhone);
+
+    tableHead.append(headRow);
+    memberTable.append(tableHead);
+    memberTable.append(tableBody);
+
+    loading.text("Loading...");
+
+    dialog.append(metaSize);
+    dialog.append(metaGroup);
+    dialog.append(metaGroupId);
+    dialog.append(filter);
+    dialog.append(count);
+    dialog.append(info);
+    dialog.append(memberTable);
+    dialog.append(loading);
+
+    // Hack to get smaller text in the title.
+    //Append memebr count for COP-3523
+    groupCode.text(groupId).append(memberCountById);
+
+    dialog.dialog(dialogConfig);
+
+    jQuery_142("#ui-dialog-title-restriction-dialog-" + community.restrictions.cleanGroupId(groupId)).append(groupCode);
+};
+
+/**
+ * When the document is loaded, build the restriction overlay.
+ */
+$(window).ready($.proxy(onDocumentReady, this)).on('permissions-dialog-close', onPermissionsDialogClose);
+
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.Restrictions:restrictions', location = 'gov/eop/omb/confluence/plugins/Restrictions/scripts/SecurePlusHelper.js' */
+var SecurePlusHelper = {
+
+	securePlusLevels : [ {
+		levelNum : 1,
+		groupId : null,
+		securityLevelText : 'Standard',
+		permissionText : 'Password, Federated Partner, or higher (NIST LOA 2)'
+	},	{
+		levelNum : 2,
+		groupId :'SecurePlus-General(MultiFactor)',
+		securityLevelText : 'Secure+2',
+		permissionText : 'SMS 2-Factor, Secure Federated Partner, or higher (NIST LOA 2+)'
+	}, {
+		levelNum : 3,
+		groupId :'SecurePlus-Advanced(NISTLevel3)',
+		securityLevelText : 'Secure+3',
+		permissionText : 'ID-Verified SMS, Secure Federated Partner, or PIV/CAC (NIST LOA 3)'
+	}, {
+		levelNum : 4,
+		groupId :'SecurePlus-Advanced(PIVOnly)',
+		securityLevelText : 'Secure+4',
+		permissionText : 'PIV/CAC only (NIST LOA 4)'
+	} ], 
+
+	getSecurePlusLevelById : function(groupId) {
+		var that = this;
+		var currentLevel = null;
+
+		if(groupId == null || groupId == "standard") return that.securePlusLevels[0];
+		else {
+			jQuery.each( that.securePlusLevels, function(level) {
+				if(this.groupId == groupId) {
+					currentLevel = this;
+				} 
+			} );
+		}
+		return currentLevel;
+	},
+
+	getSecurePlusLevelByNumber : function(levelNum) {
+		var currentLevel = null;
+
+
+		jQuery.each( that.securePlusLevels, function(level) {
+				if(this.levelNum == levelNum) currentLevel = this;
+			} );
+		return currentLevel;
+	},
+
+	isSecurePlusGroup : function(groupId) {
+		var that = this;
+		var groupIsSecurePlus = false;
+
+		jQuery.each( that.securePlusLevels, function(level) {
+			if(this.groupId == groupId) {
+				groupIsSecurePlus = true;
+			} 
+		} );
+		return groupIsSecurePlus;
+	}
+}
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;

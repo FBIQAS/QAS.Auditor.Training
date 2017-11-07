@@ -1,0 +1,721 @@
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.Favorites:favorites-resources', location = 'gov/eop/omb/confluence/plugins/Favorites/scripts/favorites.js' */
+var favoritesTree;
+var manageFavoritesTree;
+var manageFavoritesDialog;
+var manageFavTreeJSONStartingObject;
+var favTreeSaving = false;
+var readOnlyFavTreeLoaded = false;
+var smallSpinnerImgForTree = "<img style='float: right; padding-top: 15px;' class='attach-waiting-spinner' src='/community/s/1814/82/90/_/download/images/small-spinner.gif'/>";
+var readonlyfavTreeAjaxConf = {
+		// the URL to fetch the data
+		"url" : contextPath + '/pages/getfavoritesaction.action',
+		async: true,
+		dataType: "json",
+		type: "GET",
+		"error" : function (jqXHR, textStatus, errorThrown) { 
+			AJS.log("Error retreving favorites.") ;
+			if (jqXHR.status == "403") {
+				// not logged in.. 
+				//jQuery_142("#favorites-tree").find("a.jstree-loading").parent().html("<div>Your session has timed out, <a href='" + location.href  + "'>click here</a> to refresh.</div>");
+				jQuery_142("#favorites-tree").parent().append("<div style='margin: 2px; padding: 3px; border: 1px solid black; font-weight: bold;'>Please refresh the page to retrieve your favorites.</div>");
+				jQuery_142("#favorites-tree").find("a.jstree-loading").parent().hide();
+			}
+		},
+		"success" : function () {  
+			// remove ajax loading so that all folders dont get populated with the entire tree after loading
+			var readOnlyFavTreeRef = jQuery_142.jstree._reference("#favorites-tree");
+			readOnlyFavTreeRef._get_settings().json_data.ajax = false;
+			bindReadOnlyFavTreeEvents();
+		}
+};
+
+var managefavTreeAjaxConf = {
+	// the URL to fetch the data
+	"url" : contextPath + '/pages/getfavoritesaction.action',
+	async: true,
+	dataType: "json",
+	type: "GET",
+	"error" : function () { AJS.log("Error retreving favorites.") },
+	"success" : function () {  
+		// remove ajax loading so that all folders dont get populated with the entire tree after loading
+		jQuery_142.jstree._reference("#manage-favorites-tree-wrapper")._get_settings().json_data.ajax = false;										
+	}		
+};
+
+jQuery_142(document).ready(function() {
+	
+	// hide add or remove this page from favorites button
+	var localIsPageFavortied;
+	if(typeof(isPageFavortied) == "undefined")   { localIsPageFavortied = false;} else { localIsPageFavortied = isPageFavortied; }
+	if (localIsPageFavortied) {
+		jQuery_142("#jquery-favorites-add-button").hide();
+	} else {
+		jQuery_142("#jquery-favorites-remove-button").hide();
+	}
+
+	// load when containing div is shown via hover..
+	//loadReadOnlyFavoritesTree();
+		    
+    jQuery_142("#jquery-favorites-add-button, #jquery-favorite-add-link").click(function (){
+    	 addFavPage(false);
+    	 return false;
+     });
+	
+	jQuery_142("#jquery-favorites-remove-button, #jquery-favorite-remove-link").click(function (){
+		 removeFavPage(false);
+   		 return false;
+    });
+	
+	// bind click fav tab icon (add/remove page as fav)
+	/*jQuery_142("#jquery-favorites-tab").click(function (){
+		if (jQuery_142(this).hasClass("toggle")) {
+			// remove it
+			removeFavPage(true);
+			jQuery_142(this).removeClass("toggle");
+		} else {
+			// add it
+			addFavPage(true);
+			jQuery_142(this).addClass("toggle");
+		}
+		return false;
+	});*/
+	
+	jQuery_142("#favorites-tree-filter-input").keyup(function() {;
+		filterReadOnlyfavTree(jQuery_142(this).val());
+	});
+	
+	
+});
+
+
+function filterReadOnlyfavTree (searchTerm) { 
+		
+	if (jQuery_142.trim(searchTerm) == "") {
+		jQuery_142.jstree._reference("#favorites-tree").clear_search();
+		jQuery_142("#favorites-tree.jstree li").show();	
+		return;
+	}
+	
+	jQuery_142.jstree._reference("#favorites-tree").search(searchTerm);
+	jQuery_142("#favorites-tree.jstree li").hide();
+	jQuery_142("#favorites-tree.jstree li a[class=jstree-search]").parents("div.jstree li").show();
+	jQuery_142("#favorites-tree.jstree li a[class=favorite-folder jstree-search]").parents("div.jstree li").show();
+	jQuery_142("#favtree_root_li").show()	// make sure root is always visible after filter
+	
+	
+}
+
+function loadReadOnlyFavoritesTree() {
+	
+	if (readOnlyFavTreeLoaded) {
+		return;
+	}
+
+	if(jQuery_142("#favorites-tree").length == 0) {
+		jQuery_142("body").append("<div class='hidden'><div id='favorites-tree'></div></div>");
+	}
+	
+	favoritesTree = jQuery_142("#favorites-tree").jstree({
+		// the list of plugins to include
+		"plugins" : [ "json_data",  "types", "crrm", "ui", "themes", "search" ], // ,"cookies",
+		// Plugin configuration
+		"json_data" : { 
+			// All the options are the same as jQuery's except for `data` which CAN (not should) be a function
+		"ajax" : readonlyfavTreeAjaxConf			
+		},	
+		"themes" : {
+			"theme" : "default"
+		},
+		/*"metadata" : "metadata",
+		rules : {
+	        metadata : "metadata"
+		},*/
+		"types" : {
+			"max_depth" : 1,
+			valid_children : [ "root" ],			
+			types : {
+				// all node types inherit the "default" node type
+				"root" : {
+					"valid_children" : [ "folder", "favorite_item" ],
+					icon : "folder",
+					"start_drag" : false,
+					"move_node" : false,
+					"delete_node" : false,
+					"remove" : false
+				},
+				"folder" : {
+					"valid_children" : [ "favorite_item", "folder" ],
+					"max_depth" : 5,
+					icon : "folder",
+					"start_drag" : false,
+					"move_node" : false,
+					"delete_node" : false,
+					"remove" : false
+				},
+				"favorite_item" : {
+					"valid_children" : "none",
+					"max_depth" : 0,
+					"icon" : {
+						"image" : "/community/s/1814/87/1.0.9.72/_/download/batch/gov.eop.omb.confluence.plugins.Favorites:favorites-resources/file.png"
+					},
+					"start_drag" : false,
+					"move_node" : false,
+					"delete_node" : false,
+					"remove" : false
+				}
+			}
+		},
+		"crrm" : {
+			"move" : {
+				"default_position" : "first",
+				"check_move" : function (m) { return false ;  }
+			}
+		},
+		"search" : {
+			"case_insensitive" : true
+		}		
+		/*,
+		"cookies" : { 
+			auto_save : true,
+			save_opend : true,
+			cookie_options : { path: '/', expires: 9999999 }
+		}*/
+	});
+		
+	jQuery_142("#favorites-tree").bind("loaded.jstree", function (event, data) {
+	        AJS.log("Read only Fav tree is loaded.");
+	        addClassesToReadOnlyFavTree();
+	        addLinksToReadOnlyFavTree();
+	        
+	        // fix height
+			var topOffset = jQuery("#favorites-tree").offset().top;
+			var windowHeight = jQuery(window).height();
+			var theHeight =  (windowHeight -topOffset) - 50 ; // 20 px less that the heigth minus the offsest from the top
+			if (theHeight < 200)
+				theHeight = 200;
+			jQuery("#favorites-tree").css("height", theHeight);
+	});
+	
+	jQuery_142("#favorites-tree").bind("refresh.jstree", function (event, data) {
+	        AJS.log("Read only Fav tree is refreshed.");
+	        addClassesToReadOnlyFavTree();
+	        addLinksToReadOnlyFavTree();
+	        
+	        // fix height
+			var topOffset = jQuery("#favorites-tree").offset().top;
+			var windowHeight = jQuery(window).height();
+			var theHeight =  (windowHeight -topOffset) - 50 ; // 20 px less that the heigth minus the offsest from the top
+			if (theHeight < 200)
+				theHeight = 200;
+			jQuery("#favorites-tree").css("height", theHeight);
+	});
+	
+	readOnlyFavTreeLoaded = true;
+	
+}
+
+function removeFavPage(asyncBool) {
+	jQuery_142.ajax({
+ 		  type: 'GET',
+ 		  async: asyncBool,
+ 		  url: contextPath + '/pages/removefavoritepage.action',
+ 		  data: "pageId=" + jQuery_142("#pageId").val(),
+ 		  success: function() { 
+		 		// add ajax conf back to readonly tree
+			jQuery_142.jstree._reference("#favorites-tree")._get_settings().json_data.ajax = readonlyfavTreeAjaxConf;
+			// refresh read only tree
+			jQuery_142.jstree._reference("#favorites-tree").refresh();
+			// hide remove button
+			jQuery_142("#jquery-favorites-remove-button").hide();
+			jQuery_142("#button-favorites-remove").hide();
+			// show add button
+			jQuery_142("#jquery-favorites-add-button").show();
+			jQuery_142("#button-favorites-add").show();
+			// toggle check mark off fav button
+			jQuery_142("#favorite-toolbar-icon").addClass("not-favorited").removeClass("favorited");
+ 		  },
+ 		  dataType: 'json'
+   });
+}
+
+function addFavPage(asyncBool) {
+	jQuery_142.ajax({
+ 		  type: 'GET',
+ 		  async: asyncBool,
+ 		  url: contextPath + '/pages/addfavoritepage.action',
+ 		  data: "pageId=" + jQuery_142("#pageId").val(),
+ 		  success: function() { 
+		 	// add ajax conf back to readonly tree
+			jQuery_142.jstree._reference("#favorites-tree")._get_settings().json_data.ajax = readonlyfavTreeAjaxConf;
+			// refresh read only tree
+			jQuery_142.jstree._reference("#favorites-tree").refresh();
+			// hide add button
+			jQuery_142("#jquery-favorites-add-button").hide();
+			jQuery_142("#button-favorites-add").hide();
+			// show remove button
+			jQuery_142("#jquery-favorites-remove-button").show();
+			jQuery_142("#button-favorites-remove").show();
+			// toggle check mark on fav button
+			jQuery_142("#favorite-toolbar-icon").addClass("favorited").removeClass("not-favorited");
+ 		  },
+ 		  dataType: 'json'
+   });
+}
+
+// bind add/remove favorite buttons on page
+jQuery_142("#jquery-favorite-remove-link").click(function (){
+	removeFavPage(true);	
+	return false;
+
+});
+
+jQuery_142("#jquery-favorite-add-link").click(function (){
+	addFavPage(true);
+	return false;
+});
+
+//Function to get random unique ID
+(function(jQuery_142) {
+	var uid = 0;
+	jQuery_142.getUID = function() {
+		uid++;
+		return 'jQ-uid-'+uid;
+
+	};
+
+	jQuery_142.fn.getUID = function() {
+		if(!this.length) {
+			return 0;
+		}
+		var fst = this.first(), id = fst.attr('id');
+		if(!id) {
+			id = jQuery_142.getUID();
+			fst.attr('id', id);
+		}
+		return id;
+	}
+})(jQuery_142);
+
+
+function createNewFolder () {
+	var UUID = jQuery_142.getUID(); 
+	jQuery_142("#manage-favorites-tree-wrapper").jstree("create", "#favtree_root_li", "first", {
+	        "data" : {
+	                "title" : "New Folder",
+	                "attr" : {
+							"class" : "favorite-folder"
+	                	}
+	        },
+	        "attr" : {
+	                "id" : UUID,
+	                "rel" : "folder"
+	        }
+
+	}); 
+	return false;
+	
+}
+
+function removeSelectedNode() {
+	var t = jQuery_142.jstree._reference("#manage-favorites-tree-wrapper").get_selected(); 
+	if (t.length == 0) { alert("You must select a favorite and/or folder to remove first!");}
+	jQuery_142("#manage-favorites-tree-wrapper").jstree("remove");
+}
+
+function renameSelectedNode() {
+	var t = jQuery_142.jstree._reference("#manage-favorites-tree-wrapper").get_selected(); 
+	if (t.length == 0) { alert("You must select a favorite or folder to rename first!");}
+	jQuery_142("#manage-favorites-tree-wrapper").jstree("rename");
+}
+
+function bindReadOnlyFavTreeEvents() {
+	
+	jQuery_142("#favorites-tree").delegate("li[rel='favorite_item']>a","click", function(e) {
+		var linkHref = jQuery_142(this).parent().data().jstree.link;
+		if (typeof(linkHref) != 'undefined') {
+			window.location = contextPath + linkHref;
+		}
+		return false;
+	});
+	
+	jQuery_142("#favorites-tree").delegate("li[rel='folder']>a","click", function(e) {
+		jQuery_142("#favorites-tree").jstree("toggle_node", jQuery_142(this));
+	});
+}
+
+function addClassesToReadOnlyFavTree() {
+	jQuery_142("#favorites-tree>ul>li").addClass("first-level");
+	jQuery_142("#favorites-tree>ul>li>a").addClass("favtree_root");
+	jQuery_142("#favorites-tree>ul>li>ul>li").addClass("second-level");
+	jQuery_142("#favorites-tree>ul>li>ul").addClass("second-level");
+	jQuery_142("#favorites-tree li").addClass("second-level");
+	jQuery_142("#favorites-tree li[rel='folder']>a").addClass("favorite-folder");
+}
+
+function addLinksToReadOnlyFavTree() {
+	
+	// set hrefs for right click "open in new tab" support
+	jQuery_142("#favorites-tree li[rel='favorite_item']>a").each(function (index, value) { 
+		var linkHref = jQuery_142(value).parent().data().jstree.link;
+		if (typeof(linkHref) != 'undefined') {
+			jQuery_142(value).attr("href", contextPath + linkHref);
+		}	
+	});
+	
+}
+
+
+//manage tree dialog
+function generateManageFavoriteDialog() {
+	if (manageFavoritesDialog) {
+		manageFavoritesDialog.dialog('open');
+		
+		
+		return false;
+	}
+	var dialog = jQuery("<div id='manage-favorites-dialog'></div>");
+	var dialogConfig = new JQUERYUI_DIALOG_MODAL_HASH;
+	
+	dialogConfig.buttons = {
+		"Cancel":	function() {
+			jQuery(this).dialog("close");
+		} ,	
+		"Save":	function() {
+			saveFavTree();
+			jQuery(this).dialog("close"); 
+		}
+	}
+	
+	dialogConfig.closeOnEscape = false ;
+	
+	/* Scrollbars  */
+	dialogConfig.open = function(event, ui){
+		// resize on open
+		/*var windowHeight = jQuery(window).height();
+		var windowWidth = jQuery(window).width();
+		manageFavoritesDialog.height(windowHeight * 0.8);   // take 80% 
+		manageFavoritesDialog.width(windowWidth * 0.8) // take 80% 
+*/
+		var h = jQuery("#manage-favorites-dialog").height();
+		jQuery("#manage-favorites-tree-wrapper").css("height", (h - 24));
+		
+		// scroll bars
+		jQuery('body').css('overflow','hidden'); 
+		jQuery('.ui-widget-overlay').css('width','100%');		
+		jQuery("#manage-favorites-dialog").css('overflow','hidden');
+		//document.getElementsByTagName("body")[0].scroll = "no"; // for IE 7	
+		document.getElementsByTagName("html")[0].style.overflow = "hidden";		
+	};
+	
+	dialogConfig.beforeclose = function(event, ui){	
+		// check for unsaved changes
+		var manageFavTreeJSONCurrentObject = jQuery_142.jstree._reference("#manage-favorites-tree-wrapper").get_json(false , [ "id", "rel", "class" , "metadata", "data", "href" ], ["class"]);
+		var v1 = JSON.stringify(manageFavTreeJSONCurrentObject).replace(/jstree-clicked/g,'');
+		var v2 = JSON.stringify(manageFavTreeJSONStartingObject).replace(/jstree-clicked/g,'');
+		if (v1 == v2) {
+			//renderManageFavoritesTree(); // refresh the tree
+			// add ajax conf back to readonly tree
+			jQuery_142.jstree._reference("#manage-favorites-tree-wrapper")._get_settings().json_data.ajax = managefavTreeAjaxConf;
+			// refresh read only tree
+			jQuery_142.jstree._reference("#manage-favorites-tree-wrapper").refresh();
+			return true;
+		} else {
+			// unsaved changes, prompt again
+			if (confirm("You have unsaved changes!\n\nContinue without saving?")) {
+				//renderManageFavoritesTree(); // refresh the tree if user cancels COP-1646
+				// add ajax conf back to readonly tree
+				jQuery_142.jstree._reference("#manage-favorites-tree-wrapper")._get_settings().json_data.ajax = managefavTreeAjaxConf;
+				// refresh read only tree
+				jQuery_142.jstree._reference("#manage-favorites-tree-wrapper").refresh();
+				return true;
+			} else {
+				return false; // block closing
+			}
+		}
+	
+	}
+	
+	
+	dialogConfig.close = function(event, ui){	
+		
+		jQuery('body').css('overflow','auto');		
+		//jQuery("#manage-favorites-dialog").css('overflow','auto');
+		//document.getElementsByTagName("body")[0].scroll = "yes"; // for IE 7
+		document.getElementsByTagName("html")[0].style.overflow = "scroll";
+	};
+	
+	dialogConfig.resize = function(event, ui){
+		var h = jQuery("#manage-favorites-dialog").height();
+		jQuery("#manage-favorites-tree-wrapper").css("height", (h - 24));
+	};
+	
+	dialogConfig.resizeStop = function(event, ui){
+		var h = jQuery("#manage-favorites-dialog").height();
+		jQuery("#manage-favorites-tree-wrapper").css("height", (h - 24));
+	};
+		
+	// defaults were 520 height and 740 width
+	var windowHeight = jQuery(window).height();
+	var windowWidth = jQuery(window).width();
+	dialogConfig.height = windowHeight * 0.8; // take 80% 
+	dialogConfig.width = windowWidth * 0.8; // take 80% 
+	dialogConfig.title = "Manage My Favorites";
+		
+	dialogConfig.minWidth = 650;
+		
+	var favortiesTreeDiv = jQuery("<div class='manage-fav-buttons'>" +
+			"<a id='manage-favorites-tree-add-folder' class='manage-favorites-tree-add-folder' title='Add a new folder below' href='#'><span>Add New Folder</span></a>" +
+			"<a id='manage-favorites-tree-rename-node' class='manage-favorites-tree-rename-node' title='Rename a selected folder or favorite' href='#'><span>Rename</span></a>" +
+			"<a id='manage-favorites-tree-remove-node' class='manage-favorites-tree-remove-node' title='Remove selected folder(s) and/or favorite(s)' href='#'><span>Remove</span></a>" +
+			"</div><div id='manage-favorites-tree-wrapper'></div>");
+
+	dialog.append(favortiesTreeDiv);
+	
+	//var quickLinksTreeDiv = jQuery("<div class='manage-quicklinks-tree-wrapper'></div>");
+	
+	//dialog.append(quickLinksTreeDiv);
+	
+	dialog.dialog(dialogConfig);
+	
+	renderManageFavoritesTree();
+	
+	bindManageFavTreeEvents();
+	
+	manageFavoritesDialog = dialog;
+	
+}
+
+function bindManageFavTreeEvents() {
+	jQuery_142(".manage-favorites-tree-add-folder").click(function (e) {
+		createNewFolder();
+		//return false;
+		e.preventDefault();
+	});
+
+	jQuery_142(".manage-favorites-tree-rename-node").click(function (e) {
+		renameSelectedNode();
+		//return false;
+		e.preventDefault();
+	});
+	
+	jQuery_142(".manage-favorites-tree-remove-node").click(function (e) {
+		removeSelectedNode();
+		//return false;
+		e.preventDefault();
+	});
+	
+	// bind double click to rename node	
+	jQuery_142("#manage-favorites-dialog").delegate("li[rel='folder']>a","dblclick", function(e) {
+		jQuery_142("#manage-favorites-tree-wrapper").jstree("rename", jQuery_142(this)); 
+	});
+	
+	jQuery_142("#manage-favorites-dialog").delegate("li[rel='favorite_item']>a","dblclick", function(e) {
+		jQuery_142("#manage-favorites-tree-wrapper").jstree("rename", jQuery_142(this));
+	});
+	
+	// blur on any input boxes, forces the saving if they are editing another node
+	jQuery_142("#manage-favorites-tree-wrapper").bind("select_node.jstree", function (event, data) {
+		jQuery("#manage-favorites-tree-wrapper input").blur();
+	});
+	
+}
+
+function saveFavTree() {
+	if (favTreeSaving == true) {
+		return false;	
+	}
+	
+	// add spiner
+	jQuery_142("div.ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix").prepend(smallSpinnerImgForTree);
+	
+	favTreeSaving = true;
+	
+	var manageFavTreeJSON = jQuery_142.jstree._reference("#manage-favorites-tree-wrapper").get_json(false , [ "id", "rel", "class" , "metadata", "data", "href" ], ["class"]);
+	
+	manageFavTreeJSONStartingObject = manageFavTreeJSON; // set to new state
+	
+	var jsonString = JSON.stringify(manageFavTreeJSON);
+	jQuery_142.ajax({
+		  type: 'POST',
+		  async: false,
+		  url: contextPath + '/pages/setfavorites.action',
+		  data: "jsonTreeStructure=" + encodeURIComponent(jsonString), // 
+		  success: function() { 
+				AJS.log("----> Manage Fav Tree Save Success.");
+				// add ajax conf back to readonly tree
+				jQuery_142.jstree._reference("#favorites-tree")._get_settings().json_data.ajax = readonlyfavTreeAjaxConf;
+				// refresh read only tree
+				jQuery_142.jstree._reference("#favorites-tree").refresh();
+				favTreeSaving = false;
+				jQuery_142("div.ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix img").hide();
+		  },
+		  dataType: 'json'
+	});
+	
+	// hide spinner
+	jQuery_142("div.ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix img").hide();
+	favTreeSaving = false;
+}
+
+
+function renderManageFavoritesTree() {
+				
+	
+	
+	manageFavoritesTree = jQuery_142("#manage-favorites-tree-wrapper").jstree({
+		// the list of plugins to include
+		"plugins" : [ "json_data",  "dnd", "search", "types", "contextmenu", "themes" , "crrm", "ui"], // "cookies",, "sort"
+		// Plugin configuration
+		"json_data" : { 
+			// All the options are the same as jQuery's except for `data` which CAN (not should) be a function
+			"ajax" : managefavTreeAjaxConf			
+		},	
+		"themes" : {
+			"theme" : "default"
+		},
+		"types" : {
+			valid_children : [ "root" ],
+			"max_children" : 1,
+			types : {
+				// all node types inherit the "default" node type
+				"root" : {
+					"valid_children" : [ "folder", "favorite_item" ],
+					icon : "folder",
+					"start_drag" : false,
+					"move_node" : false,
+					"delete_node" : false,
+					"rename_node" : false,
+					"remove" : false,
+					"hover_node": false,
+					"dehover_node" : false
+				},
+				"folder" : {
+					"valid_children" : [ "favorite_item", "folder" ],
+					"max_depth" : 5,
+					icon : "folder",
+					"hover_node": false,
+					"dehover_node" : false
+				},
+				"favorite_item" : {
+					"valid_children" : "none",
+					"max_depth" : 0,
+					"hover_node": false,
+					"dehover_node" : false,
+					"icon" : {
+						"image" : "/community/s/1814/87/1.0.9.72/_/download/batch/gov.eop.omb.confluence.plugins.Favorites:favorites-resources/file.png"
+					}
+				}
+			}
+		},
+		"dnd" : {
+			"check_timeout" : 50
+		},
+		/*"crrm" : {
+			"move" : {
+				"default_position" : "first",
+				"check_move" : function (m) { return false ;  }
+			}
+		},
+		"cookies" : { 
+				auto_save : true,
+				save_opend : true,
+				cookie_options : { path: '/', expires: 9999999 }
+		},*/
+		contextmenu : { 
+			items: function (NODE, TREE_OBJ) {
+				var obj = {};			
+				if ('folder' == NODE.attr('rel') || 'favorite_item' ==	NODE.attr('rel')) {
+					obj['rename'] = {
+						"separator_before"	: false,
+						"separator_after"	: false,
+						"label"				: "Rename",
+						"action"			: function (obj) { this.rename(obj); }
+					}
+				}
+				if ('folder' == NODE.attr('rel') || 'favorite_item' ==	NODE.attr('rel')) {
+					obj['remove'] = {
+							"separator_before"	: false,
+							"icon"				: false,
+							"separator_after"	: false,
+							"label"				: "Delete",
+							"action"			: function (obj) { this.remove(obj); }
+					}
+				}
+				/*if ('favorite_item' ==	NODE.attr('rel')) {
+					obj['add_to_quick_links'] = {
+							"separator_before"	: true,
+							"icon"				: false,
+							"separator_after"	: false,
+							"label"				: "Add to Quick Links",
+							"action"			: function (obj) { alert(NODE); }
+					}
+				}*/
+				return obj;
+			},			 			
+			select_node : true
+		}
+	});
+	
+	
+	// jQuery_142("#manage-favorites-tree-wrapper")
+	manageFavoritesTree.bind("loaded.jstree", function (event, data) {
+		// save json object prior to use making changes
+		manageFavTreeJSONStartingObject = jQuery_142.jstree._reference("#manage-favorites-tree-wrapper").get_json(false , [ "id", "rel", "class" , "metadata", "data", "href" ], ["class"]);	 
+	});
+	
+}
+
+
+// adding jQuery cookie plugin for 1.4.2
+jQuery_142.cookie = function(name, value, options) {
+    if (typeof value != 'undefined') { // name and value given, set cookie
+        options = options || {};
+        if (value === null) {
+            value = '';
+            options.expires = -1;
+        }
+        var expires = '';
+        if (options.expires && (typeof options.expires == 'number' || options.expires.toUTCString)) {
+            var date;
+            if (typeof options.expires == 'number') {
+                date = new Date();
+                date.setTime(date.getTime() + (options.expires * 24 * 60 * 60 * 1000));
+            } else {
+                date = options.expires;
+            }
+            expires = '; expires=' + date.toUTCString(); // use expires attribute, max-age is not supported by IE
+        }
+        // CAUTION: Needed to parenthesize options.path and options.domain
+        // in the following expressions, otherwise they evaluate to undefined
+        // in the packed version for some reason...
+        var path = options.path ? '; path=' + (options.path) : '';
+        var domain = options.domain ? '; domain=' + (options.domain) : '';
+        var secure = options.secure ? '; secure' : '';
+        document.cookie = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
+    } else { // only name given, get cookie
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+};
+
+
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;

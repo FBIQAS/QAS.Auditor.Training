@@ -1,0 +1,156 @@
+var DIALOG_EXPIRE_DATE_INTERVAL = 30; // In Days
+
+function readOnlyDownloadDialog(link) {
+
+	
+	// only show for office file types - MJK
+	var fileType = detectFileType(link);
+	if ( fileType != "word" && fileType != "excel" && fileType != "ppt" & fileType != "project") {
+		launchDownload(link);
+		return true;
+	}
+	
+	
+	/*if ( supressViewOnlyDialog() ) {
+		launchDownload(link);
+		return false;
+	}*/
+
+	// TODO: open bimodal dialog here
+	var dialog = jQuery("<div class='view-attachment-warning-dialog-wrapper'></div>");
+	var dialogConfig = new JQUERYUI_DIALOG_INFO_HASH;
+	var p = jQuery_142("<h2><span class='view-attchment-warning-dialog-icon'></span>This option is READ ONLY &mdash; no editing possible</h2>" +
+			"<div class='view-attachment-warning-dialog-message'><p><strong>Ignore Microsoft Office instructions</strong> that imply you can edit and save back to the MAX Community. " +
+			"You will only be able to save this file to your local computer. </p>" +
+			"<p><strong>If using MAX Shared Desktop,</strong> all local files will be removed when the desktop is closed.</p>" +
+			"</div>");
+	var dontShowAgain = jQuery_142("<br/><input id='readonly-dont-show-again' style='position: relative; top: 2px;' name='readonly-dont-show-again' type='checkbox'>" +
+	"<label for='readonly-dont-show-again' id='readonly-dont-show-again-text' style='padding-left: 7px;'>Do not show this dialog again</label>");
+
+	dialogConfig.title = "View (or download) Attachment";
+	dialogConfig.buttons = {
+		"Cancel": function() {
+			var current = new Date();
+			var endTime = (current - clickEventsStartTime );
+			clickEvents.push(
+					{ "event" : {
+						"eventId" : "read-only-download-dialog-click-cancel", 
+						"timeSinceLoad" : endTime,
+						"occuredAt" : current.getTime()
+					}
+					});		
+			jQuery(this).dialog("close");			
+			//setReadOnlyDialogPreferences(jQuery_142("#readonly-dont-show-again").is(':checked'));
+			//return false;
+		},
+		"View or Download Attachment": function() {
+			var current = new Date();
+			var endTime = (current - clickEventsStartTime );
+			clickEvents.push(
+					{ "event" : {
+						"eventId" : "read-only-download-dialog-click-download", 
+						"timeSinceLoad" : endTime,
+						"occuredAt" : current.getTime()
+					}
+					});		
+			jQuery(this).dialog("close");
+			readOnlyDialogOpenBool = false;
+			var dontShowCheckedState = jQuery_142("#readonly-dont-show-again").is(':checked');
+			if (dontShowCheckedState) {
+				clickEvents.push(
+						{ "event" : {
+							"eventId" : "read-only-download-dialog-click-dont-show-again", 
+							"timeSinceLoad" : endTime,
+							"occuredAt" : current.getTime()
+						}
+						});		
+				setReadOnlyDialogPreferences(true) 
+			};
+			launchDownload(link);
+			//location.href = link; // navigate to download the attachment in a new window			
+			//return false;
+		}
+	};
+	dialogConfig.width = 560;
+	dialogConfig.modal = true;
+	dialogConfig.closeOnEscape = false;
+	
+	dialogConfig.resizable = false;	
+		
+	// hide the X
+	dialogConfig.open = function(event, ui) { 
+	
+		jQuery(".ui-dialog-titlebar-close").hide();
+		
+		// scroll bars
+		jQuery('body').css('overflow','hidden'); 
+		jQuery('.ui-widget-overlay').css('width','100%');			
+		document.getElementsByTagName("html")[0].style.overflow = "hidden";	
+		
+	} 
+	
+	dialogConfig.close = function(event, ui){	
+		
+		jQuery('body').css('overflow','auto');
+		document.getElementsByTagName("html")[0].style.overflow = "scroll";
+	};
+	
+	dialog.append(p);
+	//dialog.append(dontShowAgain);
+	dialog.dialog(dialogConfig);
+	
+	// set classes on buttons
+	jQuery(dialog).parent().find("div.ui-dialog-buttonpane button:nth-child(1)").addClass("view-attachment-download-file-cancel");
+	jQuery(dialog).parent().find("div.ui-dialog-buttonpane button:nth-child(2)").addClass("view-attachment-download-file-ok");
+
+	readOnlyDialogOpenBool = true;
+
+	//return false;
+
+}
+
+function launchDownload(link) {
+	
+	var downloadWindow = window.open(
+			  link,
+			  '_blank' // <- This is what makes it open in a new window.
+			);
+	downloadWindow.focus();
+	
+}
+
+function supressViewOnlyDialog() {
+	var systemPreferences = userPreferences.getSystemPreferences();
+	var suppress = false;
+
+	if(systemPreferences.downloadAttachmentDialog) {
+		if(new Date() > systemPreferences.downloadAttachmentDialog.expireDate) {
+			setReadOnlyDialogPreferences();
+			suppress = false;
+		} else if(systemPreferences.downloadAttachmentDialog.suppress == true) {
+			suppress = true;
+		}
+	} else {
+		suppress = false;
+		setReadOnlyDialogPreferences();
+	}
+
+	return suppress;
+}
+
+function setReadOnlyDialogPreferences(value) {
+	var systemPreferences = userPreferences.getSystemPreferences();
+
+	var expireDate = new Date();
+
+	expireDate.setDate(expireDate.getDate() + DIALOG_EXPIRE_DATE_INTERVAL);
+
+	if(typeof(value) === "undefined")
+		value = false;
+
+	systemPreferences.downloadAttachmentDialog = {};
+	systemPreferences.downloadAttachmentDialog.suppress = value;
+	systemPreferences.downloadAttachmentDialog.expireDate = expireDate;
+
+	userPreferences.setSystemPreferences(systemPreferences, true, false);
+}

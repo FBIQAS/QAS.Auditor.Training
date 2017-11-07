@@ -1,0 +1,542 @@
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.Comments:comments-section-scripts', location = 'gov/eop/omb/confluence/plugins/Comments/scripts/comments-section.js' */
+if(typeof community == 'undefined')
+     community = {};
+if(community.comments == undefined)
+    community.comments = {};
+
+community.comments.addCommentTitleUrl = "/pages/addcommenttitle.action";
+
+community.comments.section = {};
+community.comments.section.element = jQuery(); 			// Will contain jQuery element
+community.comments.section.collapseButton = jQuery();	// Will contain jQuery element
+community.comments.section.showHiddenButton = jQuery();	// Will contain jQuery element
+community.comments.section.hideHiddenButton = jQuery();	// Will contain jQuery element
+community.comments.section.animating = false;
+
+community.comments.deletedList = jQuery();				// Will contain jQuery element
+
+// Functions
+community.comments.initialize = function ()
+{	
+	var hash = window.location.hash;
+	
+	community.comments.section.element = jQuery(".page-controls-content-comments");
+	community.comments.section.collapseButton = jQuery("#jquery-comments-collapse");
+	community.comments.section.showHiddenButton = jQuery("#jquery-show-comments");
+	community.comments.section.hideHiddenButton = jQuery("#jquery-hide-comments");
+	community.comments.deletedList = jQuery("li.hidden-comment");
+	
+	// Collapse Comments Section Functionality
+	community.comments.section.collapseButton.click(function ()
+	{
+		community.comments.toggleSection();
+		return false;
+	});
+	
+	// Scroll to editor if one exists on page
+	if(hash == "#comments")
+		jQuery.scrollTo(jQuery("#page-controls-comments"));
+	else if(jQuery("#page-controls-comments li.editor").size() > 0)
+		jQuery.scrollTo(jQuery("#page-controls-comments li.editor"));
+	else if(hash.indexOf("comment") >= 0)
+		jQuery.scrollTo(jQuery(hash.replace("#", "#jquery-")), {axis: "y", offset: -240});
+		
+	// Move functionality
+	jQuery(".jquery-comments-move").click(function (e)
+	{
+	    var commentId = jQuery(this).closest("li").attr("id").replace("jquery-comment-", "");
+		
+	    e.preventDefault();
+	    
+	    if (jQuery("#move-page-dialog").length > 0)
+	    	jQuery("#move-page-dialog, body > .shadow, body > .blanket").remove();
+
+	    new MoveContentDialog({
+		    	title: "Move Comment",
+		    	dialogDataStore:{
+                "commentId": commentId,
+            },
+		    	locationPanelInfo: "Specify the new parent page for this comment and its children by space and title.",
+		    	searchPanelInfo: "Search for and select the new parent page for this comment and its children. ",
+		    	historyPanelInfo: "Select the new parent page for this comment and its children from your history. ",
+		    	browsePanelInfo: "Click to select the new parent page for this comment and its children. ",
+		        moveHandler: community.comments.moveCommentHandler
+		    });
+	    
+	    if(jQuery.browser.msie && jQuery.browser.version == "7.0")
+	    	jQuery.scrollTo("#move-page-dialog", {axis: 'y'})
+
+	    return false;
+	});
+	
+	jQuery("#page-controls-comments .page-controls-buttons a, #content-comment a").click(function ()
+	{
+		community.comments.expandSection();
+	});
+	
+	if(jQuery.cookie('comments-show-hidden-' + community.page.id) == "true")
+		community.comments.showHidden();
+	
+	// Comment Count
+	jQuery(".page-controls-content-comments").ready(function ()
+	{
+		var count = jQuery(".comment").size();
+		
+		jQuery("#jquery-comments-tab-count").text(count);
+	});
+};
+
+community.comments.collapseSection = function ()
+{
+	if(jQuery.browser.msie && parseInt(jQuery.browser.version) < 8)
+	{
+		community.comments.section.element.addClass("hidden");
+		community.comments.section.animating = false;
+	}
+	else
+	{
+		community.comments.section.element.slideUp('slow', function ()
+		{
+			community.comments.section.element.addClass("hidden");
+			community.comments.section.animating = false;
+		});
+	}
+	
+	community.comments.section.collapseButton.removeClass("collapse");
+	community.comments.section.collapseButton.addClass("expand");
+	
+	userPreferences.setCommentsSectionCollapse(true);
+};
+
+community.comments.expandSection = function ()
+{
+    community.comments.section.element.removeClass("hidden");
+	
+	if(jQuery.browser.msie && parseInt(jQuery.browser.version) < 8)
+	{
+		community.comments.section.animating = false;
+	}
+	else
+	{
+		community.comments.section.element.slideDown('slow', function ()
+		{
+			community.comments.section.animating = false;
+		});
+	}
+	
+	community.comments.section.collapseButton.removeClass("expand");
+	community.comments.section.collapseButton.addClass("collapse");
+	
+	userPreferences.setCommentsSectionCollapse(false, true, false);
+};
+
+community.comments.toggleSection = function ()
+{	
+	if(community.comments.section.animating == false)
+	{
+		community.comments.section.animating = true;
+	
+		if(community.comments.section.element.hasClass("hidden"))
+			community.comments.expandSection();
+		else
+			community.comments.collapseSection();
+	}
+};
+
+community.comments.showHidden = function ()
+{
+	if(jQuery.browser.msie && parseInt(jQuery.browser.version) < 8)
+		community.comments.deletedList.removeClass("hidden");
+	else
+	{
+		community.comments.deletedList.removeClass("hidden");
+		community.comments.deletedList.slideDown("slow");
+	}
+	
+	community.comments.section.showHiddenButton.hide();
+	community.comments.section.hideHiddenButton.show();
+	
+	jQuery("#jquery-no-visible-comments").hide();
+	
+	jQuery.cookie('comments-show-hidden-' + community.page.id, true);
+};
+
+community.comments.hideHidden = function ()
+{	
+	if(jQuery.browser.msie && parseInt(jQuery.browser.version) < 8)
+		community.comments.deletedList.addClass("hidden");
+	else
+		community.comments.deletedList.slideUp("slow", function (){
+			community.comments.deletedList.addClass("hidden");
+			});
+	
+	community.comments.section.showHiddenButton.show();
+	community.comments.section.hideHiddenButton.hide();
+	
+	jQuery("#jquery-no-visible-comments").show();
+	
+	jQuery.cookie('comments-show-hidden-' + community.page.id, false);
+};
+
+community.comments.archiveComment = function (id, archive)
+{
+	var dialog = jQuery("<div></div>");
+	var comment = jQuery("#jquery-comment-" + id)
+	var p = jQuery("<p></p>");
+	
+	if(!archive && comment.parent("ul").prev("li.hidden-comment").length == 1)
+	{
+		var dialogConfig = new JQUERYUI_DIALOG_WARNING_HASH;
+		
+		p.text("This comment may not be unhidden before its parent.");
+		
+		dialog.append(p);
+		dialog.dialog(dialogConfig);
+	}
+	else
+	{
+		var dialogConfig = new JQUERYUI_DIALOG_INFO_HASH;
+		var ul = jQuery("<ul></ul>");
+		var children = comment.next("ul").clone(false);
+		
+		if(archive)
+		{
+			dialogConfig.title = "Confirm Hide";
+			p.text("Are you sure you want to hide the following?");
+		}
+		else
+		{
+			dialogConfig.title = "Confirm Unhide";
+			p.text("Are you sure you want to unhide this comment?");
+		}	
+		
+		dialogConfig.buttons = {
+									"Cancel": function(){ jQuery(this).dialog("close"); },
+									"Yes": function(){ 
+												community.comments.archiveCommentAction(id, archive, true); 
+												jQuery(this).dialog("close");
+											}									
+								};
+		dialogConfig.width = 500;
+		
+		
+		dialogConfig.open = function() {
+			$(this).parents('.ui-dialog').find('.ui-dialog-buttonpane button:eq(0)').focus(); 
+	    };
+		
+		comment = comment.clone(false);
+		comment = community.comments.styleDialogComment(comment);
+		
+		ul.append(comment);
+		
+		if(children.length > 0)
+			ul.append(children);
+			
+		ul.find("div.comments-options-wrapper").remove();
+		
+		dialog.append(p);
+		dialog.append(ul);
+		dialog.dialog(dialogConfig);
+	}
+};
+
+community.comments.archiveCommentAction = function (id, archive, async)
+{
+	var link = jQuery("#hide-comment-action-" + id);
+	var url = "/pages/archivecomment.action?commentID=" + id + "&archive=" + archive;
+	link.attr("disabled", "disabled");
+
+	jQuery.ajax({
+		type:		"POST",
+		async:  async,
+		url:		url,
+		success:	function(message) {
+						community.comments.archiveSuccess(id, archive);
+					},
+		error:		function(message) {
+						community.comments.archiveError();
+					}
+	});
+	
+	link.removeAttr("disabled");
+};
+
+community.comments.archiveSuccess = function (id, archive)
+{
+	location.reload(true);
+};
+
+community.comments.archiveError = function ()
+{
+	var dialog = jQuery("<div></div>");
+	var dialogConfig = new JQUERYUI_DIALOG_ERROR_HASH;
+	var p = jQuery("<p></p>");
+	
+	dialogConfig.title = "Error Deleting Comment";
+	
+	p.text("An error has occured while archiving the comment. Please refresh the page and try again.");
+	
+	dialog.append(p);
+	dialog.dialog(dialogConfig);
+};
+
+community.comments.deleteComment = function (commentId, pageId)
+{
+	var dialog = jQuery("<div></div>");
+	var dialogConfig = new JQUERYUI_DIALOG_INFO_HASH;
+	var comment = jQuery("#jquery-comment-" + commentId).clone();
+	comment = community.comments.styleDialogComment(comment);
+	var p = jQuery("<p></p>");
+	var ul = jQuery("<ul></ul>");
+	
+	dialogConfig.title = "Confirm Delete";
+	dialogConfig.buttons = {								
+								"Cancel": function(){ jQuery(this).dialog("close"); },
+								"Yes": function(){ 
+									community.comments.deleteCommentAction(commentId, pageId, "yes"); 
+									jQuery(this).dialog("close");
+								}
+							};
+	dialogConfig.width = 500;
+	
+	dialogConfig.open = function() {
+		$(this).parents('.ui-dialog').find('.ui-dialog-buttonpane button:eq(0)').focus(); 
+    };
+	
+	p.text("Are you sure you want to remove this comment?");
+	comment.find("div.comments-options-wrapper").remove();
+	ul.append(comment);
+	
+	dialog.append(p);
+	dialog.append(ul);
+	dialog.dialog(dialogConfig);
+};
+
+community.comments.deleteCommentAction = function (commentId, pageId, confirm)
+{
+	// un-archive/un-hide before delete!
+	if ($("#jquery-comment-" + commentId).hasClass("hidden-comment")) {
+		community.comments.archiveCommentAction(commentId, false, false);
+	}
+	var url = "/pages/removecomment.action?commentId=" + commentId + "&pageId=" + pageId +  "&confirm=" + confirm +
+	    "&atl_token=" + jQuery("#atlassian-token").attr("content");
+
+	jQuery.ajax({
+		type:		"POST",
+		url:		url,
+		success:	community.comments.deleteSuccess,
+		error:		community.comments.deleteError
+	});
+};
+
+community.comments.deleteSuccess = function ()
+{
+	location.reload(true);
+};
+
+community.comments.deleteError = function ()
+{
+	var dialog = jQuery("<div></div>");
+	var dialogConfig = new JQUERYUI_DIALOG_ERROR_HASH;
+	var p = jQuery("<p></p>");
+	
+	dialogConfig.title = "Error Deleting Comment";
+	
+	p.text("An error has occured while deleting the comment. Please refresh the page and try again.");
+	
+	dialog.append(p);
+	dialog.dialog(dialogConfig);
+};
+
+community.comments.moveCommentHandler = function (dialog, newSpaceKey, newParentPage, dataStore, setErrors)
+{
+	var commentId = dataStore.commentId;
+
+	dialog = dialog.popup.element;
+    dialog.addClass("waiting");
+    
+    // jQuery("button", dialog).attr("disabled", "disabled");
+    
+    // var throbber = jQuery("<div class='throbber'></div>");
+    // dialog.append(throbber);
+    
+    // var killSpinner = Raphael.spinner(throbber[0], 100, "#666");
+
+    var moveCommentParams = { commentId: commentId,
+            				  pageId: community.page.id,
+            				  newSpaceKey: newSpaceKey,
+            				  newPageTitle: newParentPage
+        					};
+    
+    jQuery.ajax({
+        url: contextPath + "/movecomment/movecomment.action",
+        type: "POST",
+        data: moveCommentParams,
+        error: function () {
+            error(AJS.params.movePageDialogMoveFailed);
+        },
+        success: function (data) {
+            location.reload(true);
+        }
+    });
+    
+    function error(messages) {
+        setErrors(messages);
+        dialog.removeClass("waiting");
+        // killSpinner();
+        // jQuery("button", dialog).attr("disabled", "");
+    }
+};
+
+community.comments.moveTitle = function (id)
+{
+	var title = jQuery("#page-controls-comments #jquery-comment-title-" + id);
+	var wrapper = title.closest(".comment-wrapper");
+	
+	if(title.length > 0 && wrapper.data("hasTitle") == null)
+	{
+		wrapper.prepend(title);
+		wrapper.data("hasTitle", true);
+		wrapper.data("titleId", id);
+		
+		wrapper.ready(function () { wrapper.find(".jquery-comments-add-title b").text("Edit Title"); });
+	}
+	else if(wrapper.data("titleId") != id)
+	{
+		title.remove();
+	}
+};
+
+community.comments.addTitle = function (id)
+{
+	var wrapper = jQuery("#jquery-comment-" + id);
+	
+	var dialog = jQuery("#jquery-comment-title-dialog-" + id);
+	
+	if(dialog.length == 0)
+	{	
+		dialog = jQuery("<div></div>");
+		var dialogConfig = new JQUERYUI_DIALOG_MODAL_HASH;
+		
+		dialogConfig.height = 160;
+		dialogConfig.width = 500;
+		dialogConfig.minHeight = false;
+		dialogConfig.minWidth = false;
+		
+		dialog.attr("id", "jquery-comment-title-dialog-" + id);
+		
+		// Set up form
+		var form = jQuery("<form></form>");
+		
+		form.attr("class", "comment-title-form");
+		form.attr("action", community.comments.addCommentTitleUrl);
+		
+		form.submit(function (){		
+			// TODO
+			jQuery.ajax({
+				type: "POST",
+				url: jQuery(this).attr("action"),
+				data: jQuery(this).serialize(),
+				success: function (data, textStatus, jqXHR){
+					community.comments.addTitleSuccess(data, textStatus, jqXHR, id);
+				},
+				error: function (jqXHR, textStatus, errorThrown){
+					community.comments.addTitleError(data, textStatus, jqXHR, id);
+				}
+			});
+			
+			return false;
+		});
+		
+		// Comment ID field
+		var commentId = jQuery("<input />");
+		
+		commentId.attr("type", "hidden");
+		commentId.attr("name", "commentId");
+		commentId.attr("value", id);
+		
+		// Comment Title Field
+		var commentTitle = jQuery("<input />");
+		
+		commentTitle.attr("class", "comment-title-input");
+		commentTitle.attr("type", "text");
+		commentTitle.attr("name", "commentTitle");
+		
+		// Custom Title and Form field
+		if(wrapper.data("hasTitle"))
+		{
+			dialogConfig.title = "Edit Comment Title";
+			commentTitle.val(jQuery.trim(wrapper.find(".comment-title").text()));
+		}
+		else
+		{
+			dialogConfig.title = "Add Comment Title";
+		}
+		
+		// Add fields to form
+		form.append(commentId);
+		form.append(commentTitle);
+		
+		dialogConfig.buttons["OK"] = function ()
+		{
+			jQuery(this).find("form").submit();		
+			jQuery(this).dialog("close");
+		};
+		
+		dialog.append(form);
+		dialog.dialog(dialogConfig);
+	}
+	else
+	{
+		dialog.dialog("open");
+	}
+};
+
+community.comments.addTitleSuccess = function (data, textStatus, jqXHR, id)
+{
+	var dialog = jQuery("#jquery-comment-title-dialog-" + id);
+	
+	dialog.dialog("close");
+	
+	location.href = location.pathname + "#jquery-comment-" + id; // set location before reload, so you get anchor ;)  -- MJK
+	
+	location.reload(true);
+};
+
+community.comments.addTitleError = function (data, textStatus, jqXHR, id)
+{
+	var dialog = jQuery("#jquery-comment-title-dialog-" + id);
+	
+	var errorDialog = jQuery("<div></div>");
+	var dialogConfig = new JQUERYUI_DIALOG_ERROR_HASH;
+	var p = jQuery("<p></p>");
+	
+	dialogConfig.title = "Error Adding Title";
+	
+	p.text("An error has occured while adding a title to the comment. Please refresh the page and try again.");
+	
+	dialog.dialog("close");
+	
+	errorDialog.append(p);
+	errorDialog.dialog(dialogConfig);
+};
+
+community.comments.styleDialogComment = function (comment)
+{
+	comment.find("img.avatar").attr("style", "width: 24px; height: 24px; position: absolute; left: 21px;");
+	comment.attr("style", "list-style-type: none;");
+	
+	return comment;
+}
+
+
+
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;

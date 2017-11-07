@@ -1,0 +1,336 @@
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources', location = 'scripts/splashscreen.js' */
+
+	var splashScreenTitle = "";
+
+	$(document).ready(function() {
+		var NEW_COLLAB_PARAM = "showSplash=true";
+		// check for parameter value in the url and if present launch the post create splash screen  
+		var urlParams = window.location.search;
+		if(urlParams.indexOf(NEW_COLLAB_PARAM) != -1) {
+			// console.log("AWP: param found");
+	 		initOptionsWindow("Collaboration Created! Next steps...");
+			}
+	
+		
+		//Bind open splash screen user macro
+		$('#open-splash-screen-link').click( function() {
+			initOptionsWindow(splashScreenTitle);
+
+			// //Check if splash screen exists
+			// if($('.splash-screen').length) {
+			// 	//See if splash screen is currently open
+			// 	if(!jQuery('.splash-screen').dialog("isOpen")){
+			// 	//Change title text
+			// 		jQuery('.splash-screen').parent().find('.ui-dialog-title').html(splashScreenTitle);
+			// 		//Open dialog
+			// 		jQuery('.splash-screen').dialog("open");
+			// 	}
+			// }
+			// else{
+			// 	//If it doen't exist, initialize
+			// 	initOptionsWindow(splashScreenTitle);
+			// }
+		
+			// add click stats
+            var current = new Date();
+            var endTime = (current - clickEventsStartTime);
+            clickEvents.push({
+                  "event" : {
+                        "eventId" : jQuery(this).attr('id'),
+                        "timeSinceLoad" : endTime,
+                        "occuredAt" : current.getTime()
+                  }
+            });
+		});
+	});
+
+	var ActionItemView = Backbone.View.extend({
+		tagName: 'li',
+		template: '',
+		className: 'splash-action-item',
+		initialize: function(){
+			this.template = _.template($('#action-item-template').html().replace(/\t/g, ''));
+		},
+
+		render: function(){
+			this.$el.html(this.template(this.model.attributes));
+			return this; 
+		},
+	});
+
+	var ActionListView = Backbone.View.extend({
+		// model: ActionItemCollection,
+		tagName : 'div',
+		template : '',
+		className: 'splash-action-list',
+
+		initialize: function(){
+			if ($("#splash-template").size() == 0) {
+				$.ajax({
+					url : "/s/4396/" + (new Date).getTime()
+							+ "/_/download/batch/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources"
+							+ "/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-templates.html",
+					async : false,
+					success : function(data) {
+						$("body").append(data);
+					},
+					error : function() { alert("Error");},
+				});
+			}
+
+			this.template = _.template($('#action-list-template').html().replace(/\t/g, ''), this.options);
+
+		},
+
+		render: function(){
+			this.$el.html(this.template);
+
+			for(var i =0; i< this.collection.length; i++){
+				var actionItemView = new ActionItemView({model: this.collection.at(i)});
+
+				this.$el.find('.splash-list').append(actionItemView.render().$el);
+			}
+			return this;
+		},
+		events: {
+			'click #splash-edit-content' : 'handleEditClick',
+			'click #splash-addAttach-content' : 'handleAttachClick',
+			'click #splash-restrict-content' : 'handleRestrictClick',
+			'click #splash-share-content' : 'handleShareClick',
+			'click #splash-watch-content' : 'handleStartWatchClick',
+			'click #splash-stop-watch-content' : 'handleStopWatchClick',
+			'click #splash-favorite-content' : 'handleAddFavoritesClick',
+			'click #splash-favorite-remove-content' : 'handleRemoveFavoritesClick'
+		},
+		handleEditClick : function(e) {
+			if (!this.isRunning(e)) window.location.href = $('#button-edit-page-link').attr('href');
+		},
+		handleAttachClick : function(e) {
+			if (!this.isRunning(e)) {
+				//Check if attachments section is visible
+				if($('#page-controls-attachments-padding').is(":visible")){
+					$('#btn-add-attachment').click();
+					//Auto scroll to attachments section
+					$("#page-controls-attachments").get(0).scrollIntoView();
+				}
+				//If attachments seciton is hidden, see if there are attachments macros
+				else if($('.new-attachments-macro-wrapper').length) {
+					$('.new-attachments-macro-wrapper').each(function () { 
+						var attachmentsMacro = this;
+
+						//If so, find first with an upload button (if any) and click
+						var uploadButtons = $(this).find('.btn-new-attachments-macro-add-attachment');
+
+						if(uploadButtons.length) {
+						 	uploadButtons.first().click();
+						 	
+						 	//Auto scroll to section
+							$(attachmentsMacro).get(0).scrollIntoView();
+						 	
+						 	//Stop looking at first button found
+						 	return false;
+						}
+					});
+				}
+				//If no attachments macro, make attachments section visible and open upload
+				else {
+					$('#btn-add-attachment').click();
+					$('#attachment-add-new-wrapper').parent().before($('#attachment-add-new-wrapper'));
+					$("#page-controls-attachments").get(0).scrollIntoView();
+				}
+
+				jQuery('.splash-screen').dialog("close");
+			}
+		},
+		handleRestrictClick : function(e) {
+			if (!this.isRunning(e)) {
+				$('#viewInfoLink').click();
+				jQuery('.splash-screen').dialog("close");
+			}
+		},
+		handleShareClick : function(e) {
+			if (!this.isRunning(e)) {
+				$('#jquery-link-to-page').click();
+				jQuery('.splash-screen').dialog("close");
+			}
+		},
+		handleStartWatchClick : function(e) {
+			if (!this.isRunning(e)) {
+				$('#start-watching-page-link').click();
+				$('#splash-watch-content').parent().hide();
+				$('#splash-stop-watch-content').parent().show();	
+			}		
+		},
+		handleStopWatchClick : function(e) {
+			if (!this.isRunning(e)) {
+				$('#stop-watching-page-link').click();
+				$('#splash-watch-content').parent().show();
+				$('#splash-stop-watch-content').parent().hide();
+			}
+		},
+		handleAddFavoritesClick : function(e) {
+			if (!this.isRunning(e)) {
+				$('#jquery-favorites-add-button').click();
+				$('#splash-favorite-content').parent().hide();
+				$('#splash-favorite-remove-content').parent().show();
+			}
+		},
+		handleRemoveFavoritesClick : function(e) {
+			if (!this.isRunning(e)) {
+				$('#jquery-favorites-remove-button').click();
+				$('#splash-favorite-content').parent().show();
+				$('#splash-favorite-remove-content').parent().hide();
+			}
+		},
+		isRunning : function(e) {
+			if ($(e.currentTarget).hasClass("splash-action-running")) {
+				console.log("Splash Screen Action is already running. ID: " + e.currentTarget.id);
+				return true;
+			}
+			else {
+				$(e.currentTarget).addClass("splash-action-running");
+				//Remove class after specified millis
+				setTimeout(function(){ 
+					$(e.currentTarget).removeClass("splash-action-running");
+				}, 1000);
+				return false;
+			}
+		}
+	});
+
+	var ActionItem = Backbone.Model.extend({
+		defaults: {
+			id: "",
+			itemText: "",
+			onClickElementID: "",
+			iconLink: ""
+		},
+	});
+
+	var ActionItemCollection = Backbone.Collection.extend({
+		model: ActionItem
+	});
+
+
+	var initOptionsWindow = function(){
+		//Default value
+		initOptionsWindow("Page Options");
+	}
+
+	var initOptionsWindow = function(text){
+		//Setup the window
+		var titleText = text; 
+		// var wizardView = new WizardView();
+
+		var splashScreen = jQuery("<div class='splash-screen'></div>");
+		var splashConfig = new JQUERYUI_DIALOG_MODAL_HASH;
+
+		splashConfig.buttons = {
+						// "Done":	function() {
+						// 			jQuery(this).dialog("close"); 
+						// 		}
+						};
+
+		//Bind close action
+		 jQuery(this).bind('dialogclose', function(event) {
+    		 $('.splash-screen').remove();
+    		 jQuery(this).off('dialogclose');
+		 });
+		// var windowHeight = jQuery(window).height();
+		// var windowWidth = jQuery(window).width();
+		splashConfig.height = 300;
+		splashConfig.width = 500;
+
+		splashConfig.resizable = false;
+		// splashConfig.autoOpen = false;
+		splashConfig.title = titleText;
+
+		// splashScreen.append(wizardView.render().$el);
+
+		// wizardView.on('closeDialog', function() {
+		// 	splashScreen.dialog('close')
+		// });
+
+		splashScreen.dialog(splashConfig);
+		splashScreen.dialog('open');
+
+
+		//Init the models and collections
+		var authorActionItems = new ActionItemCollection();
+		var shareActionItems = new ActionItemCollection();
+
+		//Pass to helper function each action item to add to the view. 
+		//params are (name of action (for ids), text to display, collection (list to display action))
+		buildAction("edit", "Edit Content", authorActionItems);
+		buildAction("addAttach", "Add Attachments", authorActionItems);
+		buildAction("restrict", "Restrict Content",  authorActionItems);
+
+		buildAction("share", "Share via link or email", shareActionItems);
+
+		buildAction("watch", "Subscribe to Page Updates", shareActionItems);
+		buildAction("stop-watch", "Stop Watching Page", shareActionItems);
+
+		buildAction("favorite", "Add page to your favorites", shareActionItems);
+		buildAction("favorite-remove", "Remove from your favorites", shareActionItems);
+
+
+		//init the splash screen view
+		var authorView = new ActionListView({collection: authorActionItems, listTitle: "Author", id: "splash-author-list"});
+		$(".splash-screen").append(authorView.render().$el);
+
+		var shareView = new ActionListView({collection: shareActionItems, listTitle: "Share", id: "splash-share-list"});
+		$(".splash-screen").append(shareView.render().$el);
+
+		//Check if already watched, show apprioriate action
+		if($('#start-watching-page-link').parent().hasClass("hidden")) $('#splash-watch-content').parent().hide();
+		else $('#splash-stop-watch-content').parent().hide();
+
+		//Check if already favorited, show apprioriate action
+		if($('#jquery-favorites-add-button').is(":visible"))  $('#splash-favorite-content').parent().hide();
+		else $('#splash-favorite-remove-content').parent().hide();
+
+		//Check for permission to edit, attach, restrict
+		if($('#button-edit-page-link').hasClass("disabled")) disableAction('#splash-edit-content', 'You do not have permission to edit this page.');
+		if($('#btn-add-attachment-disabled').length) disableAction('#splash-addAttach-content', 'You do not have permission to add attachments.');
+		
+		//Change text of restrictions
+		if($('#viewInfoLink').text().trim() === "View Full Page Permissions") $('#splash-restrict-content .splash-item-text').text("View Page Restrictions");
+		//Neutral wording in case of text change in restrictions bar.
+		else if ($('#viewInfoLink').text().trim() != "Manage Page Permissions") $('#splash-restrict-content .splash-item-text').text("View/Edit Page Restrictions");
+		
+		//Load favorites (in order for add button work)
+		loadReadOnlyFavoritesTree(); 
+
+		//If no text, remove title and border at top
+		if(titleText.trim() === ""){
+			splashScreen.parent().find('.ui-dialog-title').remove();
+			splashScreen.parent().find('.ui-dialog-titlebar.ui-widget-header').css('border-bottom', 'none');		
+			splashScreen.parent().find('.ui-dialog-titlebar-close').css('margin-top', '5px');
+		}
+	}
+
+	var buildAction = function(name, text, collection){
+		var newItem = new ActionItem();
+		newItem.set("id", "splash-"+ name +"-content");
+		newItem.set("itemText", text);
+		// newItem.set("iconLink", "");
+		collection.add(newItem);
+
+		//Return action item to allow editing or additional attributes
+		return newItem;
+	}
+
+	var disableAction = function(actionLink, title){
+		$(actionLink).addClass('disabled').attr('onClick', "return false;");
+		$(actionLink).attr('title', title);
+	}
+			
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;

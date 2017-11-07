@@ -1,0 +1,175 @@
+/* module-key = 'gov.eop.omb.confluence.resources.MAX-Resources:jquery-jBreadCrumb-1.1', location = 'gov/eop/omb/confluence/resources/jQuery/jquery-jBreadCrumb-1.1/Base.css' */
+/* Float Clearing
+ ---------------------------------------------------------------------*/
+
+.module:after
+{
+	clear: both;
+	content: ".";
+	display: block;
+	height: 0;
+	visibility: hidden;
+}
+
+/* float clearing for IE6 */
+* html .module
+{
+	height: 1%;
+	overflow: visible;
+}
+
+/* float clearing for IE7 */
+* + html .module
+{
+	min-height: 1%;
+}
+
+
+/* Page Specific
+ ---------------------------------------------------------------------*/
+
+#container 
+{
+
+margin:0 auto 10px;
+text-align:left;
+width:1000px;
+}
+pre
+{
+	background:#ddd;
+	border:solid 1px #fff;
+	padding:10px;
+	color:#111;
+}
+.description
+{
+	float:left;
+	width:700px;
+	margin-right:20px;
+}
+.sideBar
+{
+	float:left;
+	background:#fff;
+	border:solid 1px #dedede;
+	padding:20px;
+	width:238px;
+	margin:50px 0 0 0;
+}
+.license p
+{
+	font-size:0.83333em;
+	color:#888;
+}
+
+
+
+/* module-key = 'gov.eop.omb.confluence.resources.MAX-Resources:jquery-jBreadCrumb-1.1', location = 'gov/eop/omb/confluence/resources/jQuery/jquery-jBreadCrumb-1.1/BreadCrumb.css' */
+/* Float Clearing
+ ---------------------------------------------------------------------*/
+
+.module:after {
+	clear: both;
+	content: ".";
+	display: block;
+	height: 0;
+	visibility: hidden;
+}
+/* float clearing for IE6 */
+* html .module {
+	height: 1%;
+	overflow: visible;
+}
+/* float clearing for IE7 */
+* + html .module {
+	min-height: 1%;
+}
+/* Breadcrumb Styles
+ ---------------------------------------------------------------------*/
+
+div.breadcrumb-list.breadCrumb.module {
+	min-width: 1000px;
+}
+.breadcrumb-list.breadCrumb {
+	float:none !important;
+}
+.breadCrumb {
+	margin: 0;
+	padding: 0;
+	/*float: left;*/
+	float:none;
+	display: block;
+	/* height: 21px;
+	overflow: hidden; 
+	width: 990px;*/
+	background:#fff;
+}
+.breadCrumb ul#breadcrumbs-list-collapsing {
+	margin: 0;
+	padding: 0;
+	height: 21px;
+	display: block;
+}
+.breadCrumb ul li.breadcrumb-item {
+	display: block;
+	float: left;
+	position: relative;
+	height: 21px;
+	z-index: 500;
+	/*overflow: hidden; */
+	line-height: 21px;
+	margin: 0px 3px 0px 3px;
+	padding: 0px 10px 0px 0;
+	font-size: .9167em;
+	background: url(/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/1.14.27.1/_/download/resources/gov.eop.omb.confluence.resources.MAX-Resources:jquery-jBreadCrumb-1.1/images/Chevron.gif) no-repeat 100% 0;
+}
+#breadcrumbs-list-collapsing li.hidden-crumb {
+	display: none;
+}
+.breadCrumb ul li.breadcrumb-item div.chevronOverlay {
+	position: absolute;
+	right: 0;
+	top: 0;
+	z-index: 2;
+}
+.breadCrumb ul li.breadcrumb-item span {
+	display: block;/*overflow: hidden; */
+}
+.breadCrumb ul li.breadcrumb-item a {
+	display: block;
+	position: relative;
+	height: 21px;
+	line-height: 21px;
+	/*overflow: hidden; */
+	float: left;
+	white-space:nowrap;
+}
+
+.breadCrumb ul li.first a {
+	height: 16px !important;
+	text-indent:-1000em;
+	width:0;
+	padding: 0;
+	margin-top: 2px;/*overflow: hidden; */
+	/*background:url(/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/1.14.27.1/_/download/resources/gov.eop.omb.confluence.resources.MAX-Resources:jquery-jBreadCrumb-1.1/images/IconHome.gif) no-repeat 0 0;*/
+}
+.breadCrumb ul li.first a:hover {
+	background-position: 0 -16px;
+}
+.breadCrumb ul li.last {
+	background: url(/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/1.14.27.1/_/download/resources/gov.eop.omb.confluence.resources.MAX-Resources:jquery-jBreadCrumb-1.1/images/Chevron.gif) no-repeat 100% 0 !important;
+	margin-right: 0;
+	padding: 0px 10px 0px 0;
+	list-style: none;
+}
+.chevronOverlay {
+	display: none;
+	background: url(/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/1.14.27.1/_/download/resources/gov.eop.omb.confluence.resources.MAX-Resources:jquery-jBreadCrumb-1.1/images/ChevronOverlay.png) no-repeat 100% 0;
+	width: 11px;
+	height: 20px;
+}
+#jquery-child-pages-menu {
+	margin-left:10px;
+}
+

@@ -1,0 +1,327 @@
+/* module-key = 'com.atlassian.confluence.confluence-editor-hide-tools:confluence-editor-hide-tools-resources', location = '/css/confluence-editor-hide-tools.css' */
+
+/* Hide Tools */
+
+.aui-toolbar2 span.icon-toolbartoggle {
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAA3NCSVQICAjb4U/gAAAAG1BMVEX///9wcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHCnAVwTAAAACXRSTlMAEURmmarM7v8mFvXyAAAACXBIWXMAAAsSAAALEgHS3X78AAAAFHRFWHRDcmVhdGlvbiBUaW1lADYvMS8xMzipRdAAAAAcdEVYdFNvZnR3YXJlAEFkb2JlIEZpcmV3b3JrcyBDUzbovLKMAAAAJklEQVQImWNgwAvEEqGM8FYIzdJk4QBmeBgwt4AZyQwMZmQoxgEAK50H0zr0X6cAAAAASUVORK5CYII=) no-repeat center;
+}
+
+.aui-toolbar2 #rte-button-toolbartoggle.active span.icon-toolbartoggle {
+    -moz-transform: scaleY(-1);
+    -o-transform: scaleY(-1);
+    -webkit-transform: scaleY(-1);
+    transform: scaleY(-1);
+    filter: FlipV;
+    -ms-filter: "FlipV";
+}
+
+.no-tools #rte,
+.no-tools form.editor {
+    width: 100%;
+}
+
+.no-tools #main {
+    margin-left: 0 !important;
+}
+
+.no-tools #wysiwyg {
+    bottom: 18px;
+}
+
+.no-tools #header-precursor {
+    z-index: 1000;
+}
+
+.no-tools form.editor .cell {
+    display: block;
+    height: 100%;
+}
+
+.no-tools.no-transition #rte {
+    display: table-cell;
+    width: auto;
+    height: auto;
+    position: static;
+}
+
+.no-tools #header-precursor,
+.no-tools #header,
+.no-tools #wysiwyg,
+.no-tools #editor-precursor,
+.no-tools #toolbar,
+.no-tools #preview,
+.no-tools #savebar-container {
+    display: block !important;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    right: 0;
+}
+
+.no-tools.no-transition #header-precursor,
+.no-tools.no-transition #header,
+.no-tools.no-transition #wysiwyg,
+.no-tools.no-transition #editor-precursor,
+.no-tools.no-transition #toolbar,
+.no-tools.no-transition #preview,
+.no-tools.no-transition #savebar-container {
+    display: table-row !important;
+    position: static;
+}
+
+.no-tools #preview {
+    height: auto;
+    top: 0;
+    /* This offset is the amount the toolbars 'hang over' */
+    bottom: 10px;
+    /* We want it to cover the top toolbar, but not the bottom one */
+    z-index: 110;
+}
+
+.no-tools.no-transition #preview {
+    height: 100%;
+    top: auto;
+    bottom: auto;
+}
+
+.no-tools #savebar-container {
+    position: fixed !important;
+    bottom: 0;
+}
+
+.no-tools.no-transition #savebar-container {
+    position: static !important;
+    bottom: auto;
+}
+
+.no-tools #header-precursor > div {
+    display: block;
+    margin: 0 !important;
+}
+
+.no-tools.no-transition #header-precursor > div {
+    display: table-cell !important;
+}
+
+.no-tools #header-precursor,
+.no-tools #header,
+.no-tools #editor-precursor,
+.no-tools #toolbar,
+.no-tools #wysiwyg,
+.no-tools #savebar-container,
+.no-tools > .quick-nav-drop-down,
+.no-tools > svg,
+.no-tools > .aui-property-panel-parent {
+    -moz-transition: -moz-transform .3s ease-in;
+    -webkit-transition: -webkit-transform .3s ease-in;
+    transition: transform .3s ease-in;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 800;
+    perspective: 800;
+    transform: translateZ(0);
+}
+
+.no-tools.no-transition #header-precursor,
+.no-tools.no-transition #header,
+.no-tools.no-transition #editor-precursor,
+.no-tools.no-transition #toolbar,
+.no-tools.no-transition #wysiwyg,
+.no-tools.no-transition #savebar-container {
+    -moz-transition: none;
+    -webkit-transition: none;
+    transition: none;
+}
+
+.no-tools-animate {
+    pointer-events: none;
+}
+
+.no-tools-animate-end {
+    pointer-events: auto;
+}
+
+.no-tools.no-transition #header-precursor,
+.no-tools.no-transition #header,
+.no-tools.no-transition #editor-precursor {
+    display: none !important;
+}
+
+.no-tools.no-transition #content {
+    display: block;
+}
+
+.no-tools-show-tools #header,
+.no-tools-show-tools form.editor,
+.no-tools-show-tools #savebar-container {
+    -webkit-transform: none;
+    -moz-transform: none;
+    transform: none;
+}
+
+.no-tools #header,
+.no-tools #toolbar {
+    z-index: 100;
+}
+
+.no-tools #savebar-container {
+    z-index: 120;
+}
+
+.no-tools #editor-precursor {
+    z-index: 200;
+}
+
+.no-tools #rte {
+    position: relative;
+}
+
+.no-tools #rte iframe {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    padding-bottom: 18px;
+}
+
+.no-tools.no-tools-pin-toolbar #rte iframe {
+    padding-bottom: 56px;
+}
+
+.no-tools.no-transition #rte iframe {
+    padding-bottom: 0;
+    position: static;
+}
+
+.no-tools-show-tools #rte:after {
+    display: none;
+}
+
+.no-tools.no-tools-animate-end #toolbar,
+.no-tools.no-tools-animate-end #savebar-container {
+    position: relative;
+    /* pesky table-cell doesn't play well with others. */
+    display: block !important;
+    -moz-transition: -moz-transform .3s ease-in-out;
+    -webkit-transition: -webkit-transform .3s ease-in-out;
+    transition: transform .3s ease-in-out;
+}
+
+.no-tools.no-tools-dont-animate #toolbar,
+.no-tools.no-tools-dont-animate #wysiwyg,
+.no-tools.no-tools-dont-animate #savebar-container,
+.no-tools.no-tools-pin-toolbar.no-tools-animate-end #wysiwyg {
+    -moz-transition: none;
+    -webkit-transition: none;
+    transition: none;
+}
+
+.no-tools.no-tools-dont-animate #toolbar,
+.no-tools.no-tools-dont-animate #savebar-container {
+    visibility: hidden;
+}
+
+.no-tools.no-tools-dont-animate.no-tools-pin-toolbar #toolbar,
+.no-tools.no-tools-dont-animate.no-tools-pin-toolbar #savebar-container {
+    visibility: visible;
+}
+
+.extended-hit-zone {
+    display: none;
+    height: 20px;
+    position: absolute;
+    left: 0;
+    right: 0;
+}
+
+.no-tools .extended-hit-zone {
+    display: block;
+}
+
+#toolbar .extended-hit-zone {
+    bottom: -20px;
+}
+
+/* If the user is in full screen mode, then going for the top bar
+   may invoke similar behaviour from their browser. So I'm going
+   to make the hit-zone bigger */
+.no-tools-probably-full-screen #toolbar .extended-hit-zone {
+    height: 30px;
+    bottom: -30px;
+}
+
+#savebar-container .extended-hit-zone {
+    top: -20px;
+}
+
+.editor-toolbar-transition-cover {
+    display: none;
+    height: 0;
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.no-tools-dont-animate .editor-toolbar-transition-cover {
+    display: block;
+}
+
+.no-tools-dont-animate.no-tools-pin-toolbar .editor-toolbar-transition-cover {
+    display: none;
+}
+
+.editor-toolbar-transition-cover.header {
+    top: 0;
+    border-top: 7px solid #f5f5f5;
+    border-bottom: 1px solid rgb(187, 187, 187);
+    -moz-box-shadow: 0 2px 3px #ccc;
+    -webkit-box-shadow: 0 2px 3px #ccc;
+    box-shadow: 0 2px 3px #ccc;
+}
+
+.editor-toolbar-transition-cover.footer {
+    bottom: 0;
+    border-bottom: 7px solid #f5f5f5;
+    border-top: 1px solid rgb(187, 187, 187);
+    -moz-box-shadow: rgb(204, 204, 204) 0px -1px 3px 0;
+    -webkit-box-shadow: rgb(204, 204, 204) 0px -1px 3px 0;
+    box-shadow: rgb(204, 204, 204) 0px -1px 3px 0;
+}
+
+.no-tools > #editor-messages {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    text-align: left;
+    margin: 0 60px;
+    -webkit-transition: opacity .4s ease-out;
+    opacity: 0;
+    z-index: 1000;
+}
+
+.no-tools.no-tools-animate-end > #editor-messages {
+    opacity: 1;
+}
+
+.no-tools.no-tools-animate-end #editor-messages .aui-message {
+    display: none;
+    -webkit-box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.13);
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.13);
+}
+
+/* Only show warnings and errors */
+.no-tools.no-tools-animate-end #editor-messages .aui-message.warning,
+.no-tools.no-tools-animate-end #editor-messages .aui-message.error {
+    display: block;
+}
+
+/* CONFDEV-16374 Workaround for the close icon appearing over text in the help tip */
+.edit .helptip-close {
+    margin-bottom: 4px;
+    margin-left: 4px;
+}

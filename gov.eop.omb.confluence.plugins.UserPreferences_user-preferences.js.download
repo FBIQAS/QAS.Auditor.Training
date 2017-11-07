@@ -1,0 +1,885 @@
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.UserPreferences:user-preferences', location = 'gov/eop/omb/confluence/plugins/UserPreferences/scripts/user-preferences-declarations.js' */
+var userPreferences = {};
+
+userPreferences.loadUrl = "/plugins/userpreferences/getUserPreferences.action";
+userPreferences.saveUrl = "/plugins/userpreferences/setUserPreferences.action";
+userPreferences.resetUrl = "/plugins/userpreferences/resetUserPreferences.action";
+
+userPreferences.cookie = {};
+userPreferences.cookie.id = "user-preferences";
+userPreferences.cookie.errorId = "user-preferences-error";
+userPreferences.cookie.options = { expires: 0, path: '/', secure: true };
+
+userPreferences.ready = false;
+
+// Stores Default Data
+userPreferences.defaultData = {};
+
+userPreferences.defaultData.edit = {};
+userPreferences.defaultData.edit.minorChange = false;
+
+userPreferences.defaultData.page = {};
+userPreferences.defaultData.page.attachmentsSection = false;
+userPreferences.defaultData.page.childPagesSection = false;
+userPreferences.defaultData.page.commentsSection = false;
+userPreferences.defaultData.page.pageTree = true;
+
+userPreferences.defaultData.plugins = {};
+userPreferences.defaultData.plugins.newWindow = {};
+userPreferences.defaultData.plugins.newWindow.ignoreNewWindow = false;
+
+userPreferences.defaultData.splashScreen = {};
+userPreferences.defaultData.splashScreen.preferences = {};
+userPreferences.defaultData.splashScreen.settings = {};
+
+userPreferences.defaultData.callout = {};
+userPreferences.defaultData.callout.preferences = {};
+userPreferences.defaultData.callout.settings = {};
+
+userPreferences.defaultData.system = {};
+
+userPreferences.defaultData.version = 1.1;
+
+// Data
+userPreferences.data = JSON.clone(userPreferences.defaultData);
+
+userPreferences.errors = {};
+userPreferences.errors.count = 0;
+userPreferences.errors.state = jQuery.cookie(userPreferences.cookie.errorId);
+
+// Manage Section
+userPreferences.manage = {};
+userPreferences.manage.info = {};
+
+// Init Section
+userPreferences.init = {};
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.UserPreferences:user-preferences', location = 'gov/eop/omb/confluence/plugins/UserPreferences/scripts/user-preferences-support.js' */
+userPreferences.manage.info["edit"] = {};
+userPreferences.manage.info["edit"].id = "up-edit";
+userPreferences.manage.info["edit"].name = "Edit Page";
+userPreferences.manage.info["edit"].type = "section";
+
+userPreferences.manage.info["edit.minorChange"] = {};
+userPreferences.manage.info["edit.minorChange"].id = "up-minor-change";
+userPreferences.manage.info["edit.minorChange"].parent = "up-edit";
+userPreferences.manage.info["edit.minorChange"].name = "Do Not Notify Watchers (Default)";
+userPreferences.manage.info["edit.minorChange"].inputType = "checkbox";
+userPreferences.manage.info["edit.minorChange"].type = "element";
+
+//userPreferences.manage.info["plugins"] = {};
+//userPreferences.manage.info["plugins"].id = "up-plugins";
+//userPreferences.manage.info["plugins"].name = "Plugins";
+//userPreferences.manage.info["plugins"].type = "section";
+
+userPreferences.manage.info["plugins.newWindow"] = {};
+userPreferences.manage.info["plugins.newWindow"].id = "up-plugins-new-window";
+userPreferences.manage.info["plugins.newWindow"].name = "New Window";
+userPreferences.manage.info["plugins.newWindow"].type = "section";
+
+userPreferences.manage.info["plugins.newWindow.ignoreNewWindow"] = {};
+userPreferences.manage.info["plugins.newWindow.ignoreNewWindow"].id = "up-plugins-new-window-ignore";
+userPreferences.manage.info["plugins.newWindow.ignoreNewWindow"].parent = "up-plugins-new-window";
+userPreferences.manage.info["plugins.newWindow.ignoreNewWindow"].name = "Ignore New Window Macros";
+userPreferences.manage.info["plugins.newWindow.ignoreNewWindow"].inputType = "checkbox";
+userPreferences.manage.info["plugins.newWindow.ignoreNewWindow"].type = "element";
+
+userPreferences.manage.info["page"] = {};
+userPreferences.manage.info["page"].id = "up-page";
+userPreferences.manage.info["page"].name = "Collapse Selected Page Sections";
+userPreferences.manage.info["page"].type = "section";
+
+userPreferences.manage.info["page.attachmentsSection"] = {};
+userPreferences.manage.info["page.attachmentsSection"].id = "up-attachments-section";
+userPreferences.manage.info["page.attachmentsSection"].parent = "up-page";
+userPreferences.manage.info["page.attachmentsSection"].name = "Attachments Section";
+userPreferences.manage.info["page.attachmentsSection"].inputType = "checkbox";
+userPreferences.manage.info["page.attachmentsSection"].type = "element";
+
+userPreferences.manage.info["page.childPagesSection"] = {};
+userPreferences.manage.info["page.childPagesSection"].id = "up-child-pages-section";
+userPreferences.manage.info["page.childPagesSection"].parent = "up-page";
+userPreferences.manage.info["page.childPagesSection"].name = "Child Pages Section";
+userPreferences.manage.info["page.childPagesSection"].inputType = "checkbox";
+userPreferences.manage.info["page.childPagesSection"].type = "element";
+
+userPreferences.manage.info["page.commentsSection"] = {};
+userPreferences.manage.info["page.commentsSection"].id = "up-comments-section";
+userPreferences.manage.info["page.commentsSection"].parent = "up-page";
+userPreferences.manage.info["page.commentsSection"].name = "Comments Section";
+userPreferences.manage.info["page.commentsSection"].inputType = "checkbox";
+userPreferences.manage.info["page.commentsSection"].type = "element";
+
+userPreferences.manage.info["page.pageTree"] = {};
+userPreferences.manage.info["page.pageTree"].id = "up-page-tree";
+userPreferences.manage.info["page.pageTree"].parent = "up-page";
+userPreferences.manage.info["page.pageTree"].name = "Page Tree";
+userPreferences.manage.info["page.pageTree"].inputType = "checkbox";
+userPreferences.manage.info["page.pageTree"].type = "element";
+
+
+
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.UserPreferences:user-preferences', location = 'gov/eop/omb/confluence/plugins/UserPreferences/scripts/user-preferences.js' */
+// Functions
+userPreferences.load = function ()
+{
+	jQuery.ajax({
+		type: "GET",
+		url: contextPath + userPreferences.loadUrl,
+		dataType: "json",
+		complete: function(jqXHR, textStatus) {
+				userPreferences.loadComplete(jqXHR, textStatus);
+			}
+	});
+};
+
+userPreferences.loadComplete = function (jqXHR, textStatus)
+{
+	if(jqXHR.status == 200) // Success
+		userPreferences.loadSuccess(jqXHR.responseText);
+	else if(jqXHR.status == 500) // Server Error
+		userPreferences.loadError(jqXHR, textStatus);
+	else if (jqXHR.readyState == 4 && (jqXHR.status == 0 || jqXHR.status == 12017)) // Session Timeout
+		userPreferences.loadError(jqXHR, textStatus);
+	else // Unknown Error
+		userPreferences.loadError(jqXHR, textStatus);
+};
+
+userPreferences.loadSuccess = function (htmlData)
+{
+	// Parse server response.
+	var serverData = JSON.parse(htmlData);
+	
+	if(serverData.errorMessage == undefined)
+	{
+		userPreferences.processData(serverData.data, serverData.splashSettings, serverData.calloutSettings);
+	}
+	else if(userPreferences.data.errorMessage != "You are not permitted to perform this operation.")
+	{
+		if(userPreferences.errors.count == 0)
+		{
+			var dialog = jQuery("<div></div>");
+			var dialogConfig = new JQUERYUI_DIALOG_ERROR_HASH;
+			var p = jQuery("<p></p>");
+			
+			userPreferences.errors.count++;
+			
+			dialogConfig.title = "Session Timeout";
+			
+			dialogConfig.buttons.OK = function()
+			{ 
+				userPreferences.errors.count = 0;	
+				jQuery(this).dialog("destroy");
+				
+				if(userPreferences.errors.state != "true")
+				{
+					jQuery.cookie(userPreferences.cookie.errorId, "true");
+					window.location.reload();
+				}
+			};
+			
+			dialogConfig.buttons.Cancel = function()
+			{ 
+				userPreferences.errors.count = 0;
+				jQuery(this).dialog("destroy");
+			};
+			
+			if(userPreferences.errors.state == "true")
+			{
+				p.text("Your session timed out. Please contact support.");
+				
+				delete dialogConfig.buttons.Cancel;
+			}
+			else
+			{
+				p.text("Your session timed out. Click 'OK' to refresh this page.");
+			}
+			
+			dialog.append(p);
+			dialog.dialog(dialogConfig);
+		}
+	}
+};
+
+userPreferences.loadError = function(jqXHR, textStatus)
+{	
+	if(userPreferences.errors.count == 0)
+	{
+		var dialog = jQuery("<div></div>");
+		var dialogConfig = new JQUERYUI_DIALOG_ERROR_HASH;
+		var p = jQuery("<p></p>");
+		
+		userPreferences.errors.count++;
+		
+		dialogConfig.title = "User Preferences";
+		dialogConfig.buttons.OK = function() { 
+			userPreferences.errors.count = 0;
+			jQuery(this).dialog("destroy");
+		};
+		
+		p.text("An error has occurred while retrieving user preferences from the server.");
+		dialog.append(p);
+		dialog.dialog(dialogConfig);
+	}
+};
+
+userPreferences.save = function (async)
+{	
+	var saveDataObject = { data: JSON.stringify(userPreferences.data) };
+	
+	jQuery.cookie(userPreferences.cookie.id, JSON.stringify(userPreferences.data), userPreferences.cookie.options);
+	
+	jQuery.ajax({
+		type: "POST",
+		async: async,
+		url: contextPath + userPreferences.saveUrl,
+		data: saveDataObject,
+		error: userPreferences.handleRequestError
+	});
+};
+
+userPreferences.reset = function (async)
+{		
+	jQuery.cookie(userPreferences.cookie.id, null, userPreferences.cookie.options);
+	
+	jQuery.ajax({
+		type: "POST",
+		async: async,
+		url: contextPath + userPreferences.resetUrl,
+		error: userPreferences.handleRequestError
+	});
+	
+	setTimeout("userPreferences.load();", 1000);
+};
+
+userPreferences.handleRequestError = function (jqXHR, textStatus, errorThrown)
+{
+	if(jqXHR.readyState == 4 && ( jqXHR.status == 0 || jqXHR.status == 12017))
+	{
+		if(userPreferences.errors.count == 0)
+		{
+			var dialog = jQuery("<div></div>");
+			var dialogConfig = new JQUERYUI_DIALOG_ERROR_HASH;
+			var p = jQuery("<p></p>");
+			
+			userPreferences.errors.count++;
+			
+			dialogConfig.title = "Session Timeout";
+			dialogConfig.buttons.OK = function()
+			{
+				userPreferences.errors.count = 0;
+				jQuery(this).dialog("destroy");
+				window.location.reload();
+			};
+			dialogConfig.buttons.Cancel = function()
+			{
+				userPreferences.errors.count = 0;
+				jQuery(this).dialog("destroy");
+			};
+			
+			p.text("Your session timed out. Click 'OK' to refresh this page.");
+			dialog.append(p);
+			dialog.dialog(dialogConfig);
+		}
+	}
+	else
+	{
+		if(userPreferences.errors.count == 0)
+		{
+			var dialog = jQuery("<div></div>");
+			var dialogConfig = new JQUERYUI_DIALOG_ERROR_HASH;
+			var p = jQuery("<p></p>");
+			
+			userPreferences.errors.count++;
+			
+			dialogConfig.title = "User Preferences";
+			dialogConfig.buttons.OK = function()
+			{
+				userPreferences.errors.count = 0;
+				jQuery(this).dialog("destroy");
+			};
+			
+			p.text("An error has occurred while saving user preferences to the server.");
+			dialog.append(p);
+			dialog.dialog(dialogConfig);
+		}
+	}
+};
+
+userPreferences.processData = function (data, splashSettings, calloutSettings)
+{
+	var newData = userPreferences.convertToJson(data);
+	
+	if(splashSettings == undefined && calloutSettings == undefined && (newData.version == undefined || newData.version < userPreferences.defaultData.version))
+	{
+		userPreferences.load();
+		return false;
+	}
+		
+	// Clone Data
+	if(typeof newData == "object")
+		userPreferences.data = JSON.clone(newData);
+	else
+		userPreferences.data = JSON.clone(userPreferences.defaultData);
+		
+	if(splashSettings != undefined)
+	{
+		userPreferences.data.splashScreen.settings = JSON.clone(splashSettings);
+		userPreferences.data.version = userPreferences.defaultData.version;
+	}
+	
+	if(calloutSettings != undefined)
+	{
+		if(userPreferences.data.callout == undefined) {
+			userPreferences.data.callout = {};
+			userPreferences.data.callout.preferences = {};
+			userPreferences.data.callout.settings = {};
+		}
+		userPreferences.data.callout.settings = JSON.clone(calloutSettings);
+	} 
+	
+	jQuery.cookie(userPreferences.cookie.id, JSON.stringify(userPreferences.data), userPreferences.cookie.options);
+	jQuery.cookie(userPreferences.cookie.errorId, "false");
+	userPreferences.ready = true;
+	
+	userPreferences.init.initializePage();
+};
+
+userPreferences.convertToJson = function (object)
+{
+	if(typeof object == "string" && object.length > 0)
+		return JSON.parse(object);
+		
+	return object
+};
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.UserPreferences:user-preferences', location = 'gov/eop/omb/confluence/plugins/UserPreferences/scripts/user-preferences-manage.js' */
+userPreferences.manage.buildSection = function ()
+{
+	var wrapper = jQuery("form#user-preferences div.max-profile-wrapper");
+	var dataDump = jQuery("#user-preferences-data");
+	
+	var resetButton = jQuery("<div><span>Reset All User Preferences</span></div>");
+	resetButton.attr("id", "user-preferences-reset");
+	
+	wrapper.html("<h2>User Preferences</h2>");
+	wrapper.append(resetButton);
+	dataDump.empty();
+	
+	jQuery("#user-preferences-reset").click(userPreferences.manage.openResetDialog);
+	
+	if(userPreferences.ready)
+		JSON.traverse(userPreferences.defaultData, userPreferences.manage.handleJSONTraverse);
+	else
+		setTimeout("userPreferences.manage.buildSection();", 100);
+};
+
+userPreferences.manage.openResetDialog = function ()
+{
+	var dialog = jQuery("#user-preferences-reset-dialog");
+	
+	if(dialog.length == 0)
+	{
+		var dialogConfig = new JQUERYUI_DIALOG_ERROR_HASH;
+		var p = jQuery("<p></p>");
+		
+		dialog = jQuery("<div></div>");
+		
+		dialog.attr("id", "user-preferences-reset-dialog");
+		dialogConfig.title = "Reset User Preferences";
+		
+		dialogConfig.buttons.OK = function()
+		{ 
+			userPreferences.reset(false);
+			
+			jQuery(this).dialog("destroy");
+			
+			window.location.reload();
+		};
+		
+		dialogConfig.buttons.Cancel = function()
+		{ 
+			jQuery(this).dialog("destroy");
+		};
+		
+		p.text("Are you sure you would like to reset all of your user preferences?");
+		
+		dialog.append(p);
+		dialog.dialog(dialogConfig);
+	}
+	else
+	{
+		dialog.dialog("open");
+	}
+};
+
+userPreferences.manage.handleJSONTraverse = function (key, value, location)
+{
+	var wrapper = jQuery("form#user-preferences div.max-profile-wrapper");
+	var dataDump = jQuery("#user-preferences-data");
+	var data;
+	
+	var info = userPreferences.manage.info[location + key];
+	
+	data = eval("userPreferences.data." + location + key);
+
+	if(data == undefined)
+		data = eval("userPreferences.data." + location + key + " = userPreferences.defaultData." + location + key);
+	
+	if(info != undefined)
+	{
+		if(info.type == "section")
+		{
+			var section = jQuery("<div></div>");
+			var heading = jQuery("<h6></h6>");
+			var children = jQuery("<ul></ul>");
+			
+			section.attr("id", info.id);
+			section.addClass("max-profile-fields");
+			
+			heading.text(info.name);
+			
+			section.append(heading);
+			section.append(children);
+			wrapper.append(section);
+		}
+		else if(info.type == "element")
+		{
+			var parent = wrapper.find("#" + info.parent + " ul");
+			var element = jQuery("<li></li>");
+			var label = jQuery("<b>" + info.name + "</b>")
+			var input = jQuery("<input />");
+			
+			element.attr("id", info.id);
+			
+			input.attr("name", key);
+			
+			if(info.inputType == "checkbox")
+			{
+				var data = false;
+				
+				data = eval("userPreferences.data." + location + key);
+				
+				input.attr("type", info.inputType);
+				input.data("json-target", "userPreferences.data." + location + key);
+				
+				if(data)
+					input.attr("checked", "checked");
+				
+				input.change(function (){
+					var input = jQuery(this);
+					var status = jQuery("#user-preferences-status");
+					
+					status.text("Saving...");
+					status.removeClass("hidden");
+					
+					//changing this to input.prop
+					eval(input.data("json-target") + " = " + input.prop("checked"));
+					//eval(input.data("json-target") + " = " + input.attr("checked"));
+					
+					userPreferences.save(false);
+					userPreferences.manage.actionReport();
+				});
+			}
+			
+			element.append(label);
+			element.append(input);
+			
+			parent.append(element);
+		}
+	}
+
+	dataDump.append(jQuery("<div>" + location + key + ": " + value + "</div>"));
+};
+
+userPreferences.manage.actionReport = function ()
+{
+	if(userPreferences.errors.count == 0)
+	{
+		var status = jQuery("#user-preferences-status");
+		
+		status.text("User Preferences Saved");
+	}
+};
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.UserPreferences:user-preferences', location = 'gov/eop/omb/confluence/plugins/UserPreferences/scripts/user-preferences-legacy.js' */
+/* ----------------
+ * Legacy Functions
+ * ---------------- */ 
+
+//Getter for AttachmentsSectionCollapse
+userPreferences.getAttachmentsSectionCollapse = function ()
+{
+	return userPreferences.data.page.attachmentsSection;
+};
+
+//Setter for AttachmentsSectionCollapse
+userPreferences.setAttachmentsSectionCollapse = function (value, save, async)
+{
+	userPreferences.data.page.attachmentsSection = value;
+	
+	if(save == undefined || save == true)
+	{
+		if(async == false)
+			userPreferences.save(false);
+		else
+			userPreferences.save(true);
+	}
+};
+
+//Getter for ChildPagesSectionCollapse
+userPreferences.getChildPagesSectionCollapse = function ()
+{
+	return userPreferences.data.page.childPagesSection;
+};
+
+// Setter for ChildPagesSectionCollapse
+userPreferences.setChildPagesSectionCollapse = function (value, save, async)
+{
+	userPreferences.data.page.childPagesSection = value;
+	
+	if(save == undefined || save == true)
+	{
+		if(async == false)
+			userPreferences.save(false);
+		else
+			userPreferences.save(true);
+	}
+};
+
+//Getter for CommentsSectionCollapse
+userPreferences.getCommentsSectionCollapse = function ()
+{
+	return userPreferences.data.page.commentsSection;
+};
+
+// Setter for CommentsSectionCollapse
+userPreferences.setCommentsSectionCollapse = function (value, save, async)
+{
+	userPreferences.data.page.commentsSection = value;
+	
+	if(save == undefined || save == true)
+	{
+		if(async == false)
+			userPreferences.save(false);
+		else
+			userPreferences.save(true);
+	}
+};
+
+//Getter for PageTreeCollapse
+userPreferences.getPageTreeCollapse = function ()
+{
+	return ! userPreferences.data.page.pageTree;
+};
+
+// Setter for PageTreeCollapse
+userPreferences.setPageTreeCollapse = function (value, save, async)
+{
+	userPreferences.data.page.pageTree = value;
+	
+	if(save == undefined || save == true)
+	{
+		if(async == false)
+			userPreferences.save(false);
+		else
+			userPreferences.save(true);
+	}
+};
+
+//Getter for PageTree
+userPreferences.getPageTree = function ()
+{
+	return userPreferences.data.page.pageTree;
+};
+
+// Setter for PageTree
+userPreferences.setPageTree = function (value, save, async)
+{
+	userPreferences.data.page.pageTree = value;
+	
+	if(save == undefined || save == true)
+	{
+		if(async == false)
+			userPreferences.save(false);
+		else
+			userPreferences.save(true);
+	}
+};
+
+//Getter for MinorChange
+userPreferences.getMinorChange = function ()
+{
+	return userPreferences.data.edit.minorChange;
+};
+
+// Setter for MinorChange
+userPreferences.setMinorChange = function (value, save, async)
+{
+	userPreferences.data.edit.minorChange = value;
+	
+	if(save == undefined || save == true)
+	{
+		if(async == false)
+			userPreferences.save(false);
+		else
+			userPreferences.save(true);
+	}
+};
+
+//Getter for Splash Preferences
+userPreferences.getSplashPreferences = function ()
+{
+	return userPreferences.data.splashScreen.preferences;
+};
+
+//Getter for Callout Preferences
+userPreferences.getCalloutPreferences = function ()
+{
+	return userPreferences.data.callout.preferences;
+};
+
+// Setter for Splash Preferences
+userPreferences.setSplashPreferences = function (value, save, async)
+{
+	userPreferences.data.splashScreen.preferences = value;
+	
+	if(save == undefined || save == true)
+	{
+		if(async == false)
+			userPreferences.save(false);
+		else
+			userPreferences.save(true);
+	}
+};
+
+//Setter for Callout Preferences
+userPreferences.setCalloutPreferences = function (value, save, async)
+{
+	userPreferences.data.callout.preferences = value;
+	
+	if(save == undefined || save == true)
+	{
+		if(async == false)
+			userPreferences.save(false);
+		else
+			userPreferences.save(true);
+	}
+};
+
+//Getter for Splash Settings
+userPreferences.getSplashSettings = function ()
+{
+	return userPreferencesData.splashSettings;
+};
+
+//Getter for Splash Settings
+userPreferences.getCalloutSettings = function ()
+{
+	return userPreferencesData.calloutSettings;
+};
+
+//Getter for System Preferences
+userPreferences.getSystemPreferences = function ()
+{
+	return userPreferences.data.system;
+};
+
+// Setter for System Preferences
+userPreferences.setSystemPreferences = function (value, save, async)
+{
+	userPreferences.data.system = value;
+	
+	if(save == undefined || save == true)
+	{
+		if(async == false)
+			userPreferences.save(false);
+		else
+			userPreferences.save(true);
+	}
+};
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.UserPreferences:user-preferences', location = 'gov/eop/omb/confluence/plugins/UserPreferences/scripts/user-preferences-init.js' */
+userPreferences.init.initialize = function ()
+{
+	if(jQuery.cookie == undefined)
+	{
+		setTimeout("userPreferences.init.initialize();", 100);
+	}
+	else
+	{
+		if(jQuery.cookie(userPreferences.cookie.id) == null)
+		{
+			userPreferences.load();
+		}
+		else
+		{
+			var cookieData = jQuery.cookie(userPreferences.cookie.id);
+				
+			if(cookieData != null)
+				userPreferences.processData(cookieData);
+			else
+				userPreferences.load();
+		}
+	}
+};
+
+userPreferences.init.initializePage = function ()
+{
+	// Page Tree Initialize Code
+	jQuery("div.page-tree-wrapper").ready(userPreferences.init.handlePageTree);
+	
+	// Minor Edit Initialize Code
+	jQuery("#minorEdit, #minorEdit2").ready(userPreferences.init.handleMinorChange);
+	
+	// Children Section Initialize Code
+	jQuery("#page-controls-children").ready(userPreferences.init.handleChildrenSection);
+	
+	// Note: Attachments Section takes care of itself.
+	
+	// Comments Section Initialize Code
+	jQuery("#page-controls-comments").ready(userPreferences.init.handleCommentsSection);
+	
+	// ---------------- Splash ----------------
+	var splashCookie = jQuery.cookie("splash-" + userPreferences.data.splashScreen.settings.currentId);
+	
+	// If entry doesn't exist create it.
+	if(userPreferences.data.splashScreen.preferences[userPreferences.data.splashScreen.settings.currentId] == null)
+	{
+		var splash = { id: userPreferences.data.splashScreen.settings.currentId, active: true };
+		
+		userPreferences.data.splashScreen.preferences[userPreferences.data.splashScreen.settings.currentId] = splash;
+		
+		userPreferences.save(true);
+	}
+	
+	if(userPreferences.data.splashScreen.settings.active && 
+			userPreferences.data.splashScreen.preferences[userPreferences.data.splashScreen.settings.currentId].active && 
+			splashCookie == null)
+	{
+		community.splashScreen.render();
+				
+		jQuery.cookie("splash-" + userPreferences.data.splashScreen.settings.currentId, false, userPreferences.cookie.options);
+	}
+	
+	// ---------------- Callout ----------------
+	var calloutCookie = jQuery.cookie("callout-" + userPreferences.data.callout.settings.currentId);
+	
+	// If entry doesn't exist create it.
+	if(userPreferences.data.callout.preferences[userPreferences.data.callout.settings.currentId] == null)
+	{
+		var callout = { id: userPreferences.data.callout.settings.currentId, active: true };
+		
+		userPreferences.data.callout.preferences[userPreferences.data.callout.settings.currentId] = callout;
+		
+		userPreferences.save(true);
+	}
+	
+	if(userPreferences.data.callout.settings.active && 
+			userPreferences.data.callout.preferences[userPreferences.data.callout.settings.currentId].active) // &&	calloutCookie == null
+	{
+		community.callout.render();
+				
+		jQuery.cookie("callout-" + userPreferences.data.callout.settings.currentId, false, userPreferences.cookie.options);
+	}
+};
+
+userPreferences.init.handlePageTree = function ()
+{
+	if(! userPreferences.data.page.pageTree)
+	{
+		jQuery(".page-tree-toggle-button").addClass("hidden");
+		jQuery(".page-tree-close-button").removeClass("hidden");
+		jQuery("#page-tree-content-div").removeClass("hidden");
+		
+		jQuery("#page-wrapper-content").addClass("page-tree-displayed");
+		jQuery("#page-wrapper-content").removeClass("page-tree-closed");
+		
+		jQuery("div.page-tree-wrapper").removeClass("hidden");
+		jQuery("#padding-wrapper").removeClass("padding-wrapper");
+	}
+};
+
+userPreferences.init.handleMinorChange = function ()
+{
+	if(userPreferences.data.edit.minorChange)
+	{
+		jQuery("#minorEdit, #minorEdit2").attr("checked", "true");
+	}
+};
+
+userPreferences.init.handleChildrenSection = function ()
+{
+	if(userPreferences.data.page.childPagesSection)
+	{
+		community.page.toggleChildrenSection();
+	}
+};
+
+userPreferences.init.handleCommentsSection = function ()
+{
+	if(community.comments != undefined && community.comments.section.element.length == 0)
+	{
+		setTimeout("userPreferences.init.handleCommentsSection();", 100);
+	}
+	else if(community.comments != undefined && userPreferences.data.page.commentsSection)
+	{
+		community.comments.section.element.addClass("hidden");
+		
+		community.comments.section.collapseButton.removeClass("collapse");
+		community.comments.section.collapseButton.addClass("expand");
+	}
+};
+jQuery(document).ready(function() {
+	userPreferences.init.initialize();
+});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;

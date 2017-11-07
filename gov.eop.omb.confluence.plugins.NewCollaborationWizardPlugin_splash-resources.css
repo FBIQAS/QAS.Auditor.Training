@@ -1,0 +1,105 @@
+/* module-key = 'gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources', location = 'styles/splash.css' */
+/**
+Styles for Splash Screen ("Easy Mode")
+**/
+
+
+.splash-screen {
+	margin: 30px auto;
+	/* margin-left: 65px; */
+	/* display: flex; */
+/* 	justify-content: center;*/
+}
+
+.splash-list-title {
+	text-decoration: underline;
+	font-size: 20px;
+	text-align: center;
+}
+
+.splash-action-list {
+	display: inline-block;
+	/* padding: 0px 40px; */
+	width: 49%;
+}
+
+.splash-action-item {
+	padding-top: 20px;
+}
+
+ul.splash-list {
+	list-style: none;
+	/* padding-left: 0px; */
+}
+
+.splash-action-link {
+	text-decoration: none;
+}
+.splash-action-link.disabled {
+	color: #A5A5A5 !important;
+	cursor: default;
+}
+
+.splash-item-icon {
+	width: 16px;
+	height: 16px;
+	display: inline-block;
+	margin-bottom: -3px;
+}
+
+.splash-item-text {
+	display: inline-block;
+	margin-left: 2px;
+}
+.splash-action-list+.splash-action-list {
+	border-left: 1px solid #dcdcdc;
+}
+
+/**Add icons for options **/
+#splash-edit-content-icon {
+	background:
+		url('/download/resources/gov.eop.omb.confluence.resources.MAX-Resources:design-resources/images/icon-sprites-toolbar.png')
+		80px 112px repeat scroll;
+}
+
+#splash-addAttach-content-icon {
+	background:
+		url('/download/resources/gov.eop.omb.confluence.resources.MAX-Resources:design-resources/images/icons-menus.png')
+		80px 32px scroll repeat;
+}
+
+#splash-restrict-content-icon {
+	background:
+		url('/download/resources/gov.eop.omb.confluence.resources.MAX-Resources:design-resources/images/icons-menus.png')
+		32px 48px scroll repeat;
+}
+
+#splash-share-content-icon {
+	background: url('/download/resources/gov.eop.omb.confluence.resources.MAX-Resources:design-resources/images/icon-sprites-toolbar.png') 0px 80px repeat scroll;
+}
+
+#splash-watch-content-icon {
+	background: url('/download/resources/gov.eop.omb.confluence.resources.MAX-Resources:design-resources/images/icon-sprites-toolbar.png') 0px 48px repeat scroll;
+}
+
+#splash-stop-watch-content-icon {
+	background:url('/download/resources/gov.eop.omb.confluence.resources.MAX-Resources:design-resources/images/silkicons/email_delete.png') top left no-repeat;
+}
+
+/*.disabled #splash-watch-content-icon {
+	background: url('/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/1.0.5.103/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/add-watcher-gray.png') top left no-repeat;
+}*/
+#splash-favorite-content-icon {
+	background: url('/download/resources/gov.eop.omb.confluence.resources.MAX-Resources:design-resources/images/icon-star-fav-add.png') top left no-repeat;
+}
+#splash-favorite-remove-content-icon {
+	background: url('/download/resources/gov.eop.omb.confluence.resources.MAX-Resources:design-resources/images/icon-star-fav-remove.png') top left no-repeat;
+}
+/*
+.disabled #splash-favorite-content-icon {
+	background: url('/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/1.0.5.103/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/add-favorite-gray.png') top left no-repeat;
+}*/
+/**UI Button alignment that is in PROD **/
+/* .ui-dialog .ui-dialog-buttonpane button {
+	float: right !important;
+} */

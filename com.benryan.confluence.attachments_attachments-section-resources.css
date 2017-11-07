@@ -1,0 +1,308 @@
+/* module-key = 'com.benryan.confluence.attachments:attachments-section-resources', location = 'templates/extra/checkout/script/uploadify/uploadifive.css' */
+/*
+UploadiFive
+Copyright (c) 2012 Reactive Apps, Ronnie Garcia
+*/
+
+/* -------------------------------------------------------- */
+/* ------------------------ Bulk Upload ------------------- */
+/* ------------ Will put into resources eventually -------- */
+
+.attachment-bulk-upload-div {background:white; padding:20px 20px 55px 20px; display:block; min-height:80px; }
+
+#attachment-bulk-upload-queue-custom {
+	border: 1px solid #DCDCDC;
+    border-radius: 3px;
+	padding:20px;	
+	background:white;
+	max-height:300px;
+	overflow:auto;
+	}
+	
+#attachment-bulk-upload-drop-target-text {font-size:12px; text-align:center; display:block; background:white; padding:40px; border:15px solid white;}
+	
+/* When Initially adding a file via drag an drop */
+#attachment-bulk-upload-queue-custom.bulk-highlight {
+	padding:20px;
+	border-radius:3px;
+}
+
+#attachment-bulk-upload-queue-custom.bulk-highlight #attachment-bulk-upload-drop-target-text {
+	font-weight:bold; 
+	border:15px solid #52bd4c; 
+	border-radius:3px;
+	}
+
+/* State after adding first file via drag an drop */
+#attachment-bulk-upload-queue-custom.bulk-queue-visible #attachment-bulk-upload-drop-target-text  {
+	border:1px solid white;
+	padding:0px 0px 15px 0px;
+	font-weight:bold; 
+}
+
+/* End custom Danny css */
+
+
+.uploadifive-button {
+	background:url('/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/4.5.5.1/_/download/resources/com.benryan.confluence.attachments:attachments-section-resources/images/add.png') 7px 7px no-repeat #E9F1F4;
+    border: 1px solid #96B2BC;
+    border-radius: 3px 3px 3px 3px;
+    color: #264965;
+    cursor: pointer;
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    height: 30px;
+    line-height: 30px;
+    margin-bottom: 14px;
+    text-align: center;
+    text-decoration: none;
+	width:330px !important;
+	position:relative;
+	z-index:190;
+}
+.uploadifive-button:hover {
+	background: url('/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/4.5.5.1/_/download/resources/com.benryan.confluence.attachments:attachments-section-resources/images/add.png') 7px 7px no-repeat #C9DBE2;
+}
+.uploadifive-queue-item {
+	background:url('/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/4.5.5.1/_/download/resources/com.benryan.confluence.attachments:attachments-section-resources/images/ajax-loader-item.gif') 10px 10px no-repeat #F5F5F5; 
+	border-bottom: 1px dotted #D5D5D5;
+	font: 12px Arial, Helvetica, Sans-serif;
+	margin-bottom: 3px;
+	padding: 10px 10px 10px 30px;
+}
+
+.uploadifive-queue-item.complete.success {padding-left:30px; background:url('/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/4.5.5.1/_/download/resources/com.benryan.confluence.attachments:attachments-section-resources/images/accept.png') 10px 10px no-repeat #d9ecd8; font-weight:bold;}
+.uploadifive-queue-item.complete.success:hover { background:url('/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/4.5.5.1/_/download/resources/com.benryan.confluence.attachments:attachments-section-resources/images/accept.png') 10px 10px no-repeat #b6deb4; }
+.uploadifive-queue-item.complete.success .fileinfo {display:none;}
+
+.uploadifive-queue-item.complete.error {padding-left:30px; background:url('/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/4.5.5.1/_/download/resources/com.benryan.confluence.attachments:attachments-section-resources/images/error.png') 10px 10px no-repeat #ecd8d8; font-weight:bold;}
+.uploadifive-queue-item.complete.error:hover {background:url('/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/4.5.5.1/_/download/resources/com.benryan.confluence.attachments:attachments-section-resources/images/error.png') 10px 10px no-repeat #dfabab; }
+.uploadifive-queue-item.complete.error .fileinfo {display:block; padding:5px; border:1px dotted red; font-size:11px; background:white; margin-top:5px;}
+
+.uploadifive-queue-item .close {
+	background: url('/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/4.5.5.1/_/download/resources/com.benryan.confluence.attachments:attachments-section-resources/images/uploadifive-cancel.png') 0 0 no-repeat;
+	display: block;
+	float: right;
+	height: 16px;
+	text-indent: -9999px;
+	width: 16px;
+}
+.uploadifive-queue-item .progress {
+	border: 1px solid #D0D0D0;
+	height: 6px;
+	margin-top: 5px;
+	width: 100%;
+}
+.uploadifive-queue-item .progress-bar {
+	background-color: #3A81C3;
+	height: 6px;
+	width: 0;
+}
+
+#uploadifive-uploadifive-queue {
+	border: solid black 1px;
+	margin: 8px;	
+	min-height: 10px;
+}
+
+/* module-key = 'com.benryan.confluence.attachments:attachments-section-resources', location = 'templates/extra/checkout/script/uploadify/uploadify.css' */
+/*
+Uploadify
+Copyright (c) 2012 Reactive Apps, Ronnie Garcia
+Released under the MIT License <http://www.opensource.org/licenses/mit-license.php> 
+*/
+
+.uploadify {
+	position: relative;
+	margin-bottom: 1em;
+}
+.uploadify-button {
+	background: url('/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/4.5.5.1/_/download/resources/com.benryan.confluence.attachments:attachments-section-resources/images/add.png') 7px 7px no-repeat #E9F1F4;
+    border: 1px solid #96B2BC;
+    border-radius: 3px 3px 3px 3px;
+    color: #264965;
+    cursor: pointer;
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    height: 30px;
+    line-height: 30px;
+    margin-bottom: 14px;
+    text-align: center;
+    text-decoration: none;
+	width:100% !important;
+}
+.uploadify:hover .uploadify-button {
+		background: url('/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/4.5.5.1/_/download/resources/com.benryan.confluence.attachments:attachments-section-resources/images/add.png') 7px 7px no-repeat #C9DBE2;
+
+}
+.uploadify-button.disabled {
+	background-color: #D0D0D0;
+	color: #808080;
+}
+.uploadify-queue {
+border: 1px solid #DCDCDC;
+    border-radius: 3px;
+	padding:20px;	
+	background:white;
+	max-height:300px;
+	overflow:auto;}
+	
+.uploadify-queue-item {
+	border-bottom: 1px dotted #D5D5D5;
+	font: 12px Arial, Helvetica, Sans-serif;
+	margin-bottom: 3px;
+	padding: 10px 10px 10px 30px;
+	background:url('/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/4.5.5.1/_/download/resources/com.benryan.confluence.attachments:attachments-section-resources/images/ajax-loader-item.gif') 10px 10px no-repeat #F5F5F5; 
+}
+
+.uploadify-queue-item.complete.success {padding-left:30px; background:url('/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/4.5.5.1/_/download/resources/com.benryan.confluence.attachments:attachments-section-resources/images/accept.png') 10px 10px no-repeat #d9ecd8; font-weight:bold;}
+.uploadify-queue-item.complete.success:hover { background:url('/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/4.5.5.1/_/download/resources/com.benryan.confluence.attachments:attachments-section-resources/images/accept.png') 10px 10px no-repeat #b6deb4; }
+.uploadify-queue-item.complete.success .data {display:none;}
+
+.uploadify-queue-item.complete.error {padding-left:30px; background:url('/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/4.5.5.1/_/download/resources/com.benryan.confluence.attachments:attachments-section-resources/images/error.png') 10px 10px no-repeat #ecd8d8; font-weight:bold;}
+.uploadify-queue-item.complete.error:hover {background:url('/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/4.5.5.1/_/download/resources/com.benryan.confluence.attachments:attachments-section-resources/images/error.png') 10px 10px no-repeat #dfabab; }
+.uploadify-queue-item.complete.error .uploadify-queue-item-error-message {display:block; padding:5px; border:1px dotted red; font-size:11px; background:white; margin-top:5px;}
+
+
+
+
+
+.uploadify-error {
+	background-color: #FDE5DD !important;
+}
+.uploadify-queue-item .cancel a {
+	background: url('/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/4.5.5.1/_/download/resources/com.benryan.confluence.attachments:attachments-section-resources/images/uploadify-cancel.png') 0 0 no-repeat;
+	float: right;
+	height:	16px;
+	text-indent: -9999px;
+	width: 16px;
+}
+.uploadify-queue-item.completed {
+	background-color: #E5E5E5;
+}
+.uploadify-progress {
+	background-color: #E5E5E5;
+	margin-top: 10px;
+	width: 100%;
+}
+.uploadify-progress-bar {
+	background-color: #3A81C3;
+	height: 6px;
+	width: 1px;
+}
+
+
+/* Bulk Upload Instructions */
+
+.attachment-bulk-upload-button-wrapper {position:relative; z-index:180; height:40px; display:block; width:330px; }
+.attachment-bulk-upload-button-wrapper .bulk-upload-helper {
+	background: url('/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/4.5.5.1/_/download/resources/com.benryan.confluence.attachments:attachments-section-resources/images/lightbulb.png') center center no-repeat;
+    display: block;
+   /* border: 1px solid #8ab194;
+    border-radius: 3px 3px 3px 3px;
+    color: #2d6526;
+    cursor: pointer; 
+    font-size: 14px;
+    font-weight: bold;
+    height: 30px;
+    line-height: 30px;
+    margin-bottom: 14px;
+    text-align: center;
+    text-decoration: none;*/
+	width:30px;
+	height:30px;
+	position:absolute;
+	left:330px;
+	top:0px;
+	z-index:200;}
+
+.attachment-bulk-upload-button-wrapper .bulk-upload-helper .instructions {display:none;}
+.attachment-bulk-upload-button-wrapper .bulk-upload-helper:hover .instructions {
+	display:block; 
+	position:absolute; 
+	top:30px;
+	right:0px;
+	width:300px;
+	padding:4px; 
+	border:1px solid #dcdcdc; 
+	border-radius:3px; 
+	background:white; 
+	font-size:12px; 
+	line-height:18px; 
+	color:black;     
+	text-shadow:0px 0px white;
+	font-weight:normal;
+	text-align:left;
+	box-shadow: 2px 2px 5px #5b5b5b;
+	cursor:default;}
+
+.attachment-bulk-upload-button-wrapper .bulk-upload-helper .instructions h6 {font-size:14px; margin:0px; padding:10px 10px 5px 10px;}
+.attachment-bulk-upload-button-wrapper .bulk-upload-helper .instructions  ul {padding-top:0px; margin-top:0px; padding-right:10px;}
+.attachment-bulk-upload-button-wrapper .bulk-upload-helper .instructions  ul li {padding:3px 0px; line-height:18px;  }
+.attachment-bulk-upload-button-wrapper .bulk-upload-helper .instructions  .key {
+	background: #EDFAFF;
+    border: 1px outset #8AA6B1;
+    border-radius: 3px 3px 3px 3px;
+	padding:2px 5px;
+	color:#2e5665;	}
+	
+/* New Buttons */
+
+#attach-add-attachments .jquery-upload-attachment-done-button {
+	background: none repeat scroll 0 0 #E0E0E0;
+    border: 1px solid #bcbcbc;
+    border-radius: 3px 3px 3px 3px;
+    color: #5E5E5E;
+    cursor: pointer;
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    text-decoration: none;
+	width:65px;	
+	float:right;
+	margin-left:10px;
+	}	
+	
+#attachment-add-new-docs .jquery-upload-attachment-done-button {
+	background: none repeat scroll 0 0 #E0E0E0;
+    border: 1px solid #bcbcbc;
+    border-radius: 3px 3px 3px 3px;
+    color: #5E5E5E;
+    cursor: pointer;
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    text-decoration: none;
+	width:65px;	
+	float:right;
+	margin-top:10px;
+	}	
+	
+#attachment-bulk-upload-wrapper .jquery-upload-attachment-done-button {
+	background: none repeat scroll 0 0 #E0E0E0;
+    border: 1px solid #bcbcbc;
+    border-radius: 3px 3px 3px 3px;
+    color: #5E5E5E;
+    cursor: pointer;
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    text-decoration: none;
+	width:65px;
+	float: right;
+	margin-top:10px;
+	}	
+
+
+

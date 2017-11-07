@@ -1,0 +1,20 @@
+/* module-key = 'gov.eop.omb.confluence.resources.MAX-Resources:editor-resources', location = 'gov/eop/omb/confluence/resources/design/css/max-editor-links.css' */
+#insert-menu .macro-attachments .icon {
+   background: transparent url("/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/1.14.27.1/_/download/resources/gov.eop.omb.confluence.resources.MAX-Resources:editor-resources/images/silkicons/attach.png") 0 0 no-repeat;
+   margin-top: 0px;
+}
+#insert-menu .macro-panel .icon {
+   background: transparent url("/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/1.14.27.1/_/download/resources/gov.eop.omb.confluence.resources.MAX-Resources:editor-resources/images/silkicons/layout_sidebar.png") 0 0 no-repeat;
+   margin-top: 0px;
+}
+#insert-menu .macro-new-window .icon {
+   background: transparent url("/s/en_GB/6217/82a642d727bee456b0a91262638763d5620b1a86.56/1.14.27.1/_/download/resources/gov.eop.omb.confluence.resources.MAX-Resources:editor-resources/images/external-link.png") 0 0 no-repeat;
+   margin-top: 0px;
+}
+#insert-menu .macro-panel {
+	border-bottom: 1px solid #ddd;
+}
+#insert-menu .dropdown-item.content-attachment {
+	display:none;
+	visibility:hidden;
+}

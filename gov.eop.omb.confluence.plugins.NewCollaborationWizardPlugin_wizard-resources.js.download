@@ -1,0 +1,987 @@
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:wizard-resources', location = 'scripts/wizard-static-data.js' */
+var wizardSelectErrors = {
+	contactsupport1 : "We need more information to assist you. <br/> Please contact MAX Support by calling 202-395-6860, or ",
+	contactsupport2 : "We need more information to assist you. <br/> Please contact MAX Support by calling 202-395-6860, or ",
+	contactsupport3 : "We need more information to assist you. <br/> Please contact MAX Support by calling 202-395-6860, or ",
+	contactsupport4 : "We need more information to assist you. <br/> Please contact MAX Support by calling 202-395-6860, or "
+};
+
+var staticTemplatesObject = [
+		{
+			pageId : "858489371",
+			title : "Blank Page",
+			paragraph : "Begin with an blank page.",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/blank_page.png"
+		},
+		{
+			pageId : "858489381",
+			title : "File Share",
+			paragraph : "Store attachments and share them with team members. Access these files from any computer where you can log on to MAX.",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/file_share.png"
+		},
+		{
+			pageId : "858489377",
+			title : "Event Registration",
+			paragraph : "Manage and track event registration information. Automatically send calendar invites to registered attendees. Set registration limits and optionally enable a Waitlist.",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/event_rsvp.png"
+		},
+		{
+			pageId : "858489373",
+			title : "Calendar",
+			paragraph : "Display a MAX Calendar.",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/Calendar-100.png"
+		},
+		{
+			pageId : "858489375",
+			title : "Data Call Dashboard",
+			paragraph : "Dashboard of links and instructions to accompany a data collection, such as a MAX Collect exercise.",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/Collect-100.png"
+		},
+		{
+			pageId : "858489384",
+			title : "File Folder Structure",
+			paragraph : "Easily organize files into folder-like pages.",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/Folder-100.png"
+		},
+		{
+			pageId : "858489387",
+			title : "Page with a Panel Header",
+			paragraph : "",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/Document-100.png"
+		},
+		{
+			pageId : "858489389",
+			title : "Page with Two Columns",
+			paragraph : "",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/Document-100.png"
+		},
+		{
+			pageId : "858489394",
+			title : "Page with Documents and Two Columns",
+			paragraph : "",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/Document-100.png"
+		},
+		{
+			pageId : "858489396 ",
+			title : "Userlister",
+			paragraph : "List members of a MAX group.",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/Groups-100.png"
+		},
+		{
+			pageId : "858489398 ",
+			title : "Collaboration Area Dashboard",
+			paragraph : "Home page of a collaboration with an information panel, recently updated pages, and a search functionality.",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/Template-100.png"
+		} ];
+
+var staticTemplatesObjectTest = [
+		{
+			pageId : "796983310",
+			title : "Blank Page",
+			paragraph : "Begin with an blank page.",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/blank_page.png"
+		},
+		{
+			pageId : "796983314",
+			title : "File Share",
+			paragraph : "Store attachments and share them with team members. Access these files from any computer where you can log on to MAX.",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/file_share.png"
+		},
+		{
+			pageId : "796983316",
+			title : "Event Registration",
+			paragraph : "Manage and track event registration information. Automatically send calendar invites to registered attendees. Set registration limits and optionally enable a Waitlist.",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/event_rsvp.png"
+		},
+		{
+			pageId : "858489373",
+			title : "Calendar",
+			paragraph : "Display a MAX Calendar.",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/Calendar-100.png"
+		},
+		{
+			pageId : "858489375",
+			title : "Data Call Dashboard",
+			paragraph : "Dashboard of links and instructions to accompany a data collection, such as a MAX Collect exercise.",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/Collect-100.png"
+		},
+		{
+			pageId : "858489384",
+			title : "File Folder Structure",
+			paragraph : "Easily organize files into folder-like pages.",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/Folder-100.png"
+		},
+		{
+			pageId : "858489387",
+			title : "Page with a Panel Header",
+			paragraph : "",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/Document-100.png"
+		},
+		{
+			pageId : "858489389",
+			title : "Page with Two Columns",
+			paragraph : "",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/Document-100.png"
+		},
+		{
+			pageId : "858489394",
+			title : "Page with Documents and Two Columns",
+			paragraph : "",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/Document-100.png"
+		},
+		{
+			pageId : "858489396 ",
+			title : "Userlister",
+			paragraph : "List members of a MAX group.",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/Groups-100.png"
+		},
+		{
+			pageId : "858489398 ",
+			title : "Collaboration Area Dashboard",
+			paragraph : "Home page of a collaboration with an information panel, recently updated pages, and a search functionality.",
+			previewImg : "/s/4396/123/_/download/resources/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:splash-resources/images/Template-100.png"
+		} ];
+
+var secondaryGovWideOptions = [ {
+	title : "Acquisition",
+	pageId : "23527458"
+}, {
+	title : "Budget",
+	pageId : "1503"
+}, , {
+	title : "E-Government",
+	pageId : "3599"
+}, {
+	title : "Financial Management",
+	pageId : "3601"
+}, {
+	title : "Grants",
+	pageId : "15269918"
+}, {
+	title : "Homeland Security",
+	pageId : "71860280"
+}, {
+	title : "Human Capital",
+	pageId : "25198667"
+}, {
+	title : "IT Infrastructure",
+	pageId : "129564960"
+}, {
+	title : "Management",
+	pageId : "254050536"
+}, {
+	title : "Open Government",
+	pageId : "261587330"
+}, {
+	title : "Performance",
+	pageId : "15270007"
+}, {
+	title : "Planning",
+	pageId : "23527472"
+}, {
+	title : "Recovery Act",
+	pageId : "280036340"
+}, {
+	title : "Small Agencies",
+	pageId : "187760699"
+}, {
+	title : "Sustainability",
+	pageId : "506790715"
+}, {
+	title : "Web and New Media",
+	pageId : "607750707"
+} ];
+
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:wizard-resources', location = 'scripts/wizard.js' */
+var AgencyAnchorPageSetModel = Backbone.Model.extend({
+	idAttribute : 'agencyCode',
+	defaults : {
+		agencyCode : "AGY-CODE",
+		anchorPages : [ {
+			title : "Page Title",
+			pageId : "1234"
+		}, {
+			title : "Page Title 2",
+			pageId : "5678"
+		}, ]
+	}
+
+});
+
+var AgencyAnchorPageSetCollection = Backbone.Collection.extend({
+	url : function() {
+		return '/pages/getanchorpages.action';
+	},
+	model : AgencyAnchorPageSetModel,
+	parse : function(data) {
+		return data.anchorPages;
+	}
+});
+
+var TemplatePageSetModel = Backbone.Model.extend({
+	idAttribute : 'pageId',
+	defaults : {
+		pageId : "123456",
+		title : "Default Page",
+		paragraph : "Default description.",
+		previewImg : "/path/to/default_img.png"
+	}
+});
+
+var TemplatePageSetCollection = Backbone.Collection.extend({
+	url : function() {
+		return '/plugins/restrictions/details.action?pageId=' + AJS.params.pageId;
+	},
+	model : TemplatePageSetModel,
+	parse : function(data) {
+		if (document.domain.indexOf("test") != -1) {
+			return staticTemplatesObject; // use prod data now, test has been refreshed
+		} else {
+
+			return staticTemplatesObject;
+		}
+	}
+});
+
+var WizardView = Backbone.View.extend({
+	tagName : 'div',
+	id : 'wizard-container',
+	dialog : null,
+	submitting : false,
+	anchorPages : null,
+	userAgency : null,
+	render : function() {
+		var that = this;
+		if ($("#wizard-template").size() == 0) {
+			$.ajax({
+				url : "/s/4396/" + (new Date).getTime()
+						+ "/_/download/batch/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:wizard-resources"
+						+ "/gov.eop.omb.confluence.plugins.NewCollaborationWizardPlugin:wizard-templates.html",
+				async : false,
+				success : function(data) {
+					$("body").append(data);
+				},
+			});
+		}
+
+		// get collection of anchor pages
+		var anchorPages = new AgencyAnchorPageSetCollection();
+
+		// get collection of template choices
+		var templatePages = new TemplatePageSetCollection();
+
+		// render in promise
+		$.when(anchorPages.fetch(), templatePages.fetch()).then(
+				function() {
+					// init
+					var userAgency = $("meta[name='agency-code']").attr("content");
+
+					// store for later use
+					that.anchorPages = anchorPages.models;
+					that.userAgency = userAgency;
+
+					var wizard = _.template($("#wizard-template").html().replace(/\t/g, ''), {
+						anchorPagesCollection : anchorPages.models,
+						currentPageId : $("meta[name='ajs-page-id']").attr("content"),
+						templatePagesCollection : templatePages.models,
+						userAgency : userAgency
+					});
+					that.$el.html(wizard);
+
+					// bind secondary dropdown option clicks
+					bindWizardSecondarySelections($(that.$el).find(".wizard-collaboration-location-select-wrapper"), that);
+
+					// bind jquery autocomplete for restrictions
+					bindWizardRestrictionsAutocomplete($(that.$el).find(".wizard-collaboration-restrictions-input"), $(that.$el).find(
+							".wizard-collaboration-restrictions-wrapper"));
+
+					// bind for page title checker
+					bindWizardTitleChecker($(that.$el).find(".wizard-page-title"), that);
+
+					// permission check the collaboration locations
+					permissionCheckCollaborationLocations($(that.$el).find("#wizard-anchor-page-select"));
+
+				});
+
+		return this;
+	},
+	events : {
+		'click .wizard-selectable-type li' : 'selectItem',
+		'dblclick .wizard-selectable-type li' : 'selectItemDoubleClick',
+		'click .wizard-collaboration-restrictions-add-button' : 'addRestriction',
+		'click button.wizard-next' : 'nextStep',
+		'click button.wizard-back' : 'previousStep',
+		'click button.wizard-cancel' : 'cancel',
+		'click button.wizard-create' : 'create'
+	},
+	selectItem : function(e) {
+		$(e.currentTarget).parents("ol.wizard-selectable-type").find("li").removeClass("ui-selected");
+		$(e.currentTarget).addClass("ui-selected");
+	},
+	selectItemDoubleClick : function(e) {
+		this.selectItem(e);
+		this.nextStep(e);
+	},
+	addRestriction : function(e) {
+		var restrictionToAdd = $.trim($(e.currentTarget).siblings(".wizard-collaboration-restrictions-input").val());
+
+		// check the value is valid
+		jQuery
+				.ajax({
+					url : '/pages/getentities.action?name=' + restrictionToAdd + '&type=&pageId=&spaceKey='
+							+ $("meta[name='ajs-space-key']").attr("content"),
+					async : false,
+					success : function(data) {
+						if (typeof (data[0]) == 'undefined') {
+							// show error
+							return false;
+						} else if (data[0].entity.name.toUpperCase() == restrictionToAdd.toUpperCase()) {
+							// make sure list is visible
+							$(".wizard-collaboration-restrictions-current-container").removeClass("hidden");
+
+							// add to the list
+							if (data[0].entity.type == "user") {
+								$(e.currentTarget).parents(".wizard-step-container").find(".wizard-collaboration-restrictions-current-list ul")
+										.append(_.template($("#wizard-restriction-item-user-template").html().replace(/\t/g, ''), {
+											user : data[0].entity
+										}));
+							} else if (data[0].entity.type == "group") {
+								$(e.currentTarget).parents(".wizard-step-container").find(".wizard-collaboration-restrictions-current-list ul")
+										.append(_.template($("#wizard-restriction-item-group-template").html().replace(/\t/g, ''), {
+											group : data[0].entity.name
+										}));
+							}
+
+							// reset input
+							$(e.currentTarget).siblings(".wizard-collaboration-restrictions-input").val("");
+						}
+					}
+				});
+	},
+	nextStep : function(e) {
+		// validate before moving to next
+		var stepContainerID = $(e.currentTarget).parents("div.wizard-step-container").attr("id");
+		if (stepContainerID === "wizard-step1") {
+			// check they have selected a template
+			if (!$(e.currentTarget).parents("div.wizard-step-container").find("li.ui-widget-content.ui-selected").size() > 0) {
+				// add error message
+				$(e.currentTarget).parents("div.wizard-step-container").find(".wizard-collaboration-select-error").html("Please select a template")
+						.removeClass("hidden");
+				return false;
+			} else {
+				// clear error message
+				$(e.currentTarget).parents("div.wizard-step-container").find(".wizard-collaboration-select-error").html("").addClass("hidden");
+			}
+			// update title
+			this.dialog.dialog('option', 'title', 'Create '
+					+ this.$el.find("li.ui-widget-content.ui-selected .wizard-collaboration-select-info-title").text() + ' (step 2 of 4)');
+		} else if (stepContainerID === "wizard-step2") {
+			// check if the selection is personal page that needs to be created
+			// (aka pageId 0)
+			if (this.getSelectedAnchorPage($(e.currentTarget).parents("#wizard-container")) == 0) {
+				// create a personal page and update this value
+				var pageCreated = false;
+				jQuery.ajax({
+					url : '/pages/createnewpersonalpage.action',
+					async : false,
+					success : function(data) {
+						// check for error
+						if (data.error) {
+							alert('An error occured when creating your personal page, contact MAX Support. \n ' + data.errorMessage);
+						}
+
+						$(e.currentTarget).parents("div.wizard-step-container").find('#wizard-anchor-page-select option:selected').val(
+								data.newPage.id);
+						pageCreated = true;
+					},
+					error : function() {
+						alert('An error occured when creating your personal page, contact MAX Support.');
+					}
+				});
+
+				if (pageCreated == false) {
+					return false;
+				}
+			}
+
+			// check if they have selected a error message displaying top level
+			// option
+			if (this.getSelectedAnchorPage($(e.currentTarget).parents("#wizard-container")).indexOf("contactsupport") != -1) {
+				return false;
+			}
+
+			if (this.getSelectedAnchorPage($(e.currentTarget).parents("#wizard-container")).indexOf("placeholder") != -1) {
+				// add error message
+				$(e.currentTarget).parents("div.wizard-step-container").find(".wizard-collaboration-create-general-error").html(
+						"Please select a location").removeClass("hidden");
+				return false;
+			}
+
+			// check they have selected a secondary template if appropriate
+			var secondarySelectList = $(e.currentTarget).parents("div.wizard-step-container").find("#wizard-anchor-page-secondary-select:visible");
+			if (secondarySelectList.size() > 0) {
+				if (secondarySelectList.find(":selected").val() == "placeholder") {
+					// show error
+					$(e.currentTarget).parents("div.wizard-step-container").find(".wizard-collaboration-create-general-error").html(
+							"Please select a location").removeClass("hidden");
+					secondarySelectList.addClass("error");
+					return false;
+				} else if (secondarySelectList.find(":selected").val().indexOf("contactsupport") != -1) {
+					return false;
+				} else {
+					// clear error message
+					$(e.currentTarget).parents("div.wizard-step-container").find(".wizard-collaboration-create-general-error").html("").addClass(
+							"hidden");
+					secondarySelectList.removeClass("error");
+				}
+			}
+
+			// update title
+			this.dialog.dialog('option', 'title', 'Create '
+					+ this.$el.find("li.ui-widget-content.ui-selected .wizard-collaboration-select-info-title").text() + ' (step 3 of 4)');
+
+		} else if (stepContainerID === "wizard-step3") {
+
+			// check title is there and validated
+			// $(".wizard-page-create-spinner").removeClass("hidden");
+			var wizardContainer = $(e.currentTarget).parents("#wizard-container");
+			var pageTitle = $.trim(wizardContainer.find(".wizard-page-title").val());
+			if (pageTitle == "" || !wizardContainer.find(".wizard-page-title-status").hasClass("wizard-success")) {
+				// add error message
+				$(e.currentTarget).parents("div.wizard-step-container").find(".wizard-collaboration-create-general-error").html(
+						"You must specify a valid title").removeClass("hidden");
+				$(".wizard-page-create-spinner").addClass("hidden");
+				return false;
+			}
+
+			this.dialog.dialog('option', 'title', 'Create '
+					+ this.$el.find("li.ui-widget-content.ui-selected .wizard-collaboration-select-info-title").text() + '(step 4 of 4)');
+
+			// render summary section
+			var wizardSummary = _.template($("#wizard-summary-template").html().replace(/\t/g, ''), {
+				templateTitle : this.$el.find("li.ui-widget-content.ui-selected .wizard-collaboration-select-info-title").text(),
+				anchorPageTitle : this.$el.find('#wizard-anchor-page-select option:selected').text(),
+				secondaryAnchorPageTitle : this.$el.find('#wizard-anchor-page-secondary-select:visible option:selected').text(),
+				additionalRestrictionsCount : this.$el.find('.wizard-collaboration-restrictions-current-list ul li').size(),
+				pageTitle : pageTitle
+			});
+			$(e.currentTarget).parents("#wizard-container").find(".wizard-collaboration-summary-wrapper").html(wizardSummary);
+		}
+		$(e.currentTarget).parents("div.wizard-step-container").addClass("hidden");
+		$(e.currentTarget).parents("div.wizard-step-container").next("div").removeClass("hidden");
+	},
+	previousStep : function(e) {
+
+		var stepContainerID = $(e.currentTarget).parents("div.wizard-step-container").attr("id");
+		if (stepContainerID === "wizard-step2") {
+			this.dialog.dialog('option', 'title', 'Create New Collaboration (step 1 of 4)');
+		} else if (stepContainerID === "wizard-step3") {
+			this.dialog.dialog('option', 'title', 'Create '
+					+ this.$el.find("li.ui-widget-content.ui-selected .wizard-collaboration-select-info-title").text() + ' (step 2 of 4)');
+		} else if (stepContainerID === "wizard-step4") {
+			this.dialog.dialog('option', 'title', 'Create '
+					+ this.$el.find("li.ui-widget-content.ui-selected .wizard-collaboration-select-info-title").text() + ' (step 3 of 4)');
+		}
+
+		$(e.currentTarget).parents("div.wizard-step-container").addClass("hidden");
+		$(e.currentTarget).parents("div.wizard-step-container").prev("div").removeClass("hidden");
+	},
+	cancel : function(e) {
+		this.trigger('closeDialog');
+	},
+	create : function(e) {
+		// add click stats
+		var current = new Date();
+		var endTime = (current - clickEventsStartTime);
+		clickEvents.push({
+			"event" : {
+				"eventId" : "new-collaboration-create-button",
+				"timeSinceLoad" : endTime,
+				"occuredAt" : current.getTime()
+			}
+		});
+
+		// check title is there and validated
+		$(".wizard-page-create-spinner").removeClass("hidden");
+		var wizardContainer = $(e.currentTarget).parents("#wizard-container");
+		var pageTitle = $.trim(wizardContainer.find(".wizard-page-title").val());
+		if (pageTitle == "" || !wizardContainer.find(".wizard-page-title-status").hasClass("wizard-success")) {
+			// add error message
+			$(e.currentTarget).parents("div.wizard-step-container").find(".wizard-collaboration-create-general-error").html(
+					"You must specify a valid title").removeClass("hidden");
+			$(".wizard-page-create-spinner").addClass("hidden");
+			return false;
+		}
+
+		if (this.submitting === true) {
+			$(".wizard-page-create-spinner").addClass("hidden");
+			return false;
+		}
+		this.submitting = true;
+
+		var selectedTemplatePageId = this.getSelectedTemplate(wizardContainer);
+		var selectedAnchorPageId = this.getSelectedAnchorPage(wizardContainer);
+		var additionalUserRestrictions = this.getAdditionalUserRestrictions(wizardContainer);
+		var additionalGroupRestrictions = this.getAdditionalGroupRestrictions(wizardContainer);
+		var suppressNotifications = wizardContainer.find("#wizard-collaboration-suppress-notifications").is(':checked');
+		var removeWatchers = wizardContainer.find("#wizard-collaboration-remove-notifications").is(':checked');
+
+		doPageCreate(wizardContainer, this, selectedTemplatePageId, selectedAnchorPageId, additionalUserRestrictions, additionalGroupRestrictions,
+				pageTitle, suppressNotifications, removeWatchers);
+
+	},
+	getSelectedTemplate : function(wizardContainer) {
+		return $(wizardContainer).find("li.ui-widget-content.ui-selected input[name='templatePageId']").val();
+	},
+	getSelectedAnchorPage : function(wizardContainer) {
+		// check for selected secondary first
+		if ($(wizardContainer).find("#wizard-anchor-page-secondary-select").hasClass('hidden')) {
+			return $(wizardContainer).find('#wizard-anchor-page-select option:selected').val();
+		} else {
+			return $(wizardContainer).find('#wizard-anchor-page-secondary-select option:selected').val();
+		}
+
+	},
+	getAdditionalUserRestrictions : function(wizardContainer) {
+		var userRestrictions = "";
+		$(wizardContainer).find('.wizard-collaboration-restrictions-current-list ul li.username').each(function(index, value) {
+			userRestrictions += $(this).find("input[name='username']").val() + ",";
+		});
+		return userRestrictions;
+	},
+	getAdditionalGroupRestrictions : function(wizardContainer) {
+		var groupRestrictions = "";
+		$(wizardContainer).find('.wizard-collaboration-restrictions-current-list ul li.groupname').each(function(index, value) {
+			groupRestrictions += $(this).find("input[name='groupname']").val() + ",";
+		});
+		return groupRestrictions;
+	}
+
+});
+
+function generateNewCollaborationWizard() {
+	var wizardView = new WizardView();
+
+	var wizardDialog = jQuery("<div class='wizard-dialog'></div>");
+	var dialogConfig = new JQUERYUI_DIALOG_MODAL_HASH;
+
+	dialogConfig.buttons = {};
+
+	var windowHeight = jQuery(window).height();
+	var windowWidth = jQuery(window).width();
+	dialogConfig.height = 540;
+	dialogConfig.width = 650;
+	dialogConfig.resizable = false;
+	dialogConfig.autoOpen = false;
+	dialogConfig.title = "Create New Collaboration (step 1 of 4)";
+
+	wizardDialog.append(wizardView.render().$el);
+
+	wizardView.on('closeDialog', function() {
+		wizardDialog.dialog('close');
+		$(this).dialog('destroy').remove(); // completly remove from the dom
+	});
+
+	wizardDialog.on('dialogclose', function(event) {
+		// add click stats
+		var current = new Date();
+		var endTime = (current - clickEventsStartTime);
+		clickEvents.push({
+			"event" : {
+				"eventId" : "new-collaboration-wizard-close",
+				"timeSinceLoad" : endTime,
+				"occuredAt" : current.getTime()
+			}
+		});
+	});
+
+	wizardDialog.dialog(dialogConfig);
+	wizardDialog.dialog('open');
+
+	wizardView.dialog = wizardDialog; // for later use
+
+}
+
+function doPageCreate(wizardContainer, viewObj, selectedTemplatePageId, selectedAnchorPageId, additionalUserRestrictions,
+		additionalGroupRestrictions, pageTitle, suppressNotifications, removeWatchers) {
+
+	var data = {
+		selectedTemplatePageId : selectedTemplatePageId,
+		selectedAnchorPageId : selectedAnchorPageId,
+		additionalUserRestrictions : additionalUserRestrictions,
+		additionalGroupRestrictions : additionalGroupRestrictions,
+		pageTitle : pageTitle,
+		suppressNotifications : suppressNotifications,
+		removeWatchers : removeWatchers
+	};
+
+	$.ajax({
+		type : "POST",
+		data : data,
+		url : contextPath + '/pages/createnewcollaboration.action',
+		success : function(data, textStatus, jqXHR) {
+			console.log(data);
+			if (data.error) {
+				viewObj.submitting = false;
+				$(wizardContainer).find(".wizard-collaboration-create-general-error").html("<b>Error:</b> " + data.errorMessage)
+						.removeClass("hidden");
+				$(".wizard-page-create-spinner").addClass("hidden");
+			} else {
+				// redirect to the new page
+				document.location = "/pages/viewpage.action?pageId=" + data.newPage.id + "&showSplash=true";
+			}
+		},
+		error : function(jqXHR, textStatus, errorThrown) {
+			$(wizardContainer).find(".wizard-collaboration-create-general-error").html("A server error has occurred.").removeClass("hidden");
+			console.log("ERROR!!!! textStatus = " + textStatus + " jqXHR: " + jqXHR + " jqXHR.status: " + jqXHR.status);
+			viewObj.submitting = false;
+			$(".wizard-page-create-spinner").addClass("hidden");
+		}
+	});
+
+}
+
+function bindWizardSecondarySelections(selectWrapper, viewObj) {
+
+	$(selectWrapper).find("#wizard-anchor-page-select").bind(
+			'change',
+			function() {
+				var optionSelected = $("option:selected", this);
+				var valueSelected = this.value;
+
+				if (optionSelected.hasClass("wizard-has-secondary-options")) {
+					// render secondary drop down
+					/*
+					 * var agencyAnchorPages = _.where(viewObj.anchorPages, { id :
+					 * viewObj.userAgency })[0].get('anchorPages'); var
+					 * secondaryAnchorPages = _.where(agencyAnchorPages, {
+					 * areaType : "secondary-options-list"
+					 * })[0].secondaryAnchorPages;
+					 */
+
+					if (valueSelected == "gov-wide") {
+						var pageIdsToCheck = "";
+						for ( var i in secondaryGovWideOptions) {
+							pageIdsToCheck = pageIdsToCheck + secondaryGovWideOptions[i].pageId + ",";
+						}
+
+						// check perms for these pageids
+						jQuery.ajax({
+							url : '/pages/permissioncheckpages.action?pageIds=' + pageIdsToCheck,
+							success : function(data) {
+								var permissionedPages = data.permissionedPages;
+
+								for ( var i in secondaryGovWideOptions) {
+									var objectToFind = {
+										pageId : secondaryGovWideOptions[i].pageId
+									};
+									if (_.where(permissionedPages, objectToFind).length == 0) {
+										secondaryGovWideOptions.splice(i, 1); // remove
+									}
+								}
+
+								// add hardcoded options
+
+								secondaryGovWideOptions.unshift({
+									title : "Create a new Government-wide Community *",
+									pageId : "contactsupport1"
+								});
+								secondaryGovWideOptions.unshift({
+									title : "Select a Government-Wide Community...",
+									pageId : "placeholder"
+								});
+
+								renderSecondaryDropdownOptions(selectWrapper, viewObj, secondaryGovWideOptions, valueSelected);
+								// render secondary dropdown
+							}
+						});
+						// renderSecondaryDropdownOptions(selectWrapper,
+						// viewObj, secondaryGovWideOptions, valueSelected);
+					} else if (valueSelected == "cross-agency") {
+						jQuery.ajax({
+							url : '/pages/permissionedchildpages.action?pageId=615586033', // +
+							// AJS.params.pageId,
+							success : function(data) {
+								// add hardcoded options
+
+								data.childPages.unshift({
+									title : "Create a new Cross-Agency collaboration * ",
+									pageId : "contactsupport1"
+								});
+								data.childPages.unshift({
+									title : "Select a Cross-Agency Collaboration......",
+									pageId : "placeholder"
+								});
+
+								renderSecondaryDropdownOptions(selectWrapper, viewObj, data.childPages, valueSelected);
+								// console.log(data);
+							}
+						});
+					}
+
+				} else if (valueSelected.indexOf("contactsupport") != -1) {
+
+					var contactSupportMessageHtml = wizardSelectErrors[valueSelected];
+
+					// render summary section for mailto
+					var wizardSummaryMailtoBody = _.template($("#wizard-summary-mailto-template").html().replace(/\t/g, ''), {
+						templateTitle : viewObj.$el.find("li.ui-widget-content.ui-selected .wizard-collaboration-select-info-title").text(),
+						anchorPageTitle : viewObj.$el.find('#wizard-anchor-page-select option:selected').text(),
+						secondaryAnchorPageTitle : viewObj.$el.find('#wizard-anchor-page-secondary-select:visible option:selected').text()
+					});
+
+					contactSupportMessageHtml += " <a href='mailto:maxsupport@max.gov?subject=MAX Community: New collaboration requested&body="
+							+ wizardSummaryMailtoBody + "'>click here to email maxsupport@max.gov.</a>";
+					viewObj.$el.find(".wizard-anchor-page-secondary-select-error-message").html(contactSupportMessageHtml).removeClass("hidden");
+					viewObj.$el.find(".wizard-collaboration-location-select-wrapper").addClass("error-shown");
+					viewObj.$el.find("#wizard-anchor-page-secondary-select").addClass("hidden");
+				} else {
+					viewObj.$el.find("#wizard-anchor-page-secondary-select").addClass("hidden");
+					viewObj.$el.find(".wizard-anchor-page-secondary-select-error-message").addClass("hidden");
+					viewObj.$el.find(".wizard-collaboration-create-general-error").addClass("hidden");
+					viewObj.$el.find(".wizard-collaboration-location-select-wrapper").removeClass("error-shown");
+				}
+			}).trigger('change');
+
+}
+
+function renderSecondaryDropdownOptions(selectWrapper, viewObj, secondaryOptionsList, valueSelected) {
+	var secondaryAnchorPagesHtml = _.template($("#wizard-secondary-select-template").html().replace(/\t/g, ''), {
+		secondaryAnchorPages : secondaryOptionsList,
+		secondaryType : valueSelected
+	});
+
+	// seconday list option bindings
+	viewObj.$el.find("#wizard-anchor-page-secondary-select").html(secondaryAnchorPagesHtml).removeClass("hidden");
+
+	viewObj.$el.find("#wizard-anchor-page-secondary-select").bind(
+			'change',
+			function() {
+				var optionSelected = $("option:selected", this);
+				var valueSelected = this.value;
+
+				if (valueSelected.indexOf("contactsupport") != -1) {
+					var contactSupportMessageHtml = wizardSelectErrors[valueSelected];
+
+					// render summary section for mailto
+					var wizardSummaryMailtoBody = _.template($("#wizard-summary-mailto-template").html().replace(/\t/g, ''), {
+						templateTitle : viewObj.$el.find("li.ui-widget-content.ui-selected .wizard-collaboration-select-info-title").text(),
+						anchorPageTitle : viewObj.$el.find('#wizard-anchor-page-select option:selected').text(),
+						secondaryAnchorPageTitle : viewObj.$el.find('#wizard-anchor-page-secondary-select:visible option:selected').text()
+					});
+
+					contactSupportMessageHtml += " <a href='mailto:maxsupport@max.gov?subject=MAX Community: New collaboration requested&body="
+							+ wizardSummaryMailtoBody + "'>click here to email maxsupport@max.gov.</a>";
+					viewObj.$el.find(".wizard-anchor-page-secondary-select-error-message").html(contactSupportMessageHtml).removeClass("hidden");
+					viewObj.$el.find(".wizard-collaboration-location-select-wmaxurapper").addClass("secondary-error-shown");
+				} else {
+					viewObj.$el.find(".wizard-anchor-page-secondary-select-error-message").addClass("hidden");
+					viewObj.$el.find(".wizard-collaboration-location-select-wrapper").removeClass("secondary-error-shown");
+				}
+			}).trigger('change');
+}
+
+function bindWizardRestrictionsAutocomplete(restrictionsInput, restrictionsWrapper) {
+
+	// radio buttons
+	$(restrictionsWrapper).find("#wizard-collaboration-whoshouldsee-everyone").click(function() {
+		if ($(this).hasClass("toggled")) {
+			return false;
+		}
+		// reset restrictions that may have been added and state
+		$(restrictionsWrapper).find(".wizard-collaboration-restrictions-add-container").addClass("hidden");
+		$(restrictionsWrapper).find(".wizard-collaboration-restrictions-current-list ul li").remove();
+		$(restrictionsWrapper).find(".wizard-collaboration-restrictions-current-container").addClass("hidden");
+		$(this).addClass("toggled");
+		$(restrictionsWrapper).find("#wizard-collaboration-whoshouldsee-specific").removeClass("toggled");
+	});
+
+	$(restrictionsWrapper).find("#wizard-collaboration-whoshouldsee-specific").click(
+			function() {
+				if ($(this).hasClass("toggled")) {
+					return false;
+				}
+				// add the current user to the restrictions list, with no remove
+				// link!
+				$(restrictionsWrapper).find(".wizard-collaboration-restrictions-add-container").removeClass("hidden");
+				$(restrictionsInput).parents("#wizard-container").find(".wizard-collaboration-restrictions-input").val(
+						$("meta[name='ajs-remote-user']").attr("content"));
+				$(restrictionsInput).parents("#wizard-container").find(".wizard-collaboration-restrictions-add-button").click();
+				$(restrictionsInput).parents("#wizard-container").find(".wizard-collaboration-restrictions-remove").remove();
+				$(this).addClass("toggled");
+				$(restrictionsWrapper).find("#wizard-collaboration-whoshouldsee-everyone").removeClass("toggled");
+			});
+
+	// autocomplete
+	jQuery(restrictionsInput)
+			.autocomplete(
+					{
+						minLength : 2,
+						open : function(event, ui) {
+							jQuery("ul.ui-autocomplete").css("z-index", 2002);
+						},
+						source : function(request, response) {
+							jQuery
+									.ajax({
+										url : '/rest/prototype/1/search/user-or-group.json?max-results=30&query=' + request.term,
+										data : request,
+										success : function(data) {
+											if (data.result) {
+												if (data.result.length == 0) {
+													response([ {
+														"title" : "No Matches Found.",
+														"type" : "noresults",
+														"username" : "",
+														"thumbnailLink" : {
+															"href" : "/s/en_GB-1988229788/4396/7fb75ec881e99d58f13a4ca55d03620d83ac1d71.80/1.14.19.117/_/download/resources/gov.eop.omb.confluence.resources.MAX-Resources:design-resources/images/silkicons/error.png"
+														}
+													} ]);
+												} else {
+													response(data.result);
+												}
+											}
+										},
+										error : function() {
+											response([]);
+										}
+									});
+						},
+						select : function(event, ui) {
+							if (ui.item.type == "user") {
+								$(this).val(ui.item.username);
+							} else {
+								$(this).val(ui.item.name);
+							}
+							$(restrictionsInput).parents("#wizard-container").find(".wizard-collaboration-restrictions-add-button").click();
+							// return false;
+						}
+					}).data("autocomplete")._renderItem = function(ul, item) {
+		if (item.type == "user" || item.type == "noresults") {
+			return jQuery("<li>").data("item.autocomplete", item).append(
+					"<a><img style='width: 16px;height: 16px;border-radius: 2px;margin-bottom: -2px;margin-right:4px;' src='"
+							+ item.thumbnailLink.href + "'><span>" + item.title + "</span>"
+							+ (item.username != "" ? "<span style='margin-left: 12px;'>(" + item.username + ")</span>" : "") + "</a>").appendTo(ul);
+		} else {
+			return jQuery("<li>").data("item.autocomplete", item).append(
+					"<a><img style='width: 16px;height: 16px;border-radius: 2px;margin-bottom: -2px;margin-right:4px;' src='/images/icons/avatar_group_32.png'><span>"
+							+ item.name + "</span>" + "</a>").appendTo(ul);
+		}
+	}
+}
+
+function bindWizardTitleChecker(titleInput, viewObject) {
+
+	var wizardTitleCheckTimeout = null;
+	$(titleInput).keyup(
+			function() {
+				if (wizardTitleCheckTimeout != null) {
+					clearTimeout(wizardTitleCheckTimeout);
+				}
+				if ($.trim($(this).val()) == "") {
+					$(this).parents("#wizard-container").find(".wizard-page-title-status").addClass("hidden");
+					return false;
+				}
+				var that = this;
+				wizardTitleCheckTimeout = setTimeout(function() {
+					wizardTitleCheckTimeout = null;
+					var parentPageId = viewObject.getSelectedAnchorPage($(that).parents("#wizard-container"));
+
+					// show spinner
+					$(".wizard-page-title-spinner").removeClass("hidden");
+
+					// ajax code
+					jQuery.ajax({
+						url : '/pages/checknewpagetitle.action?parentPageID=' + parentPageId + '&pageTitle=' + $.trim($(that).val()),
+						success : function(data) {
+							// check response
+							if (data.pageExists) {
+								$(that).parents("#wizard-container").find(".wizard-page-title-status").html("Duplicate or Invalid Title  &#10006;")
+										.removeClass("hidden").removeClass("wizard-success").addClass("wizard-error");
+							} else {
+								$(that).parents("#wizard-container").find(".wizard-page-title-status").html("Valid Title &#10004;").removeClass(
+										"hidden").removeClass("wizard-error").addClass("wizard-success");
+								$(that).parents("div.wizard-step-container").find(".wizard-collaboration-create-general-error").html("").addClass(
+										"hidden");
+							}
+							// hide spinner
+							$(".wizard-page-title-spinner").addClass("hidden");
+						},
+						error : function() {
+							// hide spinner
+							$(".wizard-page-title-spinner").addClass("hidden");
+						}
+					});
+
+				}, 750);
+			});
+}
+
+function permissionCheckCollaborationLocations(selectListInput) {
+	// TODO: is this needed?
+}
+
+$(document).ready(function() {
+	// add create button
+	// TODO: move this into the actual page.vmd layout
+	// jQuery("#toolbar-items-right").append("<li
+	// id='create-new-collaboration-button'><a href='#'>Create New
+	// Collaboration</a></li>")
+
+	$("#create-new-collaboration-button").click(function() {
+		// add click stats
+		var current = new Date();
+		var endTime = (current - clickEventsStartTime);
+		clickEvents.push({
+			"event" : {
+				"eventId" : jQuery(this).attr('id'),
+				"timeSinceLoad" : endTime,
+				"occuredAt" : current.getTime()
+			}
+		});
+
+		generateNewCollaborationWizard();
+	});
+
+	// bind "share a file" function
+	var fileShareTemplateVal = 858489381;
+	if (window.location.hostname == 'community.test.max.gov')
+		fileShareTemplateVal = 796983314;
+
+	$("#add-file-share-link").click(function() {
+		$('#create-new-collaboration-link').click();
+		pollCollaborationTemplateSelectVisibility(fileShareTemplateVal);
+
+		return false;
+	});
+
+});
+
+function pollCollaborationTemplateSelectVisibility(fileShareTemplateVal) {
+	if ($("#wizard-step1 .wizard-collaboration-select-wrapper li.ui-widget-content").is(":visible")) {
+		$("#wizard-step1 li input[value='" + fileShareTemplateVal + "']").click();
+		$("#wizard-step1 .wizard-next").click();
+	} else {
+		setTimeout(function() {
+			pollCollaborationTemplateSelectVisibility(fileShareTemplateVal);
+		}, 50);
+	}
+}
+
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;

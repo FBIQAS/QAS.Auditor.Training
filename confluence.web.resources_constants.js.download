@@ -1,0 +1,11 @@
+;try {
+/* module-key = 'confluence.web.resources:constants', location = '/includes/js/api/constants.js' */
+define("confluence/api/constants",["ajs"],function(b){var a={};a.CONTEXT_PATH=b.contextPath();return a});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;

@@ -1,0 +1,148 @@
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.Macros-Plugin:new-window-js', location = 'gov/eop/omb/confluence/plugins/NewWindow/script/new-window.js' */
+//Community Namespace
+if(typeof community == 'undefined')
+	community = {};
+
+//Community Plugins Namespace
+if(community.plugins == undefined)
+	community.plugins = {};
+
+//Community Plugins Namespace
+if(community.plugins.newWindow == undefined)
+	community.plugins.newWindow = {};
+
+community.plugins.newWindow.init = function ()
+{
+	AJS.log("init");
+	var container = jQuery(this);
+	var links = container.find("a[href]");
+
+	var heightParams = container.find("#new-window-height-params");
+	var widthParams = container.find("#new-window-width-params");
+
+	var options =	({
+			height: {
+				enabled: (heightParams.find("input[name=enabled]").val() === "true"),
+				isPercentage: (heightParams.find("input[name=isPercentage]").val() === "true"),
+				isPixel: (heightParams.find("input[name=isPixel]").val() === "true"),
+				value: heightParams.find("input[name=height]").val()
+			},
+			width: {
+				enabled: (widthParams.find("input[name=enabled]").val() === "true"),
+				isPercentage: (widthParams.find("input[name=isPercentage]").val() === "true"),
+				isPixel: (widthParams.find("input[name=isPixel]").val() === "true"),
+				value: widthParams.find("input[name=width]").val()
+			},
+			hideIcon: (container.find("input[name=hideIcon]").val() === "true")
+		});
+
+	container.data("newWindowConfig", options);
+
+	// Update user preferences
+	if(userPreferences.data.plugins.newWindow == undefined)
+		userPreferences.data.plugins.newWindow = userPreferences.defaultData.plugins.newWindow
+	AJS.log("userPreferences.defaultData.plugins.newWindow -->"+userPreferences.defaultData.plugins.newWindow);
+	
+	if(options != undefined && !options.hideIcon)
+		links.addClass("new-window-link");
+	
+	if(userPreferences.data.plugins.newWindow==undefined || !userPreferences.data.plugins.newWindow.ignoreNewWindow)
+		links.click(community.plugins.newWindow.openWindow);
+};
+
+community.plugins.newWindow.openWindow = function (e)
+{
+	AJS.log("openWindow");
+	var link = jQuery(this);
+	var parentMacro = link.closest(".jquery-new-window-macro");
+	var options = parentMacro.data("newWindowConfig"); //COP-2919: Changed from pre tag to jquery.data -AWP
+
+	var parameters = community.plugins.newWindow.generateParameters(options);
+	
+	var url = link.attr("href");
+	var windowName = "_blank";
+	var windowOptions = (parameters != undefined) ? parameters : "";
+	
+	if (url == "javascript:void(0)" || url == "#") {
+		e.preventDefault(); // COP-3424, COP-3953
+		//Removed to allow further click events to occur, replaced with preventDefault();
+		// return false; // COP-3424, COP-3953
+	}
+
+	else {
+		AJS.log("new-window macro: Opening new with options -> '" + windowOptions + "'");
+		AJS.log("window.open("+url+", "+windowName+", "+windowOptions+");");
+		window.open(url, windowName, windowOptions);
+		
+		return false;
+	}
+};
+
+community.plugins.newWindow.generateParameters = function (options)
+{
+	var parameters = "";
+	
+	if(options.height.enabled)
+	{
+		parameters += "height=";
+		
+		if(options.height.isPixel)
+		{
+			parameters += options.height.value;
+		}
+		else if (options.height.isPercentage)
+		{
+			var scaledHeight = window.outerHeight * (options.height.value * 0.01);
+			var scaledHeightIE = screen.height * (options.height.value * 0.01);
+			//scaledHeight = scaledHeight - (screen.availHeight - window.innerHeight);
+			if(window.outerHeight == undefined) {
+				scaledHeight = scaledHeightIE-130;
+			}
+			else {
+				scaledHeight = scaledHeight - 130;
+			}
+			parameters += scaledHeight;
+		}
+	}
+	if(options.width.enabled)
+	{
+		if(parameters.length > 0)
+			parameters += ",width=";
+		else
+			parameters += "width=";
+					
+		if(options.width.isPixel)
+		{
+			parameters += options.width.value;
+		}
+		else if (options.width.isPercentage)
+		{
+			var scaledWidth = screen.width * (options.width.value * 0.01);
+			
+			parameters += scaledWidth;
+		}
+	}
+	
+	if(parameters.length > 0)
+		parameters += ",resizable=yes,scrollbars=yes,location=yes,menubar=yes,status=yes,titlebar=yes,toolbar=yes";
+	else
+		parameters += "resizable=yes,scrollbars=yes,location=yes,menubar=yes,status=yes,titlebar=yes,toolbar=yes";
+	AJS.log("new window params: "+parameters);
+	return parameters;
+};
+
+jQuery(document).ready(function ()
+{
+	jQuery(".jquery-new-window-macro").each(community.plugins.newWindow.init);
+});
+
+
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;

@@ -1,0 +1,112 @@
+/* module-key = 'gov.eop.omb.confluence.max.utils:mds-web-resources', location = 'gov/eop/omb/confluence/max/utils/MDSDocumentService/styles/styles.css' */
+.configure-mds-dialog .ui-dialog-content.ui-widget-content { height: auto !important; }
+.configure-mds-dialog .ui-dialog-buttonset { /* jQuery Dialog Advanced Edit button */ }
+.configure-mds-dialog .ui-dialog-buttonset button:first-child, .configure-mds-dialog .ui-dialog-buttonset .download-all { /* Other options (button label) and download all button */ float: left !important; }
+.configure-mds-dialog .ui-dialog-buttonset #advanced-edit-button { margin-right: 50px; }
+.configure-mds-dialog.dialog-expand { /* Dialog is in full screen mode - Override other settings */ width: 97.8% !important; left: 0 !important; top: 0 !important; }
+.configure-mds-dialog.dialog-expand .ui-dialog-buttonpane { position: absolute; bottom: 0; width: 98%; }
+.configure-mds-dialog .expand-button, .configure-mds-dialog .collapse-button { /* Expand / collapse button in the top right corner of overlay */ position: absolute; right: 28px; top: 6px; z-index: 1; padding: 3px; }
+.configure-mds-dialog .ui-dialog-titlebar-close { z-index: 2; padding: 0 !important; }
+.configure-mds-dialog .ui-dialog-titlebar-close.ui-state-hover { /* make dialog buttons consistent.  the expand button does not have a hover state */ background: #FFFFFF; border: 0; }
+.configure-mds-dialog a.edit-button-label { display: inline-block; margin-top: 14px; }
+.configure-mds-dialog .document-assemble-component { /**
+* List of document assembly attachments.
+*/ }
+.configure-mds-dialog .document-assemble-component .document-assemble-buttons > ul { text-align: right; margin-bottom: 10px; padding: 0; }
+.configure-mds-dialog .document-assemble-component .document-assemble-buttons > ul > li { list-style: none; display: inline-block; }
+.configure-mds-dialog .document-assemble-component .document-assemble-buttons > ul > li .add-buttons { position: relative; }
+.configure-mds-dialog .document-assemble-component .document-assemble-buttons > ul > li .add-buttons #add-file { /* Add button icon needs additional padding */ padding-left: 20px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-buttons > ul > li .add-buttons > ul { /* drop down menu */ position: absolute; width: 260px; left: -152px; border-radius: 0; padding: 5px; z-index: 10; }
+.configure-mds-dialog .document-assemble-component .document-assemble-buttons > ul > li .add-buttons > ul > li { text-align: left; padding-bottom: 5px; padding-top: 5px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-buttons > ul > li .add-buttons > ul > li :not(:last-child) { border-bottom: 1px solid #ededed; }
+.configure-mds-dialog .document-assemble-component .document-assemble-buttons > ul > li .add-buttons > ul > li:hover { text-decoration: underline; cursor: pointer; }
+.configure-mds-dialog .document-assemble-component .document-assemble-buttons > ul > li .add-buttons .add-file-menu { width: 274px; margin-left: -13px; }
+.configure-mds-dialog .document-assemble-component .document-settings, .configure-mds-dialog .document-assemble-component .document-assemble-pdf-options { margin-bottom: 5px; }
+.configure-mds-dialog .document-assemble-component .document-settings > h2, .configure-mds-dialog .document-assemble-component .document-assemble-pdf-options > h2 { /* undo accordion gradient/border */ background: #FFFFFF; border: 0; text-indent: 25px; padding: 5px 0 5px 0; }
+.configure-mds-dialog .document-assemble-component .document-settings > .ui-widget-content, .configure-mds-dialog .document-assemble-component .document-assemble-pdf-options > .ui-widget-content { border: 0; }
+.configure-mds-dialog .document-assemble-component .document-assemble-type, .configure-mds-dialog .document-assemble-component .page-orientation, .configure-mds-dialog .document-assemble-component .track-changes, .configure-mds-dialog .document-assemble-component .button-label { margin-bottom: 10px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-type > ul, .configure-mds-dialog .document-assemble-component .page-orientation > ul, .configure-mds-dialog .document-assemble-component .track-changes > ul, .configure-mds-dialog .document-assemble-component .button-label > ul { list-style: none; padding-left: 0; }
+.configure-mds-dialog .document-assemble-component .document-assemble-type h2 { display: inline-block; margin-right: 5px; margin-left: 12px; }
+.configure-mds-dialog .document-assemble-component h2 { font-weight: bold; text-decoration: underline; }
+.configure-mds-dialog .document-assemble-component .other-settings .button-label { padding: 5px; width: 400px; }
+.configure-mds-dialog .document-assemble-component .advanced-add-edit { width: 100%; }
+.configure-mds-dialog .document-assemble-component .advanced-add-edit .example { width: 100%; background: #eee; border: 1px solid #D7D7D7; box-sizing: border-box; padding: 6px; margin-bottom: 10px; margin-top: 10px; }
+.configure-mds-dialog .document-assemble-component .advanced-add-edit textarea { width: 100%; height: 250px; padding: 10px; box-sizing: border-box; font-family: Courier New, Courier, monospace !important; font-size: 13px; line-height: 19px; overflow: auto; resize: vertical; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments { /* based on 750px width */ padding-top: 5px; border: 1px solid #bcbcbc; overflow-y: scroll; height: 310px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .view-mode, .configure-mds-dialog .document-assemble-component .document-assemble-attachments .edit-mode { width: 100%; padding: 0; margin: 0; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .document-compare.view-mode { /* Document compare specific attachment styles in view mode */ }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .document-compare.view-mode .column.file-name { /* no toc column so extend over the column */ width: 500px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments > ol { margin: 0; padding: 0; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments > ol ul.view-mode { /* Can only move if in view mode */ cursor: move; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments > ol > li { padding: 10px 0 10px 0; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments > ol > li:nth-child(even) { background-color: #eee; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments > ol > li.error:nth-child(even) { /* error state overrides other colors */ background-color: #FFBEBE !important; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments > ol > li.error:nth-child(odd) { /* error state overrides other colors */ background-color: #EC8F8F !important; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column { display: inline-block; vertical-align: middle; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit { /* Only edit mode for the attachment renderer */ position: relative; /**
+* Add a custom TOC heading.
+*/ /**
+* Fields within the attachment renderer
+*/ }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit .attribution-replacement label { display: block; margin-top: 5px; margin-bottom: 5px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit .attribution-prefix-suffix { /* Document compare */ margin-top: 10px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit .attribution-prefix-suffix label { /* prefix / suffix labels for input fields */ margin-right: 5px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit .attribution-prefix-suffix label:not(:first-child) { margin-left: 10px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit .attribution-prefix-suffix input { width: 80px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit .attribution-heading { /* Document compare */ margin-bottom: 5px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit .toc-heading, .configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit .attribution-heading { margin-top: 10px; text-decoration: underline; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit .cancel-button { position: absolute; right: 15px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit .accept-button { position: absolute; right: 68px; top: 7px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit .add-toc-heading { text-decoration: none; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit .add-toc-heading:hover { text-decoration: underline; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit ol.toc-heading-list { width: 100%; padding: 0; margin: 5px 0 5px 0; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit ol.toc-heading-list > li.toc-item { /* 100% makes it larger than the containing box, so make it 99% */ position: relative; width: 99%; list-style: none; border: 1px solid #bcbcbc; border-radius: 3px; padding: 5px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit ol.toc-heading-list > li.toc-item:not(:first-child) { /* Headings after the first child have margin of 5px at top. */ margin-top: 5px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit ol.toc-heading-list > li.toc-item > input.attachment-heading-renderer { /* Heading level */ width: 30px; margin-left: 5px; margin-right: 5px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit ol.toc-heading-list > li.toc-item > input.toc-header-title { /* Heading text */ width: 260px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit ol.toc-heading-list > li.toc-item > .delete-button { /* Override other delete button */ position: absolute; right: 5px; height: 16px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit p.field:not(:last-child) { margin-bottom: 10px !important; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit p.field label { display: inline-block; width: 95px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit p.field input.file-name, .configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit p.field input.page-name { width: 300px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.attachment-edit p.field input.page-break { vertical-align: middle; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.include { text-align: center; width: 65px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.page-number { text-align: center; width: 35px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.file-name { width: 230px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.file-name p:nth-child(2) { /* page name */ font-size: 12px; color: #999; text-indent: 10px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.toc-entry { width: 250px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.options { text-align: right; width: 120px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.options .draggable { /** slide move button up a few pixels and add margin spacing **/ position: relative; top: -9px; margin-left: 5px; margin-right: 10px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .column.options .delete-button { background-position: center; margin-left: 5px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-attachments .document-assemble-headers span { font-weight: bold; text-decoration: underline; }
+.configure-mds-dialog .document-assemble-component .document-assemble-pdf-options { display: inline-block; width: 100%; /**
+* PDF Options list.
+*/ }
+.configure-mds-dialog .document-assemble-component .document-assemble-pdf-options .print-page-numbers input[type=text] { width: 30px; text-align: center; }
+.configure-mds-dialog .document-assemble-component .document-assemble-pdf-options .table-of-contents input[type=text] { width: 150px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-pdf-options > ul { display: none; }
+.configure-mds-dialog .document-assemble-component .document-assemble-pdf-options > ul > li { padding-bottom: 10px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-pdf-options ul { list-style: none; }
+.configure-mds-dialog .document-assemble-component .document-assemble-pdf-options ul li label { margin-right: 10px; }
+.configure-mds-dialog .document-assemble-component .document-assemble-pdf-options ul li ul { margin-left: -11px; }
+
+/*Add file dialog styling*/
+#select-attachment-dialog .search-panel .search-query { width: 275px; }
+#select-attachment-dialog .selected-file-panel { background: #f0f0f0; padding-left: 205px; padding-top: 7px; float: left; text-align: left; width: 52%; }
+#select-attachment-dialog .selected-file-panel .selected-file-name { word-wrap: break-word; }
+#select-attachment-dialog .selected-file-panel .selected-file-name.error { color: #e42626; }
+#select-attachment-dialog #page-search-results-wrapper { margin-left: 67px; }
+#select-attachment-dialog .page-search-results-entry { margin-right: 36px; }
+#select-attachment-dialog .attachment-row .attachment-title { max-width: 375px; word-wrap: break-word; }
+#select-attachment-dialog .attachment-row:hover { background: #BFD5DE; cursor: pointer; }
+#select-attachment-dialog .attachment-row.selected { background-color: #EAEAEA; }
+
+/*Styling for autocomplete file search results*/
+.dialog-panel-body.file-search .attachment-row .attachment-title { max-width: 215px; }
+
+.doc-assemble-watermarks { width: 240px; }
+.doc-assemble-watermarks input { float: right; clear: none; padding-left: 2px; }
+.doc-assemble-watermarks label { float: left; clear: both; padding-top: 1px; }
+.doc-assemble-watermarks * { margin-top: 4px; }
+
+/*# sourceMappingURL=styles.css.map */
+

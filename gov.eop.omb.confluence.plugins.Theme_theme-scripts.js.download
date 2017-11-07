@@ -1,0 +1,66 @@
+;try {
+/* module-key = 'gov.eop.omb.confluence.plugins.Theme:theme-scripts', location = 'gov/eop/omb/confluence/plugins/Theme/scripts/theme-macro.js' */
+// Make sure JavaScript name spaces exist
+if(typeof community == 'undefined')
+	community = {};
+
+if(community.plugins == undefined)
+	community.plugins = {};
+
+if(community.plugins.themeMacro == undefined)
+	community.plugins.themeMacro = {};
+
+// Will get populated by macro template.
+// community.plugins.themeMacro.title = "";
+// community.plugins.themeMacro.secondTitle = "";
+
+community.plugins.themeMacro.initialize = function (themeMacroElement)
+{
+	var id = $(themeMacroElement).find('input.theme-macro-id').val();
+	var title = $(themeMacroElement).find('input.theme-macro-title').val();
+
+	var linkWrapper = jQuery("#theme-macro-"+id);
+	var link = jQuery("<a href=\"#\"></a>");
+	
+	link.text(title);
+	link.click(function() { community.plugins.themeMacro.showHiddenElements(themeMacroElement); });
+			
+	linkWrapper.empty();
+	linkWrapper.append(link);
+};
+
+community.plugins.themeMacro.showHiddenElements = function (themeMacroElement)
+{
+	var id = $(themeMacroElement).find('input.theme-macro-id').val();
+	var title = $(themeMacroElement).find('input.theme-macro-title').val();
+	var secondTitle = $(themeMacroElement).find('input.theme-macro-second-title').val();
+
+	var link = jQuery("#theme-macro-"+id+" a"); //jQuery(".max-theme-macro a");
+	console.log('!jQuery("#theme-macro-style-'+id+'").prop("disabled") is:'+!jQuery("#theme-macro-style-"+id).prop("disabled"));
+	console.log('jQuery("#theme-macro-style-'+id+'").attr("disabled") is:'+jQuery("#theme-macro-style-"+id).attr("disabled"));
+	if (jQuery("#theme-macro-style-"+id).attr("disabled") == undefined) {
+		console.log("disabling");
+		jQuery("#theme-macro-style-"+id).attr("disabled", "disabled");
+		link.text(secondTitle);
+	}
+	else {
+		console.log("enabling");
+		jQuery("#theme-macro-style-"+id).removeAttr("disabled");
+		link.text(title);
+	}
+};
+
+jQuery(document).ready(function (){
+	$(".theme-macro-container").each(function(){
+		community.plugins.themeMacro.initialize(this);
+	});
+});
+
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;

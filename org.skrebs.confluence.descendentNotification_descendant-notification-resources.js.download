@@ -1,0 +1,121 @@
+;try {
+/* module-key = 'org.skrebs.confluence.descendentNotification:descendant-notification-resources', location = 'script/descendant-notification.js' */
+var addWatchSubmitting = false;
+
+$(document).ready(function() {
+	
+	// bind to watch page family option
+	$("#watch-page-family-link, .page-family-readd-link, .page-family-remove-all-link").click(function() {
+
+		if (addWatchSubmitting == true) {
+			return false;
+		}
+		
+		addWatchSubmitting = true;
+		
+		var familyWatchURL = $(this).attr("href");
+
+		if (familyWatchURL.indexOf("viewpagefamilynotifications.action") != -1) {
+			window.location = familyWatchURL;
+		} else {
+			var url = "/json/max/getdescpagecount.action";
+
+			var pageId = AJS.params.pageId;
+
+			if (typeof (pageid) == "undefined") {
+				pageId = familyWatchURL.match(/pageId=([0-9]*)/)[1];
+			}
+
+			jQuery.ajax({
+				url : url,
+				data : {
+					"pageId" : pageId
+				},
+				success : function(data) {
+					
+					if (data.descendentPageCount > 500) {
+						//generateHighDescendentCountDialog(data.descendentPageCount, familyWatchURL);
+						//make the call via ajax, since it will timeout due to new throttling
+						$.get(familyWatchURL);
+						// change url to the stop watching link and text to match
+						$("#watch-page-family-link").html("<span></span>Stop Watching This Page Family <b>This page and all its sub-pages</b>");
+						$("#watch-page-family-link").attr("href", "/notificationpreferences/viewpagefamilynotifications.action");
+						$("#watch-page-family-link").attr("alt", "Stop watching this page family");
+						
+						if (typeof (pageid) == "undefined") {
+							setTimeout(function(){ window.location.reload(); }, 500);  // refresh the page after 1/2 second
+						} else {
+							addWatchSubmitting = false;
+						}
+					} else {
+						window.location = familyWatchURL;
+					}
+				},
+				error : function() {
+					addWatchSubmitting = false;
+					alert("An error has occured.");
+				}
+			});
+		}
+
+		return false;
+
+	});
+
+});
+
+generateHighDescendentCountDialog = function(descendentPageCount, familyWatchURL) {
+	if (jQuery("#high-descendent-count-dialog").length > 0) {
+		if (!jQuery("#high-descendent-count-dialog").dialog('isOpen'))
+			jQuery("#high-descendent-count-dialog").dialog('open');
+	} else {
+		var dialog = jQuery("<div></div>");
+		var wrapper = jQuery("<div class='high-descendent-count-wrapper'></div>");
+		var dialogConfig = new JQUERYUI_DIALOG_INFO_HASH;
+
+		dialog.attr("id", "high-descendent-count-dialog");
+
+		dialogConfig.height = 365;
+		dialogConfig.width = 500;
+		dialogConfig.modal = true;
+		dialogConfig.resizable = false;
+		dialogConfig.title = "Watch Page Family";
+		dialogConfig.buttons = {
+			"Cancel" : function() {
+				jQuery(this).dialog("close");
+			},
+			"Ok" : function() {
+				$.get(familyWatchURL);
+				// change url to the stop watching link and text to match
+				$("#watch-page-family-link").html("<span></span>Stop Watching This Page Family <b>This page and all its sub-pages</b>");
+				$("#watch-page-family-link").attr("href", "/notificationpreferences/viewpagefamilynotifications.action");
+				$("#watch-page-family-link").attr("alt", "Stop watching this page family");
+				jQuery(this).dialog("close");
+			}
+		};
+
+		var div = jQuery("<div></div>");
+
+		div
+				.append("<p>This page has a large number of descendants, this operation will take a long time to complete.</p>"
+						+ "<p>Click Ok to continue adding this page family watch.</p>"
+						+ "<p><label>Receive email notification when complete? <input name='familyPageWatchNotificationOnComplete' type='checkbox'/></label></p>"
+						+ "<p>" + descendentPageCount + "</p>");
+
+		wrapper.append(div);
+
+		dialog.append(wrapper);
+		dialog.dialog(dialogConfig);
+
+	}
+
+	return false;
+};
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
