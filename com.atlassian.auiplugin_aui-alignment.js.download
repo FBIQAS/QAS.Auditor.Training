@@ -1,0 +1,11 @@
+;try {
+/* module-key = 'com.atlassian.auiplugin:aui-alignment', location = 'js/aui/internal/alignment.js' */
+(function(A){AJS.Alignment=A(window.Tether);if(typeof window.define==="function"){define("aui/internal/alignment",["aui/internal/tether"],function(){return AJS.Alignment})}})(function(E){var C="data-aui-alignment";var J="data-aui-alignment-static";var H="aui-alignment";var A="aui-alignment-side-";var K="aui-alignment-snap-";var D="right middle";var I={"top left":{el:"bottom left",target:"top left"},"top center":{el:"bottom center",target:"top center"},"top right":{el:"bottom right",target:"top right"},"right top":{el:"top left",target:"top right"},"right middle":{el:"middle left",target:"middle right"},"right bottom":{el:"bottom left",target:"bottom right"},"bottom left":{el:"top left",target:"bottom left"},"bottom center":{el:"top center",target:"bottom center"},"bottom right":{el:"top right",target:"bottom right"},"left top":{el:"top right",target:"top left"},"left middle":{el:"middle right",target:"middle left"},"left bottom":{el:"bottom right",target:"bottom left"}};function G(Q,P,M){var N=A+P;var O=K+M;Q.className+=" "+N+" "+O}function B(M){var N=(M.getAttribute(C)||D).split(" ");return{side:N[0],snap:N[1]}}function F(N,M){return I[N+" "+M]||I[D]}function L(O,P){var R=B(O);var Q=F(R.side,R.snap);var N=O.hasAttribute(J);var M=new E({enabled:false,element:O,target:P,attachment:Q.el,targetAttachment:Q.target,classPrefix:H,constraints:[{to:"window",attachment:N===true?"none":"together"}]});G(O,R.side,R.snap);this._auiTether=M}L.prototype={destroy:function(){this._auiTether.destroy();return this},disable:function(){this._auiTether.disable();return this},enable:function(){this._auiTether.enable();return this}};return L});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;

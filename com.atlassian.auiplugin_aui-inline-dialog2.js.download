@@ -1,0 +1,55 @@
+;try {
+/* module-key = 'com.atlassian.auiplugin:aui-inline-dialog2', location = 'js/aui/inline-dialog2.js' */
+(function(A){define("aui/inline-dialog2",["./internal/alignment","./trigger"],function(B){return A(B,AJS.layer,window.skate)})})(function(J,C,E){var I=1000;function K(M){return document.querySelector('[aria-controls="'+M.id+'"]')}function F(N,O){var M=K(N);if(M){O(M)}}function G(M,O){var N=M.getAttribute("data-aui-responds-to")==="hover";if(N){O(M)}}function L(N,M){if(!N._auiAlignment){N._auiAlignment=new J(N,M)}}function B(N,M){L(N,M);N._auiAlignment.enable()}function A(N,M){L(N,M);N._auiAlignment.disable()}E("aui-inline-dialog2",{type:E.types.TAG,ready:function(M){F(M,function(N){N.setAttribute("aria-expanded",M.isVisible());N.setAttribute("aria-haspopup","true")});G(M,function(){M.mouseInside=false;M.addEventListener("mouseenter",function(){M.mouseInside=true;M.message({type:"mouseenter"})});M.addEventListener("mouseleave",function(){M.mouseInside=false;M.message({type:"mouseleave"})})})},remove:function(M){if(M._auiAlignment){M._auiAlignment.destroy()}},prototype:{remove:function(){C(this).remove()},show:function(){var M=this;C(this).show();F(this,function(N){B(M,N);N.setAttribute("aria-expanded","true")});return this},hide:function(){var M=this;C(this).hide();F(this,function(N){A(M,N);N.setAttribute("aria-expanded","false")});return this},isVisible:function(){return C(this).isVisible()},message:function(M){D(this,M);return this}}});function D(O,Q){var N={toggle:["click"],hover:["mouseenter","mouseleave","focus","blur"]};var M=O.getAttribute("data-aui-responds-to");var P=N[M];if(P&&P.indexOf(Q.type)>-1){H[Q.type](O,Q)}}var H={click:function(M){if(M.isVisible()){if(!C(M).isPersistent()){M.hide()}}else{M.show()}},mouseenter:function(M){if(!M.isVisible()){M.show()}if(M._clearMouseleaveTimeout){M._clearMouseleaveTimeout()}},mouseleave:function(M){if(C(M).isPersistent()||!M.isVisible()){return }if(M._clearMouseleaveTimeout){M._clearMouseleaveTimeout()}var N=setTimeout(function(){if(!M.mouseInside){M.hide()}},I);M._clearMouseleaveTimeout=function(){clearTimeout(N);M._clearMouseleaveTimeout=null}},focus:function(M){if(!M.isVisible()){M.show()}},blur:function(M){if(!C(M).isPersistent()&&M.isVisible()){M.hide()}}}});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
+;try {
+/* module-key = 'com.atlassian.auiplugin:aui-inline-dialog2', location = 'soy/inline-dialog2.soy' */
+// This file was automatically generated from inline-dialog2.soy.
+// Please don't edit this file by hand.
+
+/**
+ * @fileoverview Templates in namespace aui.inlineDialog2.
+ */
+
+if (typeof aui == 'undefined') { var aui = {}; }
+if (typeof aui.inlineDialog2 == 'undefined') { aui.inlineDialog2 = {}; }
+
+
+aui.inlineDialog2.inlineDialog2 = function(opt_data, opt_ignored) {
+  return '<aui-inline-dialog2 ' + ((opt_data.id) ? ' id="' + soy.$$escapeHtml(opt_data.id) + '"' : '') + '  class="aui-layer aui-inline-dialog' + aui.renderExtraClasses(opt_data) + '" data-aui-alignment="' + soy.$$escapeHtml(opt_data.alignment ? opt_data.alignment : '') + '" data-aui-responds-to="' + soy.$$escapeHtml(opt_data.respondsTo ? opt_data.respondsTo : '') + '" aria-hidden="true"' + aui.renderExtraAttributes(opt_data) + '>' + aui.inlineDialog2.inlineDialog2Content(opt_data) + '</aui-inline-dialog2>';
+};
+if (goog.DEBUG) {
+  aui.inlineDialog2.inlineDialog2.soyTemplateName = 'aui.inlineDialog2.inlineDialog2';
+}
+
+
+aui.inlineDialog2.inlineDialog2Content = function(opt_data, opt_ignored) {
+  return '<div class="aui-inline-dialog-contents">' + ((opt_data.content) ? soy.$$filterNoAutoescape(opt_data.content) : '') + '</div>';
+};
+if (goog.DEBUG) {
+  aui.inlineDialog2.inlineDialog2Content.soyTemplateName = 'aui.inlineDialog2.inlineDialog2Content';
+}
+
+
+aui.inlineDialog2.trigger = function(opt_data, opt_ignored) {
+  return '' + aui.trigger.trigger(soy.$$augmentMap(opt_data, {showIcon: opt_data.showIcon ? opt_data.showIcon : false}));
+};
+if (goog.DEBUG) {
+  aui.inlineDialog2.trigger.soyTemplateName = 'aui.inlineDialog2.trigger';
+}
+
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;

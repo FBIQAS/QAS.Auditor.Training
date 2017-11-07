@@ -1,0 +1,11 @@
+;try {
+/* module-key = 'biz.artemissoftware.confluence.multiexcerpt.MultiExcerptMacro:editor_multi-includemacro', location = 'multi-include-macro.js' */
+AJS.bind("init.rte",function(){var a=AJS.Meta.get("context-path"),d=AJS.Meta.get("content-id"),c="plugins/servlet/confluence/include-page-macro/goto",b=function(e,k){var j=AJS.$(e),f=k,h=a+"/"+c+"?location="+f+"&contentId="+d,g=(AJS.$.browser&&AJS.$.browser.msie)?"_blank":"confluence-goto-link-include-macro-"+e.id,i=window.open(h,g);if(i){i.focus()}};AJS.Confluence.PropertyPanel.Macro.registerButtonHandler("mep-goto-page",function(i,g){var h="meh";var j=AJS.$(g).attr("data-macro-parameters").split("|");AJS.$.each(j,function(k,n){var e=n.indexOf("=");if(e>0){var l=n.substring(0,e);var m=n.substring(e+1);if(l.indexOf("PageWithExcerpt")!==-1){h=m}console.log(l+" = "+m)}});var f=AJS.$("td.wysiwyg-macro-body",g);console.log("body: "+f.html());b(g,h)})});
+} catch (err) {
+    if (console && console.log && console.error) {
+        console.log("Error running batched script.");
+        console.error(err);
+    }
+}
+
+;
